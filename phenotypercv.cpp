@@ -413,6 +413,31 @@ void onMouse( int event, int x, int y, int f, void* ){
     }
 }
 
+Mat skeletonize(Mat img){
+	Mat mfblur;
+	medianBlur(img, mfblur, 1);
+	Mat skel(mfblur.size(), CV_8UC1, Scalar(0));
+	Mat temp;
+	Mat eroded;
+	Mat element = getStructuringElement(MORPH_CROSS, Size(3, 3));
+	bool done;
+	int iterations=0;
+
+	do
+	{
+	  erode(mfblur, eroded, element);
+	  dilate(eroded, temp, element);
+	  subtract(mfblur, temp, temp);
+	  bitwise_or(skel, temp, skel);
+	  eroded.copyTo(mfblur);
+
+	  done = (countNonZero(mfblur) == 0);
+	  iterations++;
+
+	} while (!done && (iterations < 100));
+	return skel;
+}
+
 int main(int argc, char** argv){
 	string mode;
 	if(argc == 1){
@@ -514,6 +539,12 @@ int main(int argc, char** argv){
 			    //-- ROI selector
 			    	Mat mask;
 			    	vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
+
+			    	Mat skel = skeletonize(mask);
+			    	namedWindow("Image",WINDOW_NORMAL);
+			    	        	    resizeWindow("Image",800,800);
+			    	        	    imshow("Image", skel);
+			    	waitKey(0);
 
 			    //-- Getting numerical data
 			    	vector<double> shapes_data = get_shapes(cc,mask);
