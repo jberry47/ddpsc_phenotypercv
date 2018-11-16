@@ -540,12 +540,6 @@ int main(int argc, char** argv){
 			    	Mat mask;
 			    	vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
 
-			    	Mat skel = skeletonize(mask);
-			    	namedWindow("Image",WINDOW_NORMAL);
-			    	        	    resizeWindow("Image",800,800);
-			    	        	    imshow("Image", skel);
-			    	waitKey(0);
-
 			    //-- Getting numerical data
 			    	vector<double> shapes_data = get_shapes(cc,mask);
 			    	Mat hue_data = get_color(adjImage, mask);
