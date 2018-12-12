@@ -27,7 +27,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <opencv/cv.h>
-#include <highgui.h>
+//#include <highgui.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -486,13 +486,13 @@ int main(int argc, char** argv){
 					vector<Mat> channels(3);
 					split(dest,channels);
 					Mat dest_blur;
-					blur(channels[1], dest_blur, Size( 4, 4 ) );
+					blur(channels[1], dest_blur, Size( 2, 2 ) );
 					Mat dest_thresh;
-					threshold(dest_blur,dest_thresh,40,255,THRESH_BINARY);
+					threshold(dest_blur,dest_thresh,25,255,THRESH_BINARY);
 					Mat dest_dilate;
 			    	dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 5, 1, 1);
 			    	Mat dest_erode;
-			    	erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 5, 1, 1);
+			    	erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 4, 1, 1);
 
 			   	//-- Removing barcode
 			    	Mat lab;
@@ -500,10 +500,13 @@ int main(int argc, char** argv){
 			    	vector<Mat> split_lab;
 			    	split(lab, split_lab);
 			    	Mat b_thresh1;
-			    	inRange(split_lab[2],90,141,b_thresh1);
+			    	inRange(split_lab[2],90,139,b_thresh1);
 			    	Mat invSrc =  cv::Scalar::all(255) - b_thresh1;
 			    	Mat mask1;
 			    	bitwise_and(dest_erode,invSrc,mask1);
+			    	Mat barcode_roi;
+			    	vector<Point> cc_barcode = keep_roi(mask1,Point(1146,1368),Point(1359,1479),barcode_roi);
+			    	Mat mask2 = mask1-barcode_roi;
 
 			    //-- Remove edges of pot
 			    	Mat dest_lab;
@@ -521,7 +524,7 @@ int main(int argc, char** argv){
 			    	Mat pot_erode;
 			    	erode(pot_dilate,pot_erode, Mat(), Point(-1, -1), 3, 1, 1);
 			    	Mat pot_and;
-			    	bitwise_and(pot_erode,mask1,pot_and);
+			    	bitwise_and(pot_erode,mask2,pot_and);
 			    	Mat pot_roi;
 			    	vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
 
@@ -615,7 +618,7 @@ int main(int argc, char** argv){
 					Mat dest_nir;
 					absdiff(nirBackground,nirImage,dest_nir);
 					Mat dest_nir_thresh;
-					inRange(dest_nir,10,255,dest_nir_thresh);
+					inRange(dest_nir,20,255,dest_nir_thresh);
 
 					//-- Remove white stake
 					Mat dest_stake;
@@ -688,7 +691,7 @@ int main(int argc, char** argv){
 
 			namedWindow("Image",WINDOW_NORMAL);
 			setMouseCallback("Image",onMouse,NULL );
-			resizeWindow("Image",src.cols/2,src.rows/2);
+			resizeWindow("Image",src.cols,src.rows);
 			imshow("Image",src);
 			waitKey(0);
 		}
@@ -765,10 +768,10 @@ int main(int argc, char** argv){
 	return 0;
 }
 
+
 /*
 namedWindow("Image",WINDOW_NORMAL);
         	    resizeWindow("Image",800,800);
         	    imshow("Image", b_blur);
 waitKey(0);
 */
-
