@@ -24,21 +24,175 @@
  * 		find Images/ -name 'NIR_SV*' | xargs -P8 -I{} ./PhenotyperCV NIR {} background_image.png nir_color.txt
  *
  */
-
 #include <opencv2/opencv.hpp>
-#include <opencv/cv.h>
-//#include <highgui.h>
+#include <opencv2/aruco/charuco.hpp>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <string>
 #include <math.h>
-#include <opencv2/features2d.hpp>
 #include <Eigen/Dense>
 
 using namespace cv;
 using namespace std;
 using namespace Eigen;
+
+
+static bool saveCameraParams(const string &filename, Size imageSize,
+                             const Mat &cameraMatrix, const Mat &distCoeffs) {
+    FileStorage fs(filename, FileStorage::WRITE);
+    if(!fs.isOpened())
+        return false;
+
+    time_t tt;
+    time(&tt);
+    struct tm *t2 = localtime(&tt);
+    char buf[1024];
+    strftime(buf, sizeof(buf) - 1, "%c", t2);
+
+    fs << "calibration_time" << buf;
+
+    fs << "image_width" << imageSize.width;
+    fs << "image_height" << imageSize.height;
+
+    fs << "camera_matrix" << cameraMatrix;
+    fs << "distortion_coefficients" << distCoeffs;
+
+    return true;
+}
+
+bool charuco_calibrate(string calib_imgs){
+		cv::Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+		cv::Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
+		vector< vector< vector< Point2f > > > allCorners;
+		vector< vector< int > > allIds;
+		vector< Mat > allImgs;
+		Size imgSize;
+
+		int number_of_lines = 0;
+		string line;
+		ifstream myfile(calib_imgs);
+		while (std::getline(myfile, line)){
+			++number_of_lines;
+			Mat image, imageCopy;
+			image = imread(line);
+			vector< int > ids;
+			vector< vector< Point2f > > corners, rejected;
+
+			// detect markers
+			cv::aruco::detectMarkers(image, dictionary, corners, ids);
+			Mat currentCharucoCorners, currentCharucoIds;
+			if(ids.size() > 0){
+				aruco::interpolateCornersCharuco(corners, ids, image, board, currentCharucoCorners,currentCharucoIds);
+			}
+	        allCorners.push_back(corners);
+	        allIds.push_back(ids);
+	        allImgs.push_back(image);
+	        imgSize = image.size();
+		}
+
+		double repError;
+		Mat cameraMatrix, distCoeffs;
+
+		vector< vector< Point2f > > allCornersConcatenated;
+		vector< int > allIdsConcatenated;
+		vector< int > markerCounterPerFrame;
+		markerCounterPerFrame.reserve(allCorners.size());
+		for(unsigned int i = 0; i < allCorners.size(); i++) {
+		    markerCounterPerFrame.push_back((int)allCorners[i].size());
+		        for(unsigned int j = 0; j < allCorners[i].size(); j++) {
+		            allCornersConcatenated.push_back(allCorners[i][j]);
+		            allIdsConcatenated.push_back(allIds[i][j]);
+		        }
+		    }
+
+		cout << "calibrating camera - aruco" << endl;
+	    double arucoRepErr;
+	    arucoRepErr = aruco::calibrateCameraAruco(allCornersConcatenated, allIdsConcatenated,
+	                                              markerCounterPerFrame, board, imgSize, cameraMatrix,
+	                                              distCoeffs, noArray(), noArray());
+
+	    int nFrames = (int)allCorners.size();
+	    vector< Mat > allCharucoCorners;
+	    vector< Mat > allCharucoIds;
+	    vector< Mat > filteredImages;
+	    allCharucoCorners.reserve(nFrames);
+	    allCharucoIds.reserve(nFrames);
+	    for(int i = 0; i < nFrames; i++) {
+	            // interpolate using camera parameters
+	            Mat currentCharucoCorners, currentCharucoIds;
+	            aruco::interpolateCornersCharuco(allCorners[i], allIds[i], allImgs[i], board,
+	                                             currentCharucoCorners, currentCharucoIds, cameraMatrix,
+	                                             distCoeffs);
+
+	            allCharucoCorners.push_back(currentCharucoCorners);
+	            allCharucoIds.push_back(currentCharucoIds);
+	            filteredImages.push_back(allImgs[i]);
+	    }
+		cout << "calibrating camera - charuco" << endl;
+	    repError =
+	            aruco::calibrateCameraCharuco(allCharucoCorners, allCharucoIds, board, imgSize,
+	                                          cameraMatrix, distCoeffs, noArray(), noArray());
+
+	    bool saveOk =  saveCameraParams("camera_calibration.txt", imgSize, cameraMatrix, distCoeffs);
+	    cout << "Rep Error: " << repError << endl;
+	    cout << "Rep Error Aruco: " << arucoRepErr << endl;
+	    cout << "Calibration saved to " << "camera_calibration.txt" << endl;
+	    return(saveOk);
+}
+
+bool aruco_calibrate(string calib_imgs){
+		cv::Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+		cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(5, 7, 0.04, 0.02, dictionary);
+		vector< vector< vector< Point2f > > > allCorners;
+		vector< vector< int > > allIds;
+		vector< Mat > allImgs;
+		Size imgSize;
+
+		int number_of_lines = 0;
+		string line;
+		ifstream myfile(calib_imgs);
+		while (std::getline(myfile, line)){
+			++number_of_lines;
+			Mat image, imageCopy;
+			image = imread(line);
+			vector< int > ids;
+			vector< vector< Point2f > > corners, rejected;
+
+			// detect markers
+			cv::aruco::detectMarkers(image, dictionary, corners, ids);
+	        allCorners.push_back(corners);
+	        allIds.push_back(ids);
+	        allImgs.push_back(image);
+	        imgSize = image.size();
+		}
+		Mat cameraMatrix, distCoeffs;
+		double repError;
+
+		vector< vector< Point2f > > allCornersConcatenated;
+		vector< int > allIdsConcatenated;
+		vector< int > markerCounterPerFrame;
+		markerCounterPerFrame.reserve(allCorners.size());
+		for(unsigned int i = 0; i < allCorners.size(); i++) {
+		    markerCounterPerFrame.push_back((int)allCorners[i].size());
+		        for(unsigned int j = 0; j < allCorners[i].size(); j++) {
+		            allCornersConcatenated.push_back(allCorners[i][j]);
+		            allIdsConcatenated.push_back(allIds[i][j]);
+		        }
+		    }
+
+		cout << "calibrating camera - aruco" << endl;
+	    double arucoRepErr;
+	    arucoRepErr = aruco::calibrateCameraAruco(allCornersConcatenated, allIdsConcatenated,
+	                                              markerCounterPerFrame, board, imgSize, cameraMatrix,
+	                                              distCoeffs, noArray(), noArray());
+
+	    bool saveOk =  saveCameraParams("camera_calibration.txt", imgSize, cameraMatrix, distCoeffs);
+	    cout << "Rep Error: " << repError << endl;
+	    cout << "Rep Error Aruco: " << arucoRepErr << endl;
+	    cout << "Calibration saved to " << "camera_calibration.txt" << endl;
+	    return(saveOk);
+}
 
 int is_oof(Mat img){
 	//-- Get contours of mask
@@ -74,7 +228,7 @@ vector<Point> keep_roi(Mat img,Point tl, Point br, Mat &mask){
 
     //-- Get contours of rectangular roi
     Mat src = Mat::zeros(img.size(),img.type());
-    rectangle(src,tl,br,255,CV_FILLED);
+    rectangle(src,tl,br,255,cv::FILLED);
 
     vector<vector<Point> > contours_roi;
     vector<Vec4i> hierarchy_roi;
@@ -90,7 +244,7 @@ vector<Point> keep_roi(Mat img,Point tl, Point br, Mat &mask){
       			for(unsigned int k=0; k<contours[i].size(); k++){
       				cc.push_back(contours[i][k]);
       			}
-      			drawContours(kept, contours, i, 255, CV_FILLED);
+      			drawContours(kept, contours, i, 255, cv::FILLED);
       			break;
       		}
        	}
@@ -396,10 +550,10 @@ int counter=1;
 
 void onMouse( int event, int x, int y, int f, void* ){
     switch(event){
-        case  CV_EVENT_LBUTTONDOWN  :
+        case  cv::EVENT_LBUTTONDOWN  :
                                         Mat temp = Mat::zeros(src.size(),CV_8UC1);
-                                        rectangle(temp,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),255,CV_FILLED);
-                                        rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),Scalar( 255, 255, 255 ),CV_FILLED);
+                                        rectangle(temp,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),255,cv::FILLED);
+                                        rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),Scalar( 255, 255, 255 ),cv::FILLED);
                                         imshow("Image",src);
                                         waitKey(1);
                                         stringstream ss;
@@ -453,8 +607,85 @@ int main(int argc, char** argv){
 	bool bool_getCH = mode=="SET_TARGET";
 	bool bool_avgImgs = mode=="AVG_IMGS";
 	bool bool_drawROIS = mode == "DRAW_ROIS";
+	bool bool_arucoCalib = mode == "ARUCO_CALIB";
+	bool bool_charucoCalib = mode == "CHARUCO_CALIB";
+	bool bool_charuco_est = mode == "CHARUCO_EST";
 
-	if(bool_vis | bool_vis_CH){
+	if(bool_arucoCalib){
+		if(argc != 3){
+			cout << "Using mode ARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
+		}
+		string calib_file = argv[2];
+		bool check = aruco_calibrate(calib_file);
+	}
+	else if(bool_charucoCalib){
+		if(argc != 3){
+			cout << "Using mode CHARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
+		}
+		string calib_file = argv[2];
+		bool check = charuco_calibrate(calib_file);
+	}
+	else if(bool_charuco_est){
+		if(argc != 3){
+			cout << "Using mode CHARUCO_EST requires input in this order: inputImage" << endl;
+		}
+		//-- Getting camera calibration details
+		Mat cameraMatrix, distCoeffs;
+		FileStorage fs;
+		fs.open("camera_calibration.txt", FileStorage::READ);
+		fs["camera_matrix"] >> cameraMatrix;
+		fs["distortion_coefficients"] >> distCoeffs;
+
+		//-- Getting input image and board image
+		Mat inputImage = imread(argv[2]);
+		Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+		Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
+		Mat boardImage;
+		board->draw( inputImage.size(), boardImage );
+
+		vector< cv::Point2f > charucoCorners, detectedCharucoCorners, matchedCharucoCorners;
+		vector< int > charucoIds, detectedCharucoIds, matchedCharucoIds;
+
+		//-- Detecting input image board
+		vector< int > ids;
+		vector< vector< Point2f > > corners;
+		aruco::detectMarkers(inputImage, dictionary, corners, ids);
+		if(ids.size() > 0){
+			aruco::interpolateCornersCharuco(corners, ids, inputImage, board, detectedCharucoCorners, detectedCharucoIds);
+		}
+
+		//-- Detecting perfect board image
+		vector< int > markerIds;
+		vector< vector< Point2f > > markerCorners;
+		aruco::detectMarkers(boardImage, dictionary, markerCorners, markerIds);
+		aruco::interpolateCornersCharuco(markerCorners, markerIds, boardImage, board, charucoCorners, charucoIds);
+
+		Vec3d rvec, tvec;
+
+		if (detectedCharucoIds.size() > 0) {
+		//-- Matching input board to perfect board
+					for (unsigned int i = 0; i < charucoIds.size(); i++) {
+						for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
+							if (charucoIds[i] == detectedCharucoIds[j]) {
+								matchedCharucoIds.push_back(charucoIds[i]);
+								matchedCharucoCorners.push_back(charucoCorners[i]);
+							}
+						}
+					}
+		//-- Computing spatial homography and warping
+					Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
+					Mat undistoredCharuco;
+					warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
+					bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
+
+					if(valid){
+						cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
+					}
+					imwrite("posed.png",inputImage);
+					imwrite("warped.png",undistoredCharuco);
+		}
+	}
+	else if(bool_vis | bool_vis_CH){
 		if(bool_vis && argc != 6){
 			cout << "Using mode VIS requires input in this order: inputImage backgroundImage shapes_file.txt color_file.txt" << endl;
 		}
@@ -496,7 +727,7 @@ int main(int argc, char** argv){
 
 			   	//-- Removing barcode
 			    	Mat lab;
-			    	cvtColor(adjImage, lab, CV_BGR2Lab);
+			    	cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
 			    	vector<Mat> split_lab;
 			    	split(lab, split_lab);
 			    	Mat b_thresh1;
@@ -510,7 +741,7 @@ int main(int argc, char** argv){
 
 			    //-- Remove edges of pot
 			    	Mat dest_lab;
-			    	cvtColor(dest, dest_lab, CV_BGR2Lab);
+			    	cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
 			    	vector<Mat> channels_lab;
 			    	split(dest_lab, channels_lab);
 			    	Mat pot_thresh1;
