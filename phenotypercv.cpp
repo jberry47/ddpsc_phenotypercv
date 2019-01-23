@@ -968,7 +968,7 @@ int main(int argc, char** argv){
 	}
 	else if(mode == "-h" || mode == "--help"){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
-		cout << "USAGE:" << endl << "\tThere are seven modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
+		cout << "USAGE:" << endl << "\tThere are nine modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV [MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV VIS input_image.png background_image.png shapes.txt color.txt"<<endl << endl;
@@ -977,6 +977,9 @@ int main(int argc, char** argv){
 		cout << "\t\e[1mNIR\e[0m - segment and measure plant in near-infrared images" << endl << "\t\t" << "Example: ./PhenotyperCV NIR input_image.png background_image.png nir_color.txt" << endl << endl;
 		cout << "\t\e[1mSET_TARGET\e[0m - obtain and print to stdout the RGB information for each of the chips in the image" << endl << "\t\t" << "Example: ./PhenotyperCV SET_TARGET targetImage.png > target_homography.csv" << endl << "NOTE Processing using the SET_TARGET mode requires a card_masks/ folder that contains masks for each of the chips" << endl << endl;
 		cout << "\t\e[1mDRAW_ROIS\e[0m - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET. When you click, an roi is drawn onto the input image but a new binary image is created as well. The input 'size' is half the length of the desired square roi. 8 is a good choice for the Bellweather Phenotyper. The directory card_masks must already be made for the images to save" << endl << "\t\t" << "Example: ./PhenotyperCV DRAW_ROIS input_image.png size" << endl << endl;
+		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV CHARUCO_CALIB image_list.txt" << endl << endl;
+		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV CHARUCO_EST input_image" << endl << endl;
+		//cout << "\t\e[1mARUCO_CALIB\e[0m - Same premise as CHARUCO_CALIB but instead using a purely ArUco board" << endl << "\t\t" << "Example: ./PhenotyperCV ARUCO_CALIB image_list.txt" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
 		cout << "\tColor Correction VIS Pipeline:" << endl;
@@ -992,7 +995,7 @@ int main(int argc, char** argv){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "First argument must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, or AVG_IMGS" << endl;
+    	cout << "First argument must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV --help  for more information" << endl;
     }
 
