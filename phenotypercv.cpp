@@ -589,7 +589,7 @@ int main(int argc, char *argv[]){
 
 	if(bool_charucoCreate){
 		if(!(parser.has("d") && parser.has("nx") && parser.has("ny") && parser.has("aw") && parser.has("mw"))){
-			cout << "Using mode CHARUCO_CREATE requires input: -d=dictionaryID -nx=num_board_spacesX -ny=num_board_spacesX -mw=marker_width -aw=aruco_width" << endl;
+			cout << "Using mode CHARUCO_CREATE requires input: -d=dictionaryID -nx=num_board_spacesX -ny=num_board_spacesY -mw=marker_width -aw=aruco_width" << endl;
 		}else{
 			Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
 			Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(parser.get<int>("nx"), parser.get<int>("ny"), parser.get<float>("mw"), parser.get<float>("aw"), dictionary);
@@ -960,7 +960,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
-		cout << "USAGE:" << endl << "\tThere are nine modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
+		cout << "USAGE:" << endl << "\tThere are ten modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV [MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt"<<endl << endl;
@@ -969,6 +969,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mNIR\e[0m - segment and measure plant in near-infrared images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=NIR -i=input_image.png -b=background_image.png -c=nir_color.txt" << endl << endl;
 		cout << "\t\e[1mSET_TARGET\e[0m - obtain and print to stdout the RGB information for each of the chips in the image" << endl << "\t\t" << "Example: ./PhenotyperCV -m=SET_TARGET -i=targetImage.png > target_homography.csv" << endl << "NOTE Processing using the SET_TARGET mode requires a card_masks/ folder that contains masks for each of the chips" << endl << endl;
 		cout << "\t\e[1mDRAW_ROIS\e[0m - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET. When you click, an roi is drawn onto the input image but a new binary image is created as well. The input 'size' is half the length of the desired square roi. 8 is a good choice for the Bellweather Phenotyper. The directory card_masks must already be made for the images to save" << endl << "\t\t" << "Example: ./PhenotyperCV -m=DRAW_ROIS -i=input_image.png -s=size" << endl << endl;
+		cout << "\t\e[1mCHARUCO_CREATE\e[0m - Creates a nx by ny ChArUco board with mw marker width and aw aruco chip width using d dictionary." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CREATE -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02" << endl << endl;
 		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=calib_list.txt -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
 		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=test_imgs/plate.jpg -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
 		//cout << "\t\e[1mARUCO_CALIB\e[0m - Same premise as CHARUCO_CALIB but instead using a purely ArUco board" << endl << "\t\t" << "Example: ./PhenotyperCV ARUCO_CALIB image_list.txt" << endl << endl;
