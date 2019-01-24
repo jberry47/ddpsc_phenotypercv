@@ -53,6 +53,7 @@ const char* keys  =
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
 		"{ci       |       | ChArUco calibrate input file }"
+		"{cc       |       | Camera calibration file name }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
 		        "DICT_6X6_50=8, DICT_6X6_100=9, DICT_6X6_250=10, DICT_6X6_1000=11, DICT_7X7_50=12,"
@@ -83,7 +84,7 @@ static bool saveCameraParams(const string &filename, Size imageSize,
     return true;
 }
 
-bool charuco_calibrate(string calib_imgs, int dict_id){
+bool charuco_calibrate(string outfile, string calib_imgs, int dict_id){
 	Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dict_id));
 		cv::Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
 		vector< vector< vector< Point2f > > > allCorners;
@@ -156,10 +157,10 @@ bool charuco_calibrate(string calib_imgs, int dict_id){
 	            aruco::calibrateCameraCharuco(allCharucoCorners, allCharucoIds, board, imgSize,
 	                                          cameraMatrix, distCoeffs, noArray(), noArray());
 
-	    bool saveOk =  saveCameraParams("camera_calibration.txt", imgSize, cameraMatrix, distCoeffs);
+	    bool saveOk =  saveCameraParams(outfile, imgSize, cameraMatrix, distCoeffs);
 	    cout << "Rep Error: " << repError << endl;
 	    cout << "Rep Error Aruco: " << arucoRepErr << endl;
-	    cout << "Calibration saved to " << "camera_calibration.txt" << endl;
+	    cout << "Calibration saved to " << outfile << endl;
 	    return(saveOk);
 }
 
@@ -638,24 +639,24 @@ int main(int argc, char *argv[]){
 		if(!(parser.has("ci") && parser.has("d"))){
 			cout << "Using mode ARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
 		}else{
-		    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
+		    bool check = aruco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 		}
 	}
 	else if(bool_charucoCalib){
-		if(!(parser.has("ci") && parser.has("d"))){
-			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID" << endl;
+		if(!(parser.has("ci") && parser.has("d") && parser.has("cc"))){
+			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID -cc=camera_calibration_outfile.yaml" << endl;
 		}else{
-		    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
+		    bool check = charuco_calibrate(parser.get<string>("cc"),parser.get<string>("ci"),parser.get<int>("d"));
 		}
 	}
 	else if(bool_charuco_est){
-		if(!(parser.has("i") && parser.has("d"))){
-			cout << "Using mode CHARUCO_EST requires input: -i=inputImage -d=dictionaryID"<< endl;
+		if(!(parser.has("i") && parser.has("d") &&parser.has("cc"))){
+			cout << "Using mode CHARUCO_EST requires input: -i=inputImage -d=dictionaryID -cc=camera_calibration_infile.yaml" << endl;
 		}else{
 			//-- Getting camera calibration details
 			Mat cameraMatrix, distCoeffs;
 			FileStorage fs;
-			fs.open("camera_calibration.txt", FileStorage::READ);
+			fs.open(parser.get<string>("cc"), FileStorage::READ);
 			fs["camera_matrix"] >> cameraMatrix;
 			fs["distortion_coefficients"] >> distCoeffs;
 
