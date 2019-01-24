@@ -981,7 +981,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
+    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
 
