@@ -37,6 +37,23 @@ using namespace cv;
 using namespace std;
 using namespace Eigen;
 
+namespace {
+const char* about =
+		"This program is for segmenting and measuring plants from the Bellweather Phenotyping\n"
+		" Facility. Segmentation is achieved by supplying a background image that does not contain a plant\n"
+		" and using the difference between that and a supplied image to threshold on. Further processing is\n"
+		" done to remove artifacts that arise. After segmentation is complete, shapes and color profile are\n"
+		" reported in corresponding user-specified files.\n";
+const char* keys  =
+        "{m        |       | Mode to run }"
+        "{h        |       | Show help documentation }"
+        "{i        |       | Input image }"
+        "{b        |       | Background image }"
+        "{size     |       | Square size (pixels) for DRAW_ROI mode}"
+        "{s        |       | Shape file to write to }"
+        "{c        |       | Color file to write to }"
+		"{ci       |       | ChArUco calibrate input file }";
+}
 
 static bool saveCameraParams(const string &filename, Size imageSize,
                              const Mat &cameraMatrix, const Mat &distCoeffs) {
@@ -592,12 +609,13 @@ Mat skeletonize(Mat img){
 	return skel;
 }
 
-int main(int argc, char** argv){
+int main(int argc, char *argv[]){
+    CommandLineParser parser(argc, argv, keys);
 	string mode;
-	if(argc == 1){
+	if(!parser.has("m")){
 		mode = "-h";
 	}else{
-		mode = string(argv[1]);
+		mode = parser.get<String>("m");
 	}
 
 	bool bool_nir = mode=="NIR";
@@ -619,15 +637,14 @@ int main(int argc, char** argv){
 		bool check = aruco_calibrate(calib_file);
 	}
 	else if(bool_charucoCalib){
-		if(argc != 3){
-			cout << "Using mode CHARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
+		if(!parser.has("ci")){
+			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt" << endl;
 		}
-		string calib_file = argv[2];
-		bool check = charuco_calibrate(calib_file);
+		bool check = charuco_calibrate(parser.get<string>("ci"));
 	}
 	else if(bool_charuco_est){
-		if(argc != 3){
-			cout << "Using mode CHARUCO_EST requires input in this order: inputImage" << endl;
+		if(!parser.has("i")){
+			cout << "Using mode CHARUCO_EST requires input: -i=inputImage" << endl;
 		}
 		//-- Getting camera calibration details
 		Mat cameraMatrix, distCoeffs;
@@ -637,7 +654,7 @@ int main(int argc, char** argv){
 		fs["distortion_coefficients"] >> distCoeffs;
 
 		//-- Getting input image and board image
-		Mat inputImage = imread(argv[2]);
+		Mat inputImage = imread(parser.get<string>("i"));
 		Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
 		Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
 		Mat boardImage;
@@ -686,135 +703,134 @@ int main(int argc, char** argv){
 		}
 	}
 	else if(bool_vis | bool_vis_CH){
-		if(bool_vis && argc != 6){
-			cout << "Using mode VIS requires input in this order: inputImage backgroundImage shapes_file.txt color_file.txt" << endl;
+		if(!(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
+			cout << "Using mode VIS requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
 		}
-		else if(bool_vis_CH && argc != 6){
-			cout << "Using mode VIS_CH requires input in this order: inputImage backgroundImage shapes_file.txt color_file.txt" << endl;
+		else if(!(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
+			cout << "Using mode VIS_CH requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
 		}else{
-			Mat inputImage = imread(argv[2]);
-					Mat adjBackground = imread(argv[3]);
+			Mat inputImage = imread(parser.get<string>("i"));
+			Mat adjBackground = imread(parser.get<string>("b"));
 
-				//-- Processing the VIS image
-					Mat adjImage;
-					float det=0;
-					float D;
-				//-- Color homography
-					if(bool_vis_CH){
-						MatrixXd rh, gh, bh;
-						get_standardizations(inputImage, det, rh, gh, bh);
-						adjImage = color_homography(inputImage,rh,gh,bh);
-						D = 1-det;
-					}else{
-						adjImage = inputImage;
-					}
+			//-- Processing the VIS image
+			Mat adjImage;
+			float det=0;
+			float D;
+			//-- Color homography
+			if(bool_vis_CH){
+				MatrixXd rh, gh, bh;
+				get_standardizations(inputImage, det, rh, gh, bh);
+				adjImage = color_homography(inputImage,rh,gh,bh);
+				D = 1-det;
+			}else{
+				adjImage = inputImage;
+			}
 
-				//-- Difference in images
-					Mat dest;
-					absdiff(adjBackground,adjImage,dest);
-					vector<Mat> channels(3);
-					split(dest,channels);
-					Mat dest_blur;
-					blur(channels[1], dest_blur, Size( 2, 2 ) );
-					Mat dest_thresh;
-					threshold(dest_blur,dest_thresh,25,255,THRESH_BINARY);
-					Mat dest_dilate;
-			    	dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 5, 1, 1);
-			    	Mat dest_erode;
-			    	erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 4, 1, 1);
+			//-- Difference in images
+			Mat dest;
+			absdiff(adjBackground,adjImage,dest);
+			vector<Mat> channels(3);
+			split(dest,channels);
+			Mat dest_blur;
+			blur(channels[1], dest_blur, Size( 2, 2 ) );
+			Mat dest_thresh;
+			threshold(dest_blur,dest_thresh,25,255,THRESH_BINARY);
+			Mat dest_dilate;
+			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 5, 1, 1);
+			Mat dest_erode;
+			erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 4, 1, 1);
 
-			   	//-- Removing barcode
-			    	Mat lab;
-			    	cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
-			    	vector<Mat> split_lab;
-			    	split(lab, split_lab);
-			    	Mat b_thresh1;
-			    	inRange(split_lab[2],90,139,b_thresh1);
-			    	Mat invSrc =  cv::Scalar::all(255) - b_thresh1;
-			    	Mat mask1;
-			    	bitwise_and(dest_erode,invSrc,mask1);
-			    	Mat barcode_roi;
-			    	vector<Point> cc_barcode = keep_roi(mask1,Point(1146,1368),Point(1359,1479),barcode_roi);
-			    	Mat mask2 = mask1-barcode_roi;
+			//-- Removing barcode
+			Mat lab;
+			cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
+			vector<Mat> split_lab;
+			split(lab, split_lab);
+			Mat b_thresh1;
+			inRange(split_lab[2],90,139,b_thresh1);
+			Mat invSrc =  cv::Scalar::all(255) - b_thresh1;
+			Mat mask1;
+			bitwise_and(dest_erode,invSrc,mask1);
+			Mat barcode_roi;
+			vector<Point> cc_barcode = keep_roi(mask1,Point(1146,1368),Point(1359,1479),barcode_roi);
+			Mat mask2 = mask1-barcode_roi;
 
-			    //-- Remove edges of pot
-			    	Mat dest_lab;
-			    	cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
-			    	vector<Mat> channels_lab;
-			    	split(dest_lab, channels_lab);
-			    	Mat pot_thresh1;
-			    	inRange(channels_lab[2],0,120,pot_thresh1);
-			    	Mat pot_thresh2;
-			    	inRange(channels_lab[2],135,200,pot_thresh2);
-			    	Mat pot_or;
-			    	bitwise_or(pot_thresh1,pot_thresh2,pot_or);
-			    	Mat pot_dilate;
-			    	dilate(pot_or, pot_dilate, Mat(), Point(-1, -1), 2, 1, 1);
-			    	Mat pot_erode;
-			    	erode(pot_dilate,pot_erode, Mat(), Point(-1, -1), 3, 1, 1);
-			    	Mat pot_and;
-			    	bitwise_and(pot_erode,mask2,pot_and);
-			    	Mat pot_roi;
-			    	vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
+			//-- Remove edges of pot
+			Mat dest_lab;
+			cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
+			vector<Mat> channels_lab;
+			split(dest_lab, channels_lab);
+			Mat pot_thresh1;
+			inRange(channels_lab[2],0,120,pot_thresh1);
+			Mat pot_thresh2;
+			inRange(channels_lab[2],135,200,pot_thresh2);
+			Mat pot_or;
+			bitwise_or(pot_thresh1,pot_thresh2,pot_or);
+			Mat pot_dilate;
+			dilate(pot_or, pot_dilate, Mat(), Point(-1, -1), 2, 1, 1);
+			Mat pot_erode;
+			erode(pot_dilate,pot_erode, Mat(), Point(-1, -1), 3, 1, 1);
+			Mat pot_and;
+			bitwise_and(pot_erode,mask2,pot_and);
+			Mat pot_roi;
+			vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
 
-			    //-- Remove blue stakes
-			    	Mat b_thresh;
-			    	inRange(split_lab[2],80,115,b_thresh);
-			    	Mat b_er;
-			    	erode(b_thresh,b_er, Mat(), Point(-1, -1), 1, 1, 1);
-			    	Mat b_roi;
-			    	vector<Point> cc1 = keep_roi(b_er,Point(300,600),Point(1610,1310),b_roi);
-			    	Mat b_dil;
-			    	dilate(b_roi,b_dil,Mat(),Point(-1, -1), 6, 1, 1);
-			    	Mat b_xor = pot_roi - b_dil;
+			//-- Remove blue stakes
+			Mat b_thresh;
+			inRange(split_lab[2],80,115,b_thresh);
+			Mat b_er;
+			erode(b_thresh,b_er, Mat(), Point(-1, -1), 1, 1, 1);
+			Mat b_roi;
+			vector<Point> cc1 = keep_roi(b_er,Point(300,600),Point(1610,1310),b_roi);
+			Mat b_dil;
+			dilate(b_roi,b_dil,Mat(),Point(-1, -1), 6, 1, 1);
+			Mat b_xor = pot_roi - b_dil;
 
-			    //-- ROI selector
-			    	Mat mask;
-			    	vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
+			//-- ROI selector
+			Mat mask;
+			vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
 
-			    //-- Getting numerical data
-			    	vector<double> shapes_data = get_shapes(cc,mask);
-			    	Mat hue_data = get_color(adjImage, mask);
+			//-- Getting numerical data
+			vector<double> shapes_data = get_shapes(cc,mask);
+			Mat hue_data = get_color(adjImage, mask);
 
-			    //-- Write shapes to file
-			    	string name_shape= string(argv[4]);
-			    	ofstream shape_file;
-			    	shape_file.open(name_shape.c_str(),ios_base::app);
-			    	shape_file << argv[2] << " ";
-			    	for(int i=0;i<20;i++){
-			    		shape_file << shapes_data[i];
-			    		if(i != 19){
-			    			shape_file << " ";
-			    		}
-			    	}
-			    	if(bool_vis_CH){
-			    		shape_file << " " << D;
-			    	}
-			    	shape_file << endl;
-			    	shape_file.close();
+			//-- Write shapes to file
+			string name_shape= parser.get<string>("s");
+			ofstream shape_file;
+			shape_file.open(name_shape.c_str(),ios_base::app);
+			shape_file << argv[2] << " ";
+			for(int i=0;i<20;i++){
+				shape_file << shapes_data[i];
+				if(i != 19){
+					shape_file << " ";
+				}
+			}
+			if(bool_vis_CH){
+				shape_file << " " << D;
+			}
+			shape_file << endl;
+			shape_file.close();
 
-			    //-- Write color to file
-			    	string name_hue= string(argv[5]);
-			    	ofstream hue_file;
-			    	hue_file.open(name_hue.c_str(),ios_base::app);
-			    	hue_file << argv[2] << " ";
-			    	for(int i=0;i<180;i++){
-			    		hue_file << hue_data.at<float>(i,0) << " ";
-			    	}
-			    	hue_file << endl;
-			    	hue_file.close();
+			//-- Write color to file
+			string name_hue= parser.get<string>("c");
+			ofstream hue_file;
+			hue_file.open(name_hue.c_str(),ios_base::app);
+			hue_file << argv[2] << " ";
+			for(int i=0;i<180;i++){
+				hue_file << hue_data.at<float>(i,0) << " ";
+			}
+			hue_file << endl;
+			hue_file.close();
 		}
-
 	}
 	else if(bool_vis_CH_check){
-		if(argc != 3){
-			cout << "Using mode VIS_CH_CHECK requires input in this order: inputImage" << endl;
+		if(!parser.has("i")){
+			cout << "Using mode VIS_CH_CHECK requires input: -i=inputImage" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
 		}else{
-			Mat inputImage = imread(argv[2]);
+			Mat inputImage = imread(parser.get<string>("i"));
 
 			//-- Processing the VIS image
 			Mat adjImage;
@@ -836,14 +852,14 @@ int main(int argc, char** argv){
 	}
     //-- Processing the NIR image
 	else if(bool_nir){
-		if(argc != 5){
-			cout << "Using mode NIR requires input in this order: inputImage backgroundImage nir_color_file.txt" << endl;
+		if(!(parser.has("i") && parser.has("b") && parser.has("c"))){
+			cout << "Using mode NIR requires input: -i=inputImage -b=backgroundImage -c=nir_color_file.txt" << endl;
 		}else{
 			//-- Read in image and background
-			    	Mat nirImage = imread(argv[2],0);
+			    	Mat nirImage = imread(parser.get<string>("i"),0);
 			    	Mat nir_fixed = 1.591*nirImage-31.803;
 
-			    	Mat nirBackground = imread(argv[3],0);
+			    	Mat nirBackground = imread(parser.get<string>("b"),0);
 
 			    	//-- Difference between image and background
 					Mat dest_nir;
@@ -868,7 +884,7 @@ int main(int argc, char** argv){
 			    	Mat nir_data = get_nir(nirImage, kept_mask_nir);
 
 			        //-- Writing numerical data
-			    	string name_nir= string(argv[4]);
+			    	string name_nir= parser.get<string>("c");
 			   		ofstream nir_file;
 			   		nir_file.open(name_nir.c_str(),ios_base::app);
 			   		nir_file << argv[2] << " ";
@@ -880,13 +896,13 @@ int main(int argc, char** argv){
 		}
 	}
 	else if(bool_getCH){
-		if(argc != 3){
-			cout << "Using mode SET_TARGET requires input in this order: inputImage" << endl;
+		if(!parser.has("i")){
+			cout << "Using mode SET_TARGET requires input: -i=inputImage" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "Redirect this output to 'target_homography.csv' for VIS_CH and VIS_CH_CHECK modes to work" << endl;
 		}else{
 			//-- Getting RGB components of each chip in the reference picture
-					Mat inputImage = imread(argv[2]);
+					Mat inputImage = imread(parser.get<string>("i"));
 					vector<Mat> bgr;
 					split(inputImage, bgr);
 					Mat b = bgr[0];
@@ -911,14 +927,12 @@ int main(int argc, char** argv){
 		}
     }
 	else if(bool_drawROIS){
-		if(argc != 4){
-			cout << "Using mode DRAW_ROIS requires input in this order: input_image size" << endl;
+		if(!(parser.has("i") && parser.has("s"))){
+			cout << "Using mode DRAW_ROIS requires input: -i=input_image -s=size" << endl;
 			cout << "In addition to the input requirements, a directory called 'card_masks' must exist" << endl;
 		}else{
-			src = imread(argv[2]);
-			string s = argv[3];
-			stringstream geek(s);
-			geek >> roi_size;
+			src = imread(parser.get<string>("i"));
+			roi_size = parser.get<int>("s");
 
 			namedWindow("Image",WINDOW_NORMAL);
 			setMouseCallback("Image",onMouse,NULL );
@@ -966,21 +980,21 @@ int main(int argc, char** argv){
 					imwrite("average_images.png",adjImage);
 		}
 	}
-	else if(mode == "-h" || mode == "--help"){
+	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
 		cout << "USAGE:" << endl << "\tThere are nine modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV [MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
-		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV VIS input_image.png background_image.png shapes.txt color.txt"<<endl << endl;
-		cout << "\t\e[1mVIS_CH\e[0m - standardize, segment, and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV VIS_CH input_image.png background_image.png shapes.txt color.txt" << endl << "NOTE Processing using the VIS_CH mode requires two additional items: a card_masks/ folder that contains masks for each of the chips and target_homography.csv file that is the desired color space. The csv file can be created for you using the SET_TARGET mode of this program and redirecting the output." << endl << endl;
-		cout << "\t\e[1mVIS_CH_CHECK\e[0m - standardize, and output image" << endl << "\t\t" << "Example: ./PhenotyperCV VIS_CH_CHECK input_image.png" << endl << "NOTE Processing using the VIS_CH_CHECK mode requires two additional items: a card_masks/ folder that contains masks for each of the chips and target_homography.csv file that is the desired color space. The csv file can be created for you using the SET_TARGET mode of this program and redirecting the output." << endl << endl;
-		cout << "\t\e[1mNIR\e[0m - segment and measure plant in near-infrared images" << endl << "\t\t" << "Example: ./PhenotyperCV NIR input_image.png background_image.png nir_color.txt" << endl << endl;
-		cout << "\t\e[1mSET_TARGET\e[0m - obtain and print to stdout the RGB information for each of the chips in the image" << endl << "\t\t" << "Example: ./PhenotyperCV SET_TARGET targetImage.png > target_homography.csv" << endl << "NOTE Processing using the SET_TARGET mode requires a card_masks/ folder that contains masks for each of the chips" << endl << endl;
-		cout << "\t\e[1mDRAW_ROIS\e[0m - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET. When you click, an roi is drawn onto the input image but a new binary image is created as well. The input 'size' is half the length of the desired square roi. 8 is a good choice for the Bellweather Phenotyper. The directory card_masks must already be made for the images to save" << endl << "\t\t" << "Example: ./PhenotyperCV DRAW_ROIS input_image.png size" << endl << endl;
-		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV CHARUCO_CALIB image_list.txt" << endl << endl;
-		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV CHARUCO_EST input_image" << endl << endl;
+		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt"<<endl << endl;
+		cout << "\t\e[1mVIS_CH\e[0m - standardize, segment, and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS_CH -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt" << endl << "NOTE Processing using the VIS_CH mode requires two additional items: a card_masks/ folder that contains masks for each of the chips and target_homography.csv file that is the desired color space. The csv file can be created for you using the SET_TARGET mode of this program and redirecting the output." << endl << endl;
+		cout << "\t\e[1mVIS_CH_CHECK\e[0m - standardize, and output image" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS_CH_CHECK -i=input_image.png" << endl << "NOTE Processing using the VIS_CH_CHECK mode requires two additional items: a card_masks/ folder that contains masks for each of the chips and target_homography.csv file that is the desired color space. The csv file can be created for you using the SET_TARGET mode of this program and redirecting the output." << endl << endl;
+		cout << "\t\e[1mNIR\e[0m - segment and measure plant in near-infrared images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=NIR -i=input_image.png -b=background_image.png -c=nir_color.txt" << endl << endl;
+		cout << "\t\e[1mSET_TARGET\e[0m - obtain and print to stdout the RGB information for each of the chips in the image" << endl << "\t\t" << "Example: ./PhenotyperCV -m=SET_TARGET -i=targetImage.png > target_homography.csv" << endl << "NOTE Processing using the SET_TARGET mode requires a card_masks/ folder that contains masks for each of the chips" << endl << endl;
+		cout << "\t\e[1mDRAW_ROIS\e[0m - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET. When you click, an roi is drawn onto the input image but a new binary image is created as well. The input 'size' is half the length of the desired square roi. 8 is a good choice for the Bellweather Phenotyper. The directory card_masks must already be made for the images to save" << endl << "\t\t" << "Example: ./PhenotyperCV -m=DRAW_ROIS -i=input_image.png -s=size" << endl << endl;
+		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=image_list.txt" << endl << endl;
+		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=input_image" << endl << endl;
 		//cout << "\t\e[1mARUCO_CALIB\e[0m - Same premise as CHARUCO_CALIB but instead using a purely ArUco board" << endl << "\t\t" << "Example: ./PhenotyperCV ARUCO_CALIB image_list.txt" << endl << endl;
-		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV AVG_IMGS"<< endl << endl << endl;
+		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
 		cout << "\tColor Correction VIS Pipeline:" << endl;
 		cout << "\t\t* Average together all the empty pots using AVG_IMGS" << endl;
@@ -995,8 +1009,8 @@ int main(int argc, char** argv){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "First argument must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
-    	cout << "Use  ./PhenotyperCV --help  for more information" << endl;
+    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
+    	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
 
 	return 0;
