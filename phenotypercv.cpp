@@ -52,7 +52,12 @@ const char* keys  =
         "{size     |       | Square size (pixels) for DRAW_ROI mode}"
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
-		"{ci       |       | ChArUco calibrate input file }";
+		"{ci       |       | ChArUco calibrate input file }"
+		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
+		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
+		        "DICT_6X6_50=8, DICT_6X6_100=9, DICT_6X6_250=10, DICT_6X6_1000=11, DICT_7X7_50=12,"
+		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}"
+		        "{@outfile |<none> | Output file with calibrated camera parameters }";
 }
 
 static bool saveCameraParams(const string &filename, Size imageSize,
@@ -78,8 +83,8 @@ static bool saveCameraParams(const string &filename, Size imageSize,
     return true;
 }
 
-bool charuco_calibrate(string calib_imgs){
-		cv::Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+bool charuco_calibrate(string calib_imgs, int dict_id){
+	Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dict_id));
 		cv::Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
 		vector< vector< vector< Point2f > > > allCorners;
 		vector< vector< int > > allIds;
@@ -158,8 +163,8 @@ bool charuco_calibrate(string calib_imgs){
 	    return(saveOk);
 }
 
-bool aruco_calibrate(string calib_imgs){
-		cv::Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+bool aruco_calibrate(string calib_imgs, int dict_id){
+		cv::Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(dict_id);
 		cv::Ptr<cv::aruco::GridBoard> board = cv::aruco::GridBoard::create(5, 7, 0.04, 0.02, dictionary);
 		vector< vector< vector< Point2f > > > allCorners;
 		vector< vector< int > > allIds;
@@ -630,21 +635,20 @@ int main(int argc, char *argv[]){
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 
 	if(bool_arucoCalib){
-		if(argc != 3){
+		if(!(parser.has("ci") && parser.has("d"))){
 			cout << "Using mode ARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
 		}
-		string calib_file = argv[2];
-		bool check = aruco_calibrate(calib_file);
+	    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 	}
 	else if(bool_charucoCalib){
-		if(!parser.has("ci")){
-			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt" << endl;
+		if(!(parser.has("ci") && parser.has("d"))){
+			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID" << endl;
 		}
-		bool check = charuco_calibrate(parser.get<string>("ci"));
+	    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 	}
 	else if(bool_charuco_est){
-		if(!parser.has("i")){
-			cout << "Using mode CHARUCO_EST requires input: -i=inputImage" << endl;
+		if(!(parser.has("i") && parser.has("d"))){
+			cout << "Using mode CHARUCO_EST requires input: -i=inputImage -d=dictionaryID"<< endl;
 		}
 		//-- Getting camera calibration details
 		Mat cameraMatrix, distCoeffs;
@@ -655,7 +659,7 @@ int main(int argc, char *argv[]){
 
 		//-- Getting input image and board image
 		Mat inputImage = imread(parser.get<string>("i"));
-		Ptr<aruco::Dictionary> dictionary=aruco::getPredefinedDictionary(aruco::DICT_6X6_250);
+		Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
 		Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
 		Mat boardImage;
 		board->draw( inputImage.size(), boardImage );
@@ -991,8 +995,8 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mNIR\e[0m - segment and measure plant in near-infrared images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=NIR -i=input_image.png -b=background_image.png -c=nir_color.txt" << endl << endl;
 		cout << "\t\e[1mSET_TARGET\e[0m - obtain and print to stdout the RGB information for each of the chips in the image" << endl << "\t\t" << "Example: ./PhenotyperCV -m=SET_TARGET -i=targetImage.png > target_homography.csv" << endl << "NOTE Processing using the SET_TARGET mode requires a card_masks/ folder that contains masks for each of the chips" << endl << endl;
 		cout << "\t\e[1mDRAW_ROIS\e[0m - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET. When you click, an roi is drawn onto the input image but a new binary image is created as well. The input 'size' is half the length of the desired square roi. 8 is a good choice for the Bellweather Phenotyper. The directory card_masks must already be made for the images to save" << endl << "\t\t" << "Example: ./PhenotyperCV -m=DRAW_ROIS -i=input_image.png -s=size" << endl << endl;
-		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=image_list.txt" << endl << endl;
-		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=input_image" << endl << endl;
+		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=image_list.txt -d=10" << endl << endl;
+		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=input_image -d=10" << endl << endl;
 		//cout << "\t\e[1mARUCO_CALIB\e[0m - Same premise as CHARUCO_CALIB but instead using a purely ArUco board" << endl << "\t\t" << "Example: ./PhenotyperCV ARUCO_CALIB image_list.txt" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
