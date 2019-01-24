@@ -705,8 +705,21 @@ int main(int argc, char *argv[]){
 						if(valid){
 							cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
 						}
-						imwrite("posed.png",inputImage);
-						imwrite("warped.png",undistoredCharuco);
+
+						vector<string> sub_str;
+						const string full_str = parser.get<string>("i");
+						char del = '.';
+
+						split(full_str,del,sub_str);
+						string new_name;
+						new_name= sub_str[0]+"_posed.png";
+						imwrite(new_name,inputImage);
+
+						split(full_str,del,sub_str);
+						new_name = sub_str[0]+"_opp.png";
+						imwrite(new_name,undistoredCharuco);
+
+
 			}
 		}
 	}
