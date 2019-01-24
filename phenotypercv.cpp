@@ -38,12 +38,6 @@ using namespace std;
 using namespace Eigen;
 
 namespace {
-const char* about =
-		"This program is for segmenting and measuring plants from the Bellweather Phenotyping\n"
-		" Facility. Segmentation is achieved by supplying a background image that does not contain a plant\n"
-		" and using the difference between that and a supplied image to threshold on. Further processing is\n"
-		" done to remove artifacts that arise. After segmentation is complete, shapes and color profile are\n"
-		" reported in corresponding user-specified files.\n";
 const char* keys  =
         "{m        |       | Mode to run }"
         "{h        |       | Show help documentation }"
