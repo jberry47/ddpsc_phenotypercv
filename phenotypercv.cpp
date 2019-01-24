@@ -594,7 +594,7 @@ int main(int argc, char *argv[]){
 			Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
 			Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(parser.get<int>("nx"), parser.get<int>("ny"), parser.get<float>("mw"), parser.get<float>("aw"), dictionary);
 			Mat boardImage;
-			board->draw( Size(1000,1000), boardImage );
+			board->draw( Size(2160,2160), boardImage );
 			string outname = parser.get<string>("d")+"-"+parser.get<string>("nx")+"x"+parser.get<string>("ny")+"_"+parser.get<string>("mw")+"_"+parser.get<string>("aw")+".png";
 			imwrite(outname,boardImage);
 		}
