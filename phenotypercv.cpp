@@ -637,80 +637,83 @@ int main(int argc, char *argv[]){
 	if(bool_arucoCalib){
 		if(!(parser.has("ci") && parser.has("d"))){
 			cout << "Using mode ARUCO_CALIB requires input in this order: calib_img_paths.txt" << endl;
+		}else{
+		    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 		}
-	    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 	}
 	else if(bool_charucoCalib){
 		if(!(parser.has("ci") && parser.has("d"))){
 			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID" << endl;
+		}else{
+		    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 		}
-	    bool check = charuco_calibrate(parser.get<string>("ci"),parser.get<int>("d"));
 	}
 	else if(bool_charuco_est){
 		if(!(parser.has("i") && parser.has("d"))){
 			cout << "Using mode CHARUCO_EST requires input: -i=inputImage -d=dictionaryID"<< endl;
-		}
-		//-- Getting camera calibration details
-		Mat cameraMatrix, distCoeffs;
-		FileStorage fs;
-		fs.open("camera_calibration.txt", FileStorage::READ);
-		fs["camera_matrix"] >> cameraMatrix;
-		fs["distortion_coefficients"] >> distCoeffs;
+		}else{
+			//-- Getting camera calibration details
+			Mat cameraMatrix, distCoeffs;
+			FileStorage fs;
+			fs.open("camera_calibration.txt", FileStorage::READ);
+			fs["camera_matrix"] >> cameraMatrix;
+			fs["distortion_coefficients"] >> distCoeffs;
 
-		//-- Getting input image and board image
-		Mat inputImage = imread(parser.get<string>("i"));
-		Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
-		Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
-		Mat boardImage;
-		board->draw( inputImage.size(), boardImage );
+			//-- Getting input image and board image
+			Mat inputImage = imread(parser.get<string>("i"));
+			Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
+			Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(5, 7, 0.04, 0.02, dictionary);
+			Mat boardImage;
+			board->draw( inputImage.size(), boardImage );
 
-		vector< cv::Point2f > charucoCorners, detectedCharucoCorners, matchedCharucoCorners;
-		vector< int > charucoIds, detectedCharucoIds, matchedCharucoIds;
+			vector< cv::Point2f > charucoCorners, detectedCharucoCorners, matchedCharucoCorners;
+			vector< int > charucoIds, detectedCharucoIds, matchedCharucoIds;
 
-		//-- Detecting input image board
-		vector< int > ids;
-		vector< vector< Point2f > > corners;
-		aruco::detectMarkers(inputImage, dictionary, corners, ids);
-		if(ids.size() > 0){
-			aruco::interpolateCornersCharuco(corners, ids, inputImage, board, detectedCharucoCorners, detectedCharucoIds);
-		}
+			//-- Detecting input image board
+			vector< int > ids;
+			vector< vector< Point2f > > corners;
+			aruco::detectMarkers(inputImage, dictionary, corners, ids);
+			if(ids.size() > 0){
+				aruco::interpolateCornersCharuco(corners, ids, inputImage, board, detectedCharucoCorners, detectedCharucoIds);
+			}
 
-		//-- Detecting perfect board image
-		vector< int > markerIds;
-		vector< vector< Point2f > > markerCorners;
-		aruco::detectMarkers(boardImage, dictionary, markerCorners, markerIds);
-		aruco::interpolateCornersCharuco(markerCorners, markerIds, boardImage, board, charucoCorners, charucoIds);
+			//-- Detecting perfect board image
+			vector< int > markerIds;
+			vector< vector< Point2f > > markerCorners;
+			aruco::detectMarkers(boardImage, dictionary, markerCorners, markerIds);
+			aruco::interpolateCornersCharuco(markerCorners, markerIds, boardImage, board, charucoCorners, charucoIds);
 
-		Vec3d rvec, tvec;
+			Vec3d rvec, tvec;
 
-		if (detectedCharucoIds.size() > 0) {
-		//-- Matching input board to perfect board
-					for (unsigned int i = 0; i < charucoIds.size(); i++) {
-						for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
-							if (charucoIds[i] == detectedCharucoIds[j]) {
-								matchedCharucoIds.push_back(charucoIds[i]);
-								matchedCharucoCorners.push_back(charucoCorners[i]);
+			if (detectedCharucoIds.size() > 0) {
+			//-- Matching input board to perfect board
+						for (unsigned int i = 0; i < charucoIds.size(); i++) {
+							for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
+								if (charucoIds[i] == detectedCharucoIds[j]) {
+									matchedCharucoIds.push_back(charucoIds[i]);
+									matchedCharucoCorners.push_back(charucoCorners[i]);
+								}
 							}
 						}
-					}
-		//-- Computing spatial homography and warping
-					Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
-					Mat undistoredCharuco;
-					warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
-					bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
+			//-- Computing spatial homography and warping
+						Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
+						Mat undistoredCharuco;
+						warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
+						bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
 
-					if(valid){
-						cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
-					}
-					imwrite("posed.png",inputImage);
-					imwrite("warped.png",undistoredCharuco);
+						if(valid){
+							cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
+						}
+						imwrite("posed.png",inputImage);
+						imwrite("warped.png",undistoredCharuco);
+			}
 		}
 	}
 	else if(bool_vis | bool_vis_CH){
-		if(!(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
+		if(bool_vis && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
 			cout << "Using mode VIS requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
 		}
-		else if(!(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
+		else if(bool_vis_CH && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
 			cout << "Using mode VIS_CH requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
