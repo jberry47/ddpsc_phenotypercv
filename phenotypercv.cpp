@@ -649,6 +649,7 @@ int main(int argc, char *argv[]){
 						}
 			//-- Computing spatial homography and warping
 						Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
+						cout << perspectiveTransform << endl;
 						Mat undistoredCharuco;
 						warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
 						bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
@@ -669,8 +670,6 @@ int main(int argc, char *argv[]){
 						split(full_str,del,sub_str);
 						new_name = sub_str[0]+"_opp.png";
 						imwrite(new_name,undistoredCharuco);
-
-
 			}
 		}
 	}
@@ -815,7 +814,7 @@ int main(int argc, char *argv[]){
 
 			//-- Writing out adjusted image
 			vector<string> sub_str;
-			const string full_str = string(argv[2]);
+			const string full_str = string(parser.get<string>("i"));
 			char del = '.';
 			split(full_str,del,sub_str);
 			string new_name = sub_str[0]+"_corrected.jpg";
