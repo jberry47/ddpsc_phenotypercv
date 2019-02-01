@@ -286,49 +286,55 @@ vector<double> get_shapes(vector<Point> cc,Mat mask){
     //-- Get measurements
     Moments mom = moments(mask,true);
     double area = mom.m00;
-    vector<Point>hull;
-    convexHull( Mat(cc), hull, false );
-    double hull_verticies = hull.size();
-    double hull_area = contourArea(Mat(hull));
-    double solidity = area/hull_area;
-    double perimeter = arcLength(Mat(cc),false);
-    double cmx = mom.m10 / mom.m00;
-    double cmy = mom.m01 / mom.m00;
-    Rect boundRect = boundingRect( cc );
-    double width = boundRect.width;
-    double height = boundRect.height;
-    double circ = 4*M_PI*area/(perimeter*perimeter);
-    double angle = -1;
-    double ex = -1;
-    double ey = -1;
-    double emajor = -1;
-    double eminor = -1;
-    double eccen = -1;
-    double round = -1;
-    double ar = -1;
-    if(cc.size() >= 6){
-        Mat pointsf;
-    	Mat(cc).convertTo(pointsf, CV_32F);
-   	    RotatedRect ellipse = fitEllipse(pointsf);
-   	    angle = ellipse.angle;
-  	    ex = ellipse.center.x;
-   	    ey = ellipse.center.y;
-   	    if(ellipse.size.height > ellipse.size.width){
-   	    	emajor = ellipse.size.height;
-   	    	eminor = ellipse.size.width;
-   	    }else{
-   	    	eminor = ellipse.size.height;
-  	   	    emajor = ellipse.size.width;
-   	    }
-   	    eccen = sqrt((1- eminor / emajor)*2);
-   	    round = eminor/emajor;
-   	    ar = emajor/eminor;
-    }
-    float fd = get_fd(mask);
-    double oof = is_oof(mask);
-    double shapes[20] = {area,hull_area,solidity,perimeter,width,height,cmx,cmy,hull_verticies,ex,ey,emajor,eminor,angle,eccen,circ,round,ar,fd,oof};
-    vector<double> shapes_v(shapes,shapes+20);
-    return shapes_v;
+	if(area>0){
+	    vector<Point>hull;
+	    convexHull( Mat(cc), hull, false );
+	    double hull_verticies = hull.size();
+	    double hull_area = contourArea(Mat(hull));
+	    double solidity = area/hull_area;
+	    double perimeter = arcLength(Mat(cc),false);
+	    double cmx = mom.m10 / mom.m00;
+	    double cmy = mom.m01 / mom.m00;
+	    Rect boundRect = boundingRect( cc );
+	    double width = boundRect.width;
+	    double height = boundRect.height;
+	    double circ = 4*M_PI*area/(perimeter*perimeter);
+	    double angle = -1;
+	    double ex = -1;
+	    double ey = -1;
+	    double emajor = -1;
+	    double eminor = -1;
+	    double eccen = -1;
+	    double round = -1;
+	    double ar = -1;
+	    if(cc.size() >= 6){
+	        Mat pointsf;
+	    	Mat(cc).convertTo(pointsf, CV_32F);
+	   	    RotatedRect ellipse = fitEllipse(pointsf);
+	   	    angle = ellipse.angle;
+	  	    ex = ellipse.center.x;
+	   	    ey = ellipse.center.y;
+	   	    if(ellipse.size.height > ellipse.size.width){
+	   	    	emajor = ellipse.size.height;
+	   	    	eminor = ellipse.size.width;
+	   	    }else{
+	   	    	eminor = ellipse.size.height;
+	  	   	    emajor = ellipse.size.width;
+	   	    }
+	   	    eccen = sqrt((1- eminor / emajor)*2);
+	   	    round = eminor/emajor;
+	   	    ar = emajor/eminor;
+	    }
+	    float fd = get_fd(mask);
+	    double oof = is_oof(mask);
+	    double shapes[20] = {area,hull_area,solidity,perimeter,width,height,cmx,cmy,hull_verticies,ex,ey,emajor,eminor,angle,eccen,circ,round,ar,fd,oof};
+	    vector<double> shapes_v(shapes,shapes+20);
+	    return shapes_v;
+	}else{
+	    double shapes[20] = {0, 0, -nan("1"), 0, 0, 0, -nan("1"), -nan("1"), 0, -1, -1, -1, -1, -1, -1, -nan("1"), -1, -1, -nan("1"), 0};
+	    vector<double> shapes_v(shapes,shapes+20);
+	    return shapes_v;
+	}
 }
 
 Mat get_color(Mat img,Mat mask){
@@ -770,7 +776,7 @@ int main(int argc, char *argv[]){
 			string name_shape= parser.get<string>("s");
 			ofstream shape_file;
 			shape_file.open(name_shape.c_str(),ios_base::app);
-			shape_file << argv[2] << " ";
+			shape_file << parser.get<string>("i") << " ";
 			for(int i=0;i<20;i++){
 				shape_file << shapes_data[i];
 				if(i != 19){
