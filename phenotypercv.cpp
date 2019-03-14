@@ -52,7 +52,7 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
-
+		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
 		        "DICT_6X6_50=8, DICT_6X6_100=9, DICT_6X6_250=10, DICT_6X6_1000=11, DICT_7X7_50=12,"
@@ -799,6 +799,15 @@ int main(int argc, char *argv[]){
 			}
 			hue_file << endl;
 			hue_file.close();
+
+			if(parser.has("debug")){
+				vector<string> sub_str;
+				const string full_str = string(parser.get<string>("i"));
+				char del = '.';
+				split(full_str,del,sub_str);
+				string new_name = sub_str[0]+"_mask.png";
+				imwrite(new_name,mask);
+			}
 		}
 	}
 	else if(bool_vis_CH_check){
@@ -870,6 +879,15 @@ int main(int argc, char *argv[]){
 			   		}
 			   		nir_file << endl;
 			   		nir_file.close();
+
+			   		if(parser.has("debug")){
+						vector<string> sub_str;
+						const string full_str = string(parser.get<string>("i"));
+						char del = '.';
+						split(full_str,del,sub_str);
+						string new_name = sub_str[0]+"_mask.png";
+						imwrite(new_name,kept_mask_nir);
+					}
 		}
 	}
 	else if(bool_getCH){
