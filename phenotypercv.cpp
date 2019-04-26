@@ -655,7 +655,6 @@ int main(int argc, char *argv[]){
 						}
 			//-- Computing spatial homography and warping
 						Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
-						cout << perspectiveTransform << endl;
 						Mat undistoredCharuco;
 						warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
 						bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
