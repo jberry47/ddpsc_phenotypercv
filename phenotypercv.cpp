@@ -91,6 +91,7 @@ bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, i
 		vector< Mat > allImgs;
 		Size imgSize;
 
+		cout << "Gathering images..." << endl;
 		int number_of_lines = 0;
 		string line;
 		ifstream myfile(calib_imgs);
@@ -151,14 +152,15 @@ bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, i
 	            allCharucoIds.push_back(currentCharucoIds);
 	            filteredImages.push_back(allImgs[i]);
 	    }
+
 		cout << "calibrating camera - charuco" << endl;
 	    repError =
 	            aruco::calibrateCameraCharuco(allCharucoCorners, allCharucoIds, board, imgSize,
 	                                          cameraMatrix, distCoeffs, noArray(), noArray());
 
 	    bool saveOk =  saveCameraParams(outfile, imgSize, cameraMatrix, distCoeffs);
-	    cout << "Rep Error: " << repError << endl;
-	    cout << "Rep Error Aruco: " << arucoRepErr << endl;
+	    cout << "Rep Error ChArUco: " << repError << endl;
+	    cout << "Rep Error ArUco: " << arucoRepErr << endl;
 	    cout << "Calibration saved to " << outfile << endl;
 	    return(saveOk);
 }
