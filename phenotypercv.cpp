@@ -390,6 +390,7 @@ float extractRGB_chips(Mat img,Mat &mask){
 	return hist_avg;
 }
 
+
 MatrixXd getRGBarray(Mat img){
 	//-- Loops over chips and gets RGB values of each one
 	MatrixXd sourceColors(22,3);
@@ -794,7 +795,7 @@ int main(int argc, char *argv[]){
 			string name_hue= parser.get<string>("c");
 			ofstream hue_file;
 			hue_file.open(name_hue.c_str(),ios_base::app);
-			hue_file << argv[2] << " ";
+			hue_file << parser.get<string>("i") << " ";
 			for(int i=0;i<180;i++){
 				hue_file << hue_data.at<float>(i,0) << " ";
 			}
