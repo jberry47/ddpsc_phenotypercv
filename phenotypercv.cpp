@@ -25,6 +25,7 @@
  *
  */
 #include <opencv2/opencv.hpp>
+#include "opencv2/ximgproc.hpp"
 #include <opencv2/aruco/charuco.hpp>
 #include <iostream>
 #include <fstream>
@@ -36,6 +37,7 @@
 using namespace cv;
 using namespace std;
 using namespace Eigen;
+using namespace ximgproc;
 
 namespace {
 const char* keys  =
