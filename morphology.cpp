@@ -138,7 +138,7 @@ Mat segment_skeleton(Mat input, bool colored=false){
 	return(out);
 }
 
-Mat classify_skeleton(Mat skel, Mat tips){
+Mat find_leaves(Mat skel, Mat tips){
 	vector<vector<Point> > skel_contours;
 	vector<Vec4i> skel_hierarchy;
     findContours( skel, skel_contours, skel_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
@@ -151,29 +151,80 @@ Mat classify_skeleton(Mat skel, Mat tips){
 
     Mat temp_tip, temp_seg, band;
     double length;
-    bool drawn = false;
     for(unsigned int seg=0; seg < skel_contours.size(); seg++){
       	for(unsigned int tip=0; tip < tips_contours.size(); tip++){
-      		temp_tip = Mat::zeros(skel.size(),skel.type());
-      		drawContours(temp_tip, tips_contours, tip, 255, cv::FILLED);
+      		if(seg != 0){
+          		temp_tip = Mat::zeros(skel.size(),skel.type());
+          		drawContours(temp_tip, tips_contours, tip, 255, cv::FILLED);
 
-     		temp_seg = Mat::zeros(skel.size(),skel.type());
-      		drawContours(temp_seg, skel_contours, seg, 255, cv::FILLED);
+         		temp_seg = Mat::zeros(skel.size(),skel.type());
+          		drawContours(temp_seg, skel_contours, seg, 255, cv::FILLED);
 
-      		band = Mat::zeros(skel.size(),skel.type());
-      		bitwise_and(temp_tip,temp_seg,band);
-        	length = sum(band/255)[0];
-      		if(length >0){
-      			drawn = true;
-      			drawContours(kept, skel_contours, seg, Scalar( 0, 255,0 ), cv::FILLED);
-       		}
+          		band = Mat::zeros(skel.size(),skel.type());
+          		bitwise_and(temp_tip,temp_seg,band);
+            	length = sum(band/255)[0];
+          		if(length >0){
+          			drawContours(kept, skel_contours, seg, Scalar( 0, 255,0 ), cv::FILLED);
+           		}
+      		}
        	}
-      	if(!drawn){
-      		drawContours(kept, skel_contours, seg, Scalar( 255, 0,255 ), cv::FILLED);
-      	}
-      	drawn = false;
     }
    	return(kept);
+}
+
+Mat add_stem(Mat classified_skel, Mat full_skel){
+	vector<Mat> bgr(3);
+	split(classified_skel,bgr);
+	Mat leaf_segs = bgr[1];
+	Mat stem_segs = full_skel-leaf_segs;
+
+	vector<vector<Point> > stem_contours;
+	vector<Vec4i> stem_hierarchy;
+    findContours( stem_segs, stem_contours, stem_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+	vector<vector<Point> > leaf_contours;
+	vector<Vec4i> leaf_hierarchy;
+    findContours( leaf_segs, leaf_contours, leaf_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+    Mat out = Mat::zeros(classified_skel.size(),CV_8UC3);
+    for(unsigned int seg=0; seg < stem_contours.size(); seg++){
+			drawContours(out, stem_contours, seg, Scalar( 255, 0,255 ), 1);
+    }
+    for(unsigned int seg=0; seg < leaf_contours.size(); seg++){
+			drawContours(out, leaf_contours, seg, Scalar( 0, 255,255 ), 1);
+    }
+    return(out);
+}
+
+Mat fill_mask(Mat mask, Mat classified_in){
+	vector<Mat> out_bgr(3);
+	vector<Mat> in_bgr(3);
+	Mat expanded, all, kept_mask,stem,leaves,both;
+	Mat merged = classified_in.clone();
+	int diff = 1;
+	int last_diff = 0;
+
+	while((diff-last_diff) != 0){
+		last_diff = diff;
+		dilate(merged, expanded, Mat(), Point(-1, -1), 1, 1, 1);
+		split(expanded,in_bgr);
+		all = in_bgr[2];
+		diff = sum((mask-all)/255)[0];
+		kept_mask = mask & all;
+		leaves = in_bgr[1] & kept_mask;
+		stem = in_bgr[0] & kept_mask;
+		both = leaves & stem;
+		out_bgr[0] = stem-both;
+		out_bgr[1] = leaves-both;
+		Mat bit_xor;
+		bitwise_xor(stem,leaves,bit_xor);
+		out_bgr[2] = bit_xor | stem;
+
+		merged = Mat::zeros(merged.size(),merged.type());
+		merge(out_bgr,merged);
+	}
+
+	return(merged);
 }
 
 vector<vector<double> > calc_leaf_curvatures(Mat classified_skel){
