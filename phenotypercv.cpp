@@ -9,20 +9,20 @@
  *
  * Usage: ./PhenotyperCV --help  for more information
  *
- * Compiling Notes:
- * -I/usr/local/include/opencv -I/usr/local/include/opencv2 -I/usr/include/Eigen
- * -L/usr/local/lib lopencv_core -lopencv_features2d -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
- *
- * On Danforth Center Bioinformatics Infrastructure:
- * g++ -I/shares/bioinfo/installs/opencv-3.1.0/install/include -I/shares/bioinfo/installs/eigen/Eigen -L/shares/bioinfo/installs/opencv-3.1.0/install/lib -lopencv_imgproc -lopencv_imgcodecs -lopencv_core phenotypercv.cpp -o PhenotyperCV
+ * Compiling on Danforth Center Bioinformatics Infrastructure:
+ * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/phenotypercv.d" -MT"./ddpsc_phenotypercv/phenotypercv.d" -o "./ddpsc_phenotypercv/phenotypercv.o" "./ddpsc_phenotypercv/phenotypercv.cpp"
+ * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/color_calibration.d" -MT"./ddpsc_phenotypercv/color_calibration.d" -o "./ddpsc_phenotypercv/color_calibration.o" "./ddpsc_phenotypercv/color_calibration.cpp"
+ * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/spatial_calibration.d" -MT"./ddpsc_phenotypercv/spatial_calibration.d" -o "./ddpsc_phenotypercv/spatial_calibration.o" "./ddpsc_phenotypercv/spatial_calibration.cpp"
+ * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/feature_extraction.d" -MT"./ddpsc_phenotypercv/feature_extraction.d" -o "./ddpsc_phenotypercv/feature_extraction.o" "./ddpsc_phenotypercv/feature_extraction.cpp"
+ * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/morphology.d" -MT"./ddpsc_phenotypercv/morphology.d" -o "./ddpsc_phenotypercv/morphology.o" "./ddpsc_phenotypercv/morphology.cpp"
+ * g++ -L/shares/bioinfo/installs/opencv-3.3.0/install/lib ./ddpsc_phenotypercv/color_calibration.o ./ddpsc_phenotypercv/feature_extraction.o ./ddpsc_phenotypercv/morphology.o ./ddpsc_phenotypercv/phenotypercv.o ./ddpsc_phenotypercv/spatial_calibration.o -lopencv_core -lopencv_aruco -lopencv_calib3d -lopencv_highgui -lopencv_features2d -lopencv_imgproc -lopencv_imgcodecs -o "PhenotyperCV"
  *
  * To use the program in a parallelized fashion, pipe find into xargs with the -P flag followed by
  * number of cores like this:
  * 	Usage VIS or VIS_CH:
- * 		find Images/ -name 'VIS_SV*' | xargs -P8 -I{} ./PhenotyperCV VIS_CH {} background_image.png shapes.txt color.txt'
+ * 		find Images/ -name 'VIS_SV*' | xargs -P8 -I{} ./PhenotyperCV -m=VIS_CH -i={} -b=background_image.png -s=shapes.txt -c=color.txt'
  * 	Usage NIR:
- * 		find Images/ -name 'NIR_SV*' | xargs -P8 -I{} ./PhenotyperCV NIR {} background_image.png nir_color.txt
- *
+ * 		find Images/ -name 'NIR_SV*' | xargs -P8 -I{} ./PhenotyperCV -m=NIR -i={} -b=background_image.png -c=nir_color.txt
  */
 #include <opencv2/opencv.hpp>
 #include "opencv2/ximgproc.hpp"
@@ -33,6 +33,7 @@
 #include <string>
 #include <math.h>
 #include <Eigen/Dense>
+
 #include <morphology.h>
 #include <spatial_calibration.h>
 #include <color_calibration.h>
@@ -502,7 +503,7 @@ int main(int argc, char *argv[]){
 	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
 		cout << "USAGE:" << endl << "\tThere are ten modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
-		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV [MODE] [INPUTS]" << endl << endl;
+		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV -m=[MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt"<<endl << endl;
 		cout << "\t\e[1mVIS_CH\e[0m - standardize, segment, and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS_CH -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt" << endl << "NOTE Processing using the VIS_CH mode requires two additional items: a card_masks/ folder that contains masks for each of the chips and target_homography.csv file that is the desired color space. The csv file can be created for you using the SET_TARGET mode of this program and redirecting the output." << endl << endl;
