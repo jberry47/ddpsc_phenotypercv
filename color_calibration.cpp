@@ -150,17 +150,3 @@ Mat color_homography(Mat img, MatrixXd r_coef,MatrixXd g_coef,MatrixXd b_coef){
 	merge(bgr,adjImage);
 	return adjImage;
 }
-
-void split(const string& s, char c, vector<string>& v) {
-   string::size_type i = 0;
-   string::size_type j = s.find(c);
-
-   while (j != string::npos) {
-      v.push_back(s.substr(i, j-i));
-      i = ++j;
-      j = s.find(c, j);
-
-      if (j == string::npos)
-         v.push_back(s.substr(i, s.length()));
-   }
-}

@@ -38,6 +38,7 @@
 #include <spatial_calibration.h>
 #include <color_calibration.h>
 #include <feature_extraction.h>
+#include <miscellaneous.h>
 
 using namespace cv;
 using namespace std;
@@ -66,32 +67,6 @@ const char* keys  =
 		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}"
 		        "{@outfile |<none> | Output file with calibrated camera parameters }";
 }
-
-
-//-- Have to make global variables for DRAW_ROIS mode
-int roi_size = 0;
-Mat src;
-int counter=1;
-
-void onMouse( int event, int x, int y, int f, void* ){
-    switch(event){
-        case  cv::EVENT_LBUTTONDOWN  :
-                                        Mat temp = Mat::zeros(src.size(),CV_8UC1);
-                                        rectangle(temp,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),255,cv::FILLED);
-                                        rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),Scalar( 255, 255, 255 ),cv::FILLED);
-                                        imshow("Image",src);
-                                        waitKey(1);
-                                        stringstream ss;
-                       				  	ss << counter;
-                       				   	string str = ss.str();
-                                        string file_name = "card_masks/"+str+"_mask.png";
-                                        imwrite(file_name,temp);
-                                        counter++;
-                                        cout << "Made: " << file_name << endl;
-                                        break;
-    }
-}
-
 
 int main(int argc, char *argv[]){
     CommandLineParser parser(argc, argv, keys);
