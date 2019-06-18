@@ -11,7 +11,7 @@ using namespace cv;
 using namespace std;
 using namespace Eigen;
 
-int roi_size = 0;
+int roi_size;
 Mat src;
 int counter=1;
 
