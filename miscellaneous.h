@@ -8,6 +8,21 @@
 #ifndef MISCELLANEOUS_H_
 #define MISCELLANEOUS_H_
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/ximgproc.hpp"
+#include <opencv2/aruco/charuco.hpp>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <string>
+#include <math.h>
+#include <Eigen/Dense>
+
+using namespace cv;
+using namespace std;
+using namespace Eigen;
+using namespace ximgproc;
+
 extern int roi_size;
 extern Mat src;
 extern int counter;

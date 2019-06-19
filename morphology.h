@@ -31,7 +31,7 @@ Mat segment_skeleton(Mat input, bool colored=false);
 Mat find_leaves(Mat skel, Mat tips);
 Mat add_stem(Mat classified_skel, Mat full_skel);
 Mat fill_mask(Mat mask, Mat classified_in);
-vector<vector<double> > calc_leaf_curvatures(Mat classified_skel);
+vector<vector<double> > get_leaf_info(Mat classified_skel, Mat filled_mask);
 
 
 #endif /* MORPHOLOGY_H_ */

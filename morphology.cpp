@@ -227,7 +227,7 @@ Mat fill_mask(Mat mask, Mat classified_in){
 	return(merged);
 }
 
-vector<vector<double> > calc_leaf_curvatures(Mat classified_skel){
+vector<vector<double> > get_leaf_info(Mat classified_skel, Mat filled_mask){
 	vector<Mat> bgr(3);
 	split(classified_skel,bgr);
 	Mat leaves = bgr[1];
@@ -236,9 +236,18 @@ vector<vector<double> > calc_leaf_curvatures(Mat classified_skel){
 	vector<Vec4i> skel_hierarchy;
     findContours(leaves, skel_contours, skel_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
+	vector<Mat> bgr_mask(3);
+	split(filled_mask,bgr_mask);
+	Mat leaves_mask = bgr_mask[1];
+
+	vector<vector<Point> > leaf_contours;
+	vector<Vec4i> leaf_hierarchy;
+    findContours(leaves_mask, leaf_contours, leaf_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
 	vector<double> my_curv;
 	vector<double> my_path;
 	vector<double> my_ed;
+	vector<double> my_area;
 	vector<vector<double> > my_data;
     Mat src;
     for(unsigned int seg=0; seg < skel_contours.size(); seg++){
@@ -255,6 +264,7 @@ vector<vector<double> > calc_leaf_curvatures(Mat classified_skel){
     		}
     	}
 
+    	Mat kept;
     	if(cc.size()==2){
         	Point p1 = cc[0];
         	Point p2 = cc[1];
@@ -264,8 +274,22 @@ vector<vector<double> > calc_leaf_curvatures(Mat classified_skel){
         	my_path.push_back(path_length);
         	double curv = path_length/ed;
         	my_curv.push_back(curv);
+
+        	for(unsigned int i=0; i<leaf_contours.size(); i++){
+   	    		for(unsigned int j=0; j<skel_contours[seg].size(); j++){
+   	    			int test = pointPolygonTest(leaf_contours[i],Point2f(skel_contours[seg][j]),false);
+   	    	   		if(test==1){
+  	    	   			kept = Mat::zeros(filled_mask.size(),CV_8UC1);
+  	    	   			drawContours(kept, leaf_contours, i, 255, cv::FILLED);
+   	    	   			my_area.push_back(sum(kept/255)[0]);
+   	    	   			break;
+   	    	   		}
+  	    		}
+   	    	}
     	}
     }
+
+    my_data.push_back(my_area);
     my_data.push_back(my_ed);
     my_data.push_back(my_path);
     my_data.push_back(my_curv);

@@ -8,6 +8,20 @@
 #ifndef COLOR_CALIBRATION_H_
 #define COLOR_CALIBRATION_H_
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/ximgproc.hpp"
+#include <opencv2/aruco/charuco.hpp>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <string>
+#include <math.h>
+#include <Eigen/Dense>
+
+using namespace cv;
+using namespace std;
+using namespace Eigen;
+using namespace ximgproc;
 
 float extractRGB_chips(Mat img,Mat &mask);
 MatrixXd getRGBarray(Mat img);

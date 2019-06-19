@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/ximgproc.hpp"
-#include <opencv2/aruco/charuco.hpp>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>

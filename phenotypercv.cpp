@@ -64,8 +64,7 @@ const char* keys  =
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
 		        "DICT_6X6_50=8, DICT_6X6_100=9, DICT_6X6_250=10, DICT_6X6_1000=11, DICT_7X7_50=12,"
-		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}"
-		        "{@outfile |<none> | Output file with calibrated camera parameters }";
+		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}";
 }
 
 int main(int argc, char *argv[]){
@@ -180,11 +179,11 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_vis | bool_vis_CH){
-		if(bool_vis && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
-			cout << "Using mode VIS requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
+		if(bool_vis && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c") && parser.has("d"))){
+			cout << "Using mode VIS requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt -d=leaf_file.txt" << endl;
 		}
-		else if(bool_vis_CH && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
-			cout << "Using mode VIS_CH requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt" << endl;
+		else if(bool_vis_CH && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c") && parser.has("d"))){
+			cout << "Using mode VIS_CH requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt -d=leaf_file.txt" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
 		}else{
@@ -268,9 +267,24 @@ int main(int argc, char *argv[]){
 			Mat mask;
 			vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
 
+			//-- Segmenting leaves from stem
+			Mat dil;
+			dilate(mask, dil, Mat(), Point(-1, -1), 1, 1, 1);
+			Mat skel;
+			ximgproc::thinning(dil,skel,THINNING_ZHANGSUEN);
+			Mat skel_filt0 = length_filter(skel,50);
+			Mat pruned = prune(skel_filt0,5);
+			Mat seg_skel = segment_skeleton(pruned);
+			Mat tips = find_endpoints(pruned);
+			Mat skel_filt1 = length_filter(seg_skel,12);
+			Mat leaves = find_leaves(skel_filt1,tips);
+			Mat classified = add_stem(leaves,pruned);
+			Mat filled_mask = fill_mask(dil,classified);
+
 			//-- Getting numerical data
 			vector<double> shapes_data = get_shapes(cc,mask);
 			Mat hue_data = get_color(adjImage, mask);
+			vector<vector<double> > leaf_data = get_leaf_info(classified,filled_mask);
 
 			//-- Write shapes to file
 			string name_shape= parser.get<string>("s");
@@ -300,6 +314,17 @@ int main(int argc, char *argv[]){
 			hue_file << endl;
 			hue_file.close();
 
+			//-- Write leaf data to file
+			//string name_leaf= parser.get<string>("test");
+			string name_leaf= parser.get<string>("d");
+			ofstream leaf_file;
+			leaf_file.open(name_leaf.c_str(),ios_base::app);
+			for(unsigned int i = 0; i<leaf_data[0].size(); i++){
+				leaf_file << parser.get<string>("i") << " " << i << " " << leaf_data[0][i] << " " << leaf_data[1][i] << " " << leaf_data[2][i] << " " << leaf_data[3][i] << endl;
+			}
+			leaf_file.close();
+
+
 			if(parser.has("debug")){
 				vector<string> sub_str;
 				const string full_str = string(parser.get<string>("i"));
@@ -307,6 +332,8 @@ int main(int argc, char *argv[]){
 				split(full_str,del,sub_str);
 				string new_name = sub_str[0]+"_mask.png";
 				imwrite(new_name,mask);
+				new_name = sub_str[0]+"_filled.png";
+				imwrite(new_name,filled_mask);
 			}
 		}
 	}
