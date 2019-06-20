@@ -86,8 +86,16 @@ int main(int argc, char *argv[]){
 	bool bool_charucoCalib = mode == "CHARUCO_CALIB";
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 	bool bool_charucoCreate = mode == "CHARUCO_CREATE";
+	bool bool_testing = mode == "TESTING";
 
-	if(bool_charucoCreate){
+	if(bool_testing){
+		Mat inputImage = imread(parser.get<string>("i"));
+		Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);
+		//Mat nirImage = imread(parser.get<string>("i"),0);
+    	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
+		imwrite("clahe_corrected.png",CLAHE_corrected);
+	}
+	else if(bool_charucoCreate){
 		if(!(parser.has("d") && parser.has("nx") && parser.has("ny") && parser.has("aw") && parser.has("mw"))){
 			cout << "Using mode CHARUCO_CREATE requires input: -d=dictionaryID -nx=num_board_spacesX -ny=num_board_spacesY -mw=marker_width -aw=aruco_width" << endl;
 		}else{

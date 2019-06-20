@@ -150,3 +150,32 @@ Mat color_homography(Mat img, MatrixXd r_coef,MatrixXd g_coef,MatrixXd b_coef){
 	merge(bgr,adjImage);
 	return adjImage;
 }
+
+Mat CLAHE_correct_rgb(Mat img){
+	Mat lab_image;
+	cvtColor(img, lab_image, COLOR_BGR2Lab);
+
+    vector<cv::Mat> lab_planes(3);
+    split(lab_image, lab_planes);  // now we have the L image in lab_planes[0]
+
+    Ptr<cv::CLAHE> clahe = cv::createCLAHE(2,Size(8.0,8.0));
+    Mat dst;
+    clahe->apply(lab_planes[0], dst);
+
+    dst.copyTo(lab_planes[0]);
+    merge(lab_planes, lab_image);
+
+   Mat image_clahe;
+   cvtColor(lab_image, image_clahe, COLOR_Lab2BGR);
+   clahe->collectGarbage();
+   return(image_clahe);
+}
+
+Mat CLAHE_correct_gray(Mat img){
+    Ptr<cv::CLAHE> clahe = cv::createCLAHE(2,Size(8.0,8.0));
+    Mat dst;
+    clahe->apply(img, dst);
+
+    clahe->collectGarbage();
+    return(dst);
+}

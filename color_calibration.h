@@ -27,6 +27,8 @@ float extractRGB_chips(Mat img,Mat &mask);
 MatrixXd getRGBarray(Mat img);
 void get_standardizations(Mat img, float &det, MatrixXd &rh,MatrixXd &gh,MatrixXd &bh);
 Mat color_homography(Mat img, MatrixXd r_coef,MatrixXd g_coef,MatrixXd b_coef);
+Mat CLAHE_correct_rgb(Mat img);
+Mat CLAHE_correct_gray(Mat img);
 
 
 #endif /* COLOR_CALIBRATION_H_ */
