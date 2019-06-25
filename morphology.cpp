@@ -153,7 +153,7 @@ Mat find_leaves(Mat skel, Mat tips){
     double length;
     for(unsigned int seg=0; seg < skel_contours.size(); seg++){
       	for(unsigned int tip=0; tip < tips_contours.size(); tip++){
-      		if(seg != 0){
+      		if(true){
           		temp_tip = Mat::zeros(skel.size(),skel.type());
           		drawContours(temp_tip, tips_contours, tip, 255, cv::FILLED);
 

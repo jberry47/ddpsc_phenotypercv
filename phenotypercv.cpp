@@ -284,6 +284,10 @@ int main(int argc, char *argv[]){
 			Mat pruned = prune(skel_filt0,5);
 			Mat seg_skel = segment_skeleton(pruned);
 			Mat tips = find_endpoints(pruned);
+		    Mat no_tips = Mat::zeros(inputImage.size(),pruned.type());
+		    rectangle(no_tips,Point(1164,1266),Point(1290,1407),255,cv::FILLED);
+		    tips = tips -(tips & no_tips);
+
 			Mat skel_filt1 = length_filter(seg_skel,12);
 			Mat leaves = find_leaves(skel_filt1,tips);
 			Mat classified = add_stem(leaves,pruned);
@@ -323,7 +327,6 @@ int main(int argc, char *argv[]){
 			hue_file.close();
 
 			//-- Write leaf data to file
-			//string name_leaf= parser.get<string>("test");
 			string name_leaf= parser.get<string>("d");
 			ofstream leaf_file;
 			leaf_file.open(name_leaf.c_str(),ios_base::app);
@@ -331,7 +334,6 @@ int main(int argc, char *argv[]){
 				leaf_file << parser.get<string>("i") << " " << i << " " << leaf_data[0][i] << " " << leaf_data[1][i] << " " << leaf_data[2][i] << " " << leaf_data[3][i] << endl;
 			}
 			leaf_file.close();
-
 
 			if(parser.has("debug")){
 				vector<string> sub_str;
@@ -378,7 +380,7 @@ int main(int argc, char *argv[]){
 		}else{
 			//-- Read in image and background
 			    	Mat nirImage = imread(parser.get<string>("i"),0);
-			    	Mat nir_fixed = 1.591*nirImage-31.803;
+			    	//Mat nir_fixed = 1.591*nirImage-31.803;
 
 			    	Mat nirBackground = imread(parser.get<string>("b"),0);
 
