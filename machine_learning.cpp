@@ -127,7 +127,7 @@ void trainBC(Mat img, Mat mask, string fname){
 
 Mat predictBC(Mat img,string fname){
 	Mat imageR;
-	resize(img.clone(), imageR, Size(512,512), 0, 0, INTER_LINEAR);
+	resize(img.clone(), imageR, Size(512*2,512*2), 0, 0, INTER_LINEAR);
 
 	cout << "Loading..." << endl;
 	Ptr<NormalBayesClassifier> classifier = NormalBayesClassifier::load(fname);
