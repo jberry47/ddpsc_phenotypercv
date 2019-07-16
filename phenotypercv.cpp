@@ -90,6 +90,7 @@ int main(int argc, char *argv[]){
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 	bool bool_charucoCreate = mode == "CHARUCO_CREATE";
 	bool bool_svmCreate = mode == "SVM_CREATE";
+	bool bool_bcCreate = mode == "BC_CREATE";
 	bool bool_testing = mode == "TESTING";
 
 	if(bool_testing){
@@ -112,6 +113,17 @@ int main(int argc, char *argv[]){
 		//Mat nirImage = imread(parser.get<string>("i"),0);
     	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
+	}
+	else if(bool_bcCreate){
+		if(!(parser.has("i") && parser.has("b"))){
+			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage" << endl;
+		}else{
+			Mat inputImage = imread(parser.get<string>("i"));
+			Mat msk = imread(parser.get<string>("b"),0);
+			Mat mask;
+			threshold(msk,mask,25,255,THRESH_BINARY_INV);
+			trainBC(inputImage, mask, "bayes_classifier.yaml");
+		}
 	}
 	else if(bool_svmCreate){
 		if(!(parser.has("i") && parser.has("b"))){
