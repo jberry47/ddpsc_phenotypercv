@@ -94,8 +94,18 @@ int main(int argc, char *argv[]){
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
-		Mat response = predictSVM(inputImage,"svm_classifier.yaml");
-		imwrite("svm_pred.png",response);
+		Mat msk = imread(parser.get<string>("b"),0);
+		Mat mask;
+		threshold(msk,mask,25,255,THRESH_BINARY);
+
+		//trainBC(inputImage,mask,"bayes_classifier.yaml");
+		Mat response = predictBC(inputImage,"bayes_classifier.yaml");
+		imwrite("bayes_pred.png",response);
+
+		//trainSVM(inputImage, mask, "svm_classifier.yaml");
+		//Mat response = predictSVM(inputImage,"svm_classifier.yaml");
+		//imwrite("svm_pred.png",response);
+
 
 		//Mat inputImage = imread(parser.get<string>("i"));
 		//Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);

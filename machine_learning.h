@@ -26,5 +26,6 @@ using namespace Eigen;
 
 void trainSVM(Mat img, Mat mask, string fname);
 Mat predictSVM(Mat img, string fname);
-
+void trainBC(Mat img, Mat mask, string fname);
+Mat predictBC(Mat img, string fname);
 #endif /* MACHINE_LEARNING_H_ */
