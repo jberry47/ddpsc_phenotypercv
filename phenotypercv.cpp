@@ -27,6 +27,7 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/ximgproc.hpp"
 #include <opencv2/aruco/charuco.hpp>
+#include <opencv2/ml.hpp>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -39,8 +40,10 @@
 #include <color_calibration.h>
 #include <feature_extraction.h>
 #include <miscellaneous.h>
+#include <machine_learning.h>
 
 using namespace cv;
+using namespace cv::ml;
 using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
@@ -86,14 +89,30 @@ int main(int argc, char *argv[]){
 	bool bool_charucoCalib = mode == "CHARUCO_CALIB";
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 	bool bool_charucoCreate = mode == "CHARUCO_CREATE";
+	bool bool_svmCreate = mode == "SVM_CREATE";
 	bool bool_testing = mode == "TESTING";
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
-		Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);
+		Mat response = predictSVM(inputImage,"svm_classifier.yaml");
+		imwrite("svm_pred.png",response);
+
+		//Mat inputImage = imread(parser.get<string>("i"));
+		//Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);
 		//Mat nirImage = imread(parser.get<string>("i"),0);
     	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
-		imwrite("clahe_corrected.png",CLAHE_corrected);
+		//imwrite("clahe_corrected.png",CLAHE_corrected);
+	}
+	else if(bool_svmCreate){
+		if(!(parser.has("i") && parser.has("b"))){
+			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage" << endl;
+		}else{
+			Mat inputImage = imread(parser.get<string>("i"));
+			Mat msk = imread(parser.get<string>("b"),0);
+			Mat mask;
+			threshold(msk,mask,25,255,THRESH_BINARY_INV);
+			trainSVM(inputImage, mask, "svm_classifier.yaml");
+		}
 	}
 	else if(bool_charucoCreate){
 		if(!(parser.has("d") && parser.has("nx") && parser.has("ny") && parser.has("aw") && parser.has("mw"))){

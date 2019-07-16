@@ -47,3 +47,10 @@ void split(const string& s, char c, vector<string>& v) {
          v.push_back(s.substr(i, s.length()));
    }
 }
+
+void showImage(Mat img){
+	namedWindow("Image",WINDOW_NORMAL);
+	        	    resizeWindow("Image",800,800);
+	        	    imshow("Image", img);
+	waitKey(0);
+}

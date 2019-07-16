@@ -31,5 +31,4 @@ int is_oof(Mat img);
 vector<Point> keep_roi(Mat img,Point tl, Point br, Mat &mask);
 
 
-
 #endif /* FEATURE_EXTRACTION_H_ */

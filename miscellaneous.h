@@ -29,6 +29,6 @@ extern int counter;
 
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
-
+void showImage(Mat img);
 
 #endif /* MISCELLANEOUS_H_ */
