@@ -2,7 +2,7 @@
 Pipeline for analyzing images from the Bellwether Foundation Phenotyping Facility at Donald Danforth Plant Science Center
 
 
-###Installing
+### Installing
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`  
 First clone the repository
 ```bash
