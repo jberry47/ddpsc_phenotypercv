@@ -47,7 +47,7 @@ bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, i
 		cout << "Gathering images..." << endl;
 		int number_of_lines = 0;
 		string line;
-		ifstream myfile(calib_imgs);
+		ifstream myfile(calib_imgs.c_str());
 		while (std::getline(myfile, line)){
 			++number_of_lines;
 			Mat image, imageCopy;
