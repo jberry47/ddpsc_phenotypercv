@@ -10,7 +10,7 @@ git clone https://github.com/jberry47/ddpsc_phenotypercv
 ```
 Create a build directory
 ```bash
-mkdir build && cd build
+cd ddpsc_phenotypercv && mkdir build && cd build
 ```
 Build the program
 ```bash
