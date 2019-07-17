@@ -4,20 +4,19 @@ Pipeline for analyzing images from the Bellwether Foundation Phenotyping Facilit
 
 ### Installing
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`  
-First clone the repository
+1. First clone the repository
 ```bash
 git clone https://github.com/jberry47/ddpsc_phenotypercv
 ```
-Create a build directory
+2. Create a build directory
 ```bash
 cd ddpsc_phenotypercv && mkdir build && cd build
 ```
-Build the program
+3. Build the program
 ```bash
 cmake ..
 ```
-
-If there were no errors or warnings (mainly about finding Eigen) then you can build the program
+4. If there were no errors or warnings (mainly about finding Eigen) then you can build the program
 ```bash
 make
 ```
