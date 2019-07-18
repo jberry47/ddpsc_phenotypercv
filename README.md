@@ -8,7 +8,7 @@ This program has multiple features that are selected for using `-m` flag indicat
 * VIS_CH - Color correct, segment, and measure plant in RGB images
 * VIS_CH_CHECK - Color correct, and output image for viewing
 * SET_TARGET - Obtain and print to stdout the RGB information for each of the chips in the image
-* DRAW_ROIS - This is a GUI that makes the card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
+* DRAW_ROIS - GUI for making card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
 * AVG_IMGS - Pipe in list of input images to be averaged and outputs average_images.png
 * NIR - Segment and measure plant in near-infrared images
 * CHARUCO_CREATE - Creates a nx by ny ChArUco board with mw marker width and aw aruco chip width using d dictionary
