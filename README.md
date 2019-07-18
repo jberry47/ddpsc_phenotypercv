@@ -15,8 +15,9 @@ This program has multiple features that are selected for using `-m` flag indicat
 * **CHARUCO_CALIB** - Camera calibration using multiple viewpoints of a ChArUco board
 * **CHARUCO_EST** - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
 * **SVM_CREATE** - Creates a SVM classifier from input image and respective labeled image
+* **SVM_PRED** - Uses provided SVM classifier to predict features in input image
 * **BC_CREATE** - Creates a Bayesian classifer from input image and respective labeled image
-
+* **BC_PRED** - Uses provided Bayes classifier to predict features in input image
 
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`  
