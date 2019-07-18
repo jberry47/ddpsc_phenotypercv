@@ -54,7 +54,7 @@ void trainSVM(Mat img, Mat mask, string fname){
 	Ptr<SVM> svm = SVM::create();
 	svm->setType(SVM::C_SVC);
 	svm->setKernel(SVM::LINEAR);
-	svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 50, 1e-6));
+	svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 500, 1e-16));
 	cout << "Training SVM..." << endl;
 	svm->train(trainingMat, ROW_SAMPLE, labelsMat);
 	svm->save(fname);

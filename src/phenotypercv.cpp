@@ -90,24 +90,12 @@ int main(int argc, char *argv[]){
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 	bool bool_charucoCreate = mode == "CHARUCO_CREATE";
 	bool bool_svmCreate = mode == "SVM_CREATE";
+	bool bool_svmPred = mode == "SVM_PRED";
 	bool bool_bcCreate = mode == "BC_CREATE";
+	bool bool_bcPred = mode == "BC_PRED";
 	bool bool_testing = mode == "TESTING";
 
 	if(bool_testing){
-		Mat inputImage = imread(parser.get<string>("i"));
-		Mat msk = imread(parser.get<string>("b"),0);
-		Mat mask;
-		threshold(msk,mask,25,255,THRESH_BINARY);
-
-		//trainBC(inputImage,mask,"bayes_classifier.yaml");
-		Mat response = predictBC(inputImage,"bayes_classifier.yaml");
-		imwrite("bayes_pred.png",response);
-
-		//trainSVM(inputImage, mask, "svm_classifier.yaml");
-		//Mat response = predictSVM(inputImage,"svm_classifier.yaml");
-		//imwrite("svm_pred.png",response);
-
-
 		//Mat inputImage = imread(parser.get<string>("i"));
 		//Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);
 		//Mat nirImage = imread(parser.get<string>("i"),0);
@@ -115,25 +103,54 @@ int main(int argc, char *argv[]){
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
 	}
 	else if(bool_bcCreate){
-		if(!(parser.has("i") && parser.has("b"))){
-			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage" << endl;
+		if(!(parser.has("i") && parser.has("b") && parser.has("s"))){
+			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage -s=output_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat msk = imread(parser.get<string>("b"),0);
 			Mat mask;
-			threshold(msk,mask,25,255,THRESH_BINARY_INV);
-			trainBC(inputImage, mask, "bayes_classifier.yaml");
+			threshold(msk,mask,25,255,THRESH_BINARY);
+			trainBC(inputImage, mask, parser.get<string>("s"));
+		}
+	}
+	else if(bool_bcPred){
+		if(!(parser.has("i") && parser.has("s"))){
+			cout << "Using mode BC_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
+		}else{
+			Mat inputImage = imread(parser.get<string>("i"));
+			Mat response = predictBC(inputImage,parser.get<string>("s"));
+
+			vector<string> sub_str;
+			const string full_str = string(parser.get<string>("i"));
+			char del = '.';
+			split(full_str,del,sub_str);
+			string new_name = sub_str[0]+"_bayes_pred.png";
+			imwrite(new_name,response);
 		}
 	}
 	else if(bool_svmCreate){
 		if(!(parser.has("i") && parser.has("b"))){
-			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage" << endl;
+			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -s=output_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat msk = imread(parser.get<string>("b"),0);
 			Mat mask;
 			threshold(msk,mask,25,255,THRESH_BINARY_INV);
-			trainSVM(inputImage, mask, "svm_classifier.yaml");
+			trainSVM(inputImage, mask, parser.get<string>("s"));
+		}
+	}
+	else if(bool_svmPred){
+		if(!(parser.has("i") && parser.has("s"))){
+			cout << "Using mode SVM_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
+		}else{
+			Mat inputImage = imread(parser.get<string>("i"));
+			Mat response = predictSVM(inputImage,parser.get<string>("s"));
+			vector<string> sub_str;
+			const string full_str = string(parser.get<string>("i"));
+			char del = '.';
+			split(full_str,del,sub_str);
+			string new_name = sub_str[0]+"_svm_pred.png";
+			imwrite(new_name,response);
 		}
 	}
 	else if(bool_charucoCreate){
