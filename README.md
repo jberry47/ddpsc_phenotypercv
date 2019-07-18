@@ -4,18 +4,18 @@
 This program has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As developement continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Current modes are listed here and futher information can be found using the `-h` flag. 
 
 ### Modes
-* VIS - Segment and measure plant in RGB images
-* VIS_CH - Color correct, segment, and measure plant in RGB images
-* VIS_CH_CHECK - Color correct, and output image for viewing
-* SET_TARGET - Obtain and print to stdout the RGB information for each of the chips in the image
-* DRAW_ROIS - GUI for making card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
-* AVG_IMGS - Pipe in list of input images to be averaged and outputs average_images.png
-* NIR - Segment and measure plant in near-infrared images
-* CHARUCO_CREATE - Creates a ChArUco board with specified sizes and dictionary
-* CHARUCO_CALIB - Camera calibration using multiple viewpoints of a ChArUco board
-* CHARUCO_EST - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
-* SVM_CREATE - Creates a SVM classifier from input image and respective labeled image
-* BC_CREATE - Creates a Bayesian classifer from input image and respective labeled image
+* **VIS** - Segment and measure plant in RGB images
+* **VIS_CH** - Color correct, segment, and measure plant in RGB images
+* **VIS_CH_CHECK** - Color correct, and output image for viewing
+* **SET_TARGET** - Obtain and print to stdout the RGB information for each of the chips in the image
+* **DRAW_ROIS** - GUI for making card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
+* **AVG_IMGS** - Pipe in list of input images to be averaged and outputs average_images.png
+* **NIR** - Segment and measure plant in near-infrared images
+* **CHARUCO_CREATE** - Creates a ChArUco board with specified sizes and dictionary
+* **CHARUCO_CALIB** - Camera calibration using multiple viewpoints of a ChArUco board
+* **CHARUCO_EST** - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
+* **SVM_CREATE** - Creates a SVM classifier from input image and respective labeled image
+* **BC_CREATE** - Creates a Bayesian classifer from input image and respective labeled image
 
 
 ### Building the program
@@ -45,6 +45,6 @@ After a successful build, you can read the help page with `./PhenotyperCV -h`
 
 ### DDPSC Datasci Cluster Usage
 Example condor job file and accompanying executable for processing images on the DDPSC infrastructure can be found in the `misc` directory
-* phenotypercv.submit - condor submit file that MUST BE EDITED to your file paths and image location
-* run_phenocv.sh - the executable that the job file calls and MUST BE EDITED to your file paths and image location
+* **phenotypercv.submit** - condor submit file that MUST BE EDITED to your file paths and image location
+* **run_phenocv.sh** - the executable that the job file calls and MUST BE EDITED to your file paths and image location
 
