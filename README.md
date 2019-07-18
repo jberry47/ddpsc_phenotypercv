@@ -11,7 +11,7 @@ This program has multiple features that are selected for using `-m` flag indicat
 * DRAW_ROIS - GUI for making card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
 * AVG_IMGS - Pipe in list of input images to be averaged and outputs average_images.png
 * NIR - Segment and measure plant in near-infrared images
-* CHARUCO_CREATE - Creates a nx by ny ChArUco board with mw marker width and aw aruco chip width using d dictionary
+* CHARUCO_CREATE - Creates a ChArUco board with specified sizes and dictionary
 * CHARUCO_CALIB - Camera calibration using multiple viewpoints of a ChArUco board
 * CHARUCO_EST - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
 * SVM_CREATE - Creates a SVM classifier from input image and respective labeled image
