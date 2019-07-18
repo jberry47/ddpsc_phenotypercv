@@ -96,6 +96,19 @@ int main(int argc, char *argv[]){
 	bool bool_testing = mode == "TESTING";
 
 	if(bool_testing){
+
+		Mat inputImage = imread(parser.get<string>("i"));
+		Mat msk = imread(parser.get<string>("b"),0);
+		Mat mask;
+		threshold(msk,mask,25,255,THRESH_BINARY);
+		trainBoost(inputImage, mask, parser.get<string>("s"));
+
+		/*
+		Mat inputImage = imread(parser.get<string>("i"));
+		Mat response = predictBoost(inputImage,parser.get<string>("s"))*255;
+		imwrite("boost_pred.png",response);
+		 */
+
 		//Mat inputImage = imread(parser.get<string>("i"));
 		//Mat CLAHE_corrected = CLAHE_correct_rgb(inputImage);
 		//Mat nirImage = imread(parser.get<string>("i"),0);
