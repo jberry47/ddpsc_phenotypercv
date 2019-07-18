@@ -1,0 +1,24 @@
+####################
+#
+# Example Vanilla Universe Job
+# Simple HTCondor submit description file
+#
+####################
+
+name             = pheno5_condor
+universe         = vanilla
+getenv           = true
+executable       = run_phenocv.sh
+arguments        = 
+log              = /home/jberry/Phenotyper/Pheno5/$(name).log
+output           = /home/jberry/Phenotyper/Pheno5/$(name).out
+error            = /home/jberry/Phenotyper/Pheno5/$(name).error
+request_cpus     = 10
+request_memory   = 4G
+notification     = Always
+
+##  Do not edit  ##
+accounting_group = $ENV(CONDOR_GROUP)
+###################
+
+queue
