@@ -43,7 +43,7 @@ Both OpenCV and Eigen3 depedencies are in unconventional locations that are not 
 
 After a successful build, you can read the help page with `./PhenotyperCV -h`
 
-### Usage
+### DDPSC Datasci Cluster Usage
 Example condor job file and accompanying executable for processing images on the DDPSC infrastructure can be found in the `misc` directory
 * phenotypercv.submit - condor submit file that MUST BE EDITED to your file paths and image location
 * run_phenocv.sh - the executable that the job file calls and MUST BE EDITED to your file paths and image location
