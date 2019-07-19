@@ -19,6 +19,24 @@ This program has multiple features that are selected for using `-m` flag indicat
 * **BC_CREATE** - Creates a Bayesian classifer from input image and respective labeled image
 * **BC_PRED** - Uses provided Bayes classifier to predict features in input image
 
+### VIS_CH Workflow
+1. Average together all the empty pots using AVG_IMGS
+2. Create card_masks directory and use DRAW_ROIS to create the chip masks
+3. Set the averaged image to target for color correction using SET_TARGET
+4. Run the analysis with the averaged image as background using VIS_CH
+
+### VIS Workflow
+1. Average together all the empty pots using AVG_IMGS
+2. Run the analysis with the averaged image as background using VIS
+
+In both the VIS and VIS_CH, the plant is segmented using the following protocol: 
+<img src="www/pheno3_segmentation.png"></img>
+
+### NIR Workflow
+1. Average together all the empty pots using AVG_IMGS
+2. Run the analysis with the averaged image as background using NIR
+
+
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`  
 1. First clone the repository
