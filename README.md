@@ -1,7 +1,7 @@
 <img src="www/raw.png" width="33%"></img><img src="www/mask.png" width="33%"></img><img src="www/classified.png" width="33%"></img>
 
 # DDPSC PhenotyperCV
-This program has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As developement continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Current modes are listed here and futher information can be found using the `-h` flag. 
+This program has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Current modes are listed here and futher information can be found using the `-h` flag. 
 
 ### Modes
 * **VIS** - Segment and measure plant in RGB images
