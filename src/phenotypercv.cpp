@@ -121,9 +121,9 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat msk = imread(parser.get<string>("b"),0);
-			Mat mask;
-			threshold(msk,mask,25,255,THRESH_BINARY);
-			trainBC(inputImage, mask, parser.get<string>("s"));
+			//Mat mask;
+			//threshold(msk,mask,25,255,THRESH_BINARY);
+			trainBC(inputImage, msk, parser.get<string>("s"));
 		}
 	}
 	else if(bool_bcPred){
@@ -147,9 +147,9 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat msk = imread(parser.get<string>("b"),0);
-			Mat mask;
-			threshold(msk,mask,25,255,THRESH_BINARY_INV);
-			trainSVM(inputImage, mask, parser.get<string>("s"));
+			//Mat mask;
+			//threshold(msk,mask,25,255,THRESH_BINARY_INV);
+			trainSVM(inputImage, msk, parser.get<string>("s"));
 		}
 	}
 	else if(bool_svmPred){
