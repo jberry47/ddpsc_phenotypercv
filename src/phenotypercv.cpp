@@ -178,162 +178,153 @@ int main(int argc, char *argv[]){
    		split(lab, split_lab);
 
    		Mat map=inputImage;
-
-	    bool found = false;
-	    Mat kept = Mat::zeros(src.size(),src.type());
-	    for(unsigned int i=0; i < pred_contours.size(); i++){
-	    	found=false;
-	      	for(unsigned int j=0; j<pred_contours[i].size(); j++){
-
-	      		for(unsigned int b=0; b<b_contours.size(); b++){
+  		for(unsigned int b=0; b<b_contours.size(); b++){
+		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+  			for(unsigned int i=0; i < pred_contours.size(); i++){
+  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
 		      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
 		      		if(test==1 || test == 0){
-		      			found = true;
-		      			drawContours(kept, pred_contours, i, Scalar(255,0,0), cv::FILLED);
 		      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
-
-		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
 		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-
-		    		    Moments m = moments(b_contours[b],true);
-		    		    Point p(m.m10/m.m00, m.m01/m.m00);
-		                putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-		    		    Mat tmask = z;
-		    			Mat mask;
-		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		    			vector<double> shapes_data = get_shapes(cc,mask);
-		    			Mat gray_data = get_nir(split_lab[0], mask);
-
-		    			//-- Write shapes to file
-		    			string name_shape= "shapes.txt";
-		    			ofstream shape_file;
-		    			shape_file.open(name_shape.c_str(),ios_base::app);
-		    			shape_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
-		    			for(int i=0;i<20;i++){
-		    				shape_file << shapes_data[i];
-		    				if(i != 19){
-		    					shape_file << " ";
-		    				}
-		    			}
-		    			shape_file << endl;
-		    			shape_file.close();
-
-		    			//-- Write color to file
-		    			string name_gray= "gray.txt";
-		    			ofstream gray_file;
-		    			gray_file.open(name_gray.c_str(),ios_base::app);
-		    			gray_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
-		    			for(int i=0;i<255;i++){
-		    				gray_file << gray_data.at<float>(i,0) << " ";
-		    			}
-		    			gray_file << endl;
-		    			gray_file.close();
-
 		      			break;
 		      		}
-	      		}
-	      		if(found){break;};
-	      		for(unsigned int g=0; g<g_contours.size(); g++){
+  				}
+  			}
+
+		    Moments m = moments(z,true);
+		    Point p(m.m10/m.m00, m.m01/m.m00);
+            putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    Mat tmask = z;
+			Mat mask;
+			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+			vector<double> shapes_data = get_shapes(cc,mask);
+			Mat gray_data = get_nir(split_lab[0], mask);
+
+			//-- Write shapes to file
+			string name_shape= "shapes.txt";
+			ofstream shape_file;
+			shape_file.open(name_shape.c_str(),ios_base::app);
+			shape_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
+			for(int i=0;i<20;i++){
+				shape_file << shapes_data[i];
+				if(i != 19){
+					shape_file << " ";
+				}
+			}
+			shape_file << endl;
+			shape_file.close();
+
+			//-- Write color to file
+			string name_gray= "gray.txt";
+			ofstream gray_file;
+			gray_file.open(name_gray.c_str(),ios_base::app);
+			gray_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
+			for(int i=0;i<255;i++){
+				gray_file << gray_data.at<float>(i,0) << " ";
+			}
+			gray_file << endl;
+			gray_file.close();
+  		}
+
+  		for(unsigned int g=0; g<g_contours.size(); g++){
+		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+  			for(unsigned int i=0; i < pred_contours.size(); i++){
+  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
 		      		int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
 		      		if(test==1 || test == 0){
-		      			found = true;
-		      			drawContours(kept, pred_contours, i, Scalar(0,255,0), cv::FILLED);
 		      			drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
-
-		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
 		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-		    		    Moments m = moments(g_contours[g],true);
-
-		    		    Point p(m.m10/m.m00, m.m01/m.m00);
-		                putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-		    		    Mat tmask = z;
-		    			Mat mask;
-		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		    			vector<double> shapes_data = get_shapes(cc,mask);
-		    			Mat gray_data = get_nir(split_lab[0], mask);
-
-		    			//-- Write shapes to file
-		    			string name_shape= "shapes.txt";
-		    			ofstream shape_file;
-		    			shape_file.open(name_shape.c_str(),ios_base::app);
-		    			shape_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
-		    			for(int i=0;i<20;i++){
-		    				shape_file << shapes_data[i];
-		    				if(i != 19){
-		    					shape_file << " ";
-		    				}
-		    			}
-		    			shape_file << endl;
-		    			shape_file.close();
-
-		    			//-- Write color to file
-		    			string name_gray= "gray.txt";
-		    			ofstream gray_file;
-		    			gray_file.open(name_gray.c_str(),ios_base::app);
-		    			gray_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
-		    			for(int i=0;i<255;i++){
-		    				gray_file << gray_data.at<float>(i,0) << " ";
-		    			}
-		    			gray_file << endl;
-		    			gray_file.close();
-
 		      			break;
 		      		}
-	      		}
-	      		if(found){break;};
-	      		for(unsigned int r=0; r<r_contours.size(); r++){
+  				}
+  			}
+
+		    Moments m = moments(z,true);
+		    Point p(m.m10/m.m00, m.m01/m.m00);
+            putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    Mat tmask = z;
+			Mat mask;
+			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+			vector<double> shapes_data = get_shapes(cc,mask);
+			Mat gray_data = get_nir(split_lab[0], mask);
+
+			//-- Write shapes to file
+			string name_shape= "shapes.txt";
+			ofstream shape_file;
+			shape_file.open(name_shape.c_str(),ios_base::app);
+			shape_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
+			for(int i=0;i<20;i++){
+				shape_file << shapes_data[i];
+				if(i != 19){
+					shape_file << " ";
+				}
+			}
+			shape_file << endl;
+			shape_file.close();
+
+			//-- Write color to file
+			string name_gray= "gray.txt";
+			ofstream gray_file;
+			gray_file.open(name_gray.c_str(),ios_base::app);
+			gray_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
+			for(int i=0;i<255;i++){
+				gray_file << gray_data.at<float>(i,0) << " ";
+			}
+			gray_file << endl;
+			gray_file.close();
+  		}
+
+  		for(unsigned int r=0; r<r_contours.size(); r++){
+		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+  			for(unsigned int i=0; i < pred_contours.size(); i++){
+  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
 		      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
 		      		if(test==1 || test == 0){
-		      			found = true;
-		      			drawContours(kept, pred_contours, i, Scalar(0,0,255), cv::FILLED);
-		      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
-
-		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+		      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
 		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-		    		    Moments m = moments(r_contours[r],true);
-
-		    		    Point p(m.m10/m.m00, m.m01/m.m00);
-		                putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-		    		    Mat tmask = z;
-		    			Mat mask;
-		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		    			vector<double> shapes_data = get_shapes(cc,mask);
-		    			Mat gray_data = get_nir(split_lab[0], mask);
-
-		    			//-- Write shapes to file
-		    			string name_shape= "shapes.txt";
-		    			ofstream shape_file;
-		    			shape_file.open(name_shape.c_str(),ios_base::app);
-		    			shape_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
-		    			for(int i=0;i<20;i++){
-		    				shape_file << shapes_data[i];
-		    				if(i != 19){
-		    					shape_file << " ";
-		    				}
-		    			}
-		    			shape_file << endl;
-		    			shape_file.close();
-
-		    			//-- Write color to file
-		    			string name_gray= "gray.txt";
-		    			ofstream gray_file;
-		    			gray_file.open(name_gray.c_str(),ios_base::app);
-		    			gray_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
-		    			for(int i=0;i<255;i++){
-		    				gray_file << gray_data.at<float>(i,0) << " ";
-		    			}
-		    			gray_file << endl;
-		    			gray_file.close();
-
 		      			break;
 		      		}
-	      		}
-	      		if(found){break;};
-	      	}
-	    }
+  				}
+  			}
+
+		    Moments m = moments(z,true);
+		    Point p(m.m10/m.m00, m.m01/m.m00);
+            putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    Mat tmask = z;
+			Mat mask;
+			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+			vector<double> shapes_data = get_shapes(cc,mask);
+			Mat gray_data = get_nir(split_lab[0], mask);
+
+			//-- Write shapes to file
+			string name_shape= "shapes.txt";
+			ofstream shape_file;
+			shape_file.open(name_shape.c_str(),ios_base::app);
+			shape_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
+			for(int i=0;i<20;i++){
+				shape_file << shapes_data[i];
+				if(i != 19){
+					shape_file << " ";
+				}
+			}
+			shape_file << endl;
+			shape_file.close();
+
+			//-- Write color to file
+			string name_gray= "gray.txt";
+			ofstream gray_file;
+			gray_file.open(name_gray.c_str(),ios_base::app);
+			gray_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
+			for(int i=0;i<255;i++){
+				gray_file << gray_data.at<float>(i,0) << " ";
+			}
+			gray_file << endl;
+			gray_file.close();
+  		}
+
 		vector<string> sub_str;
 		const string full_str = string(parser.get<string>("i"));
 		char del = '.';
