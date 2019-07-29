@@ -43,21 +43,21 @@ void kMouse( int event, int x, int y, int f, void* ){
         	color = Scalar( 0, 0, 255 );
             rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
+            imshow("Select spots",src);
             waitKey(1);
             break;
         case cv::EVENT_RBUTTONDOWN   :
         	color = Scalar( 0, 255, 0 );
             rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
+            imshow("Select spots",src);
             waitKey(1);
             break;
         case cv::EVENT_MBUTTONDOWN   :
         	color = Scalar( 255, 0, 0 );
             rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
+            imshow("Select spots",src);
             waitKey(1);
             break;
     }

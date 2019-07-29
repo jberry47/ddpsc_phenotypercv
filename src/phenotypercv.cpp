@@ -136,10 +136,10 @@ int main(int argc, char *argv[]){
 					"\e[1mMiddle\e[0m - Blue\n"
 					"\e[1mRight\e[0m - Green\n" << endl;
 
-			namedWindow("Image",WINDOW_NORMAL);
-			setMouseCallback("Image",kMouse,NULL );
-			resizeWindow("Image",src.cols,src.rows);
-			imshow("Image",src);
+			namedWindow("Select spots",WINDOW_NORMAL);
+			setMouseCallback("Select spots",kMouse,NULL );
+			resizeWindow("Select spots",src.cols,src.rows);
+			imshow("Select spots",src);
 			waitKey(0);
 
 			vector<Mat> roi_bgr(3);
