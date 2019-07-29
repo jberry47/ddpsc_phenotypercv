@@ -13,7 +13,9 @@ using namespace Eigen;
 
 int roi_size;
 Mat src;
+Mat kionaMat;
 int counter=1;
+int rcount=0, gcount=0, bcount=0;
 
 void onMouse( int event, int x, int y, int f, void* ){
     switch(event){

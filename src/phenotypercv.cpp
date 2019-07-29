@@ -63,12 +63,41 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
+		"{size     |       | Kiona size }"
 		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
 		        "DICT_6X6_50=8, DICT_6X6_100=9, DICT_6X6_250=10, DICT_6X6_1000=11, DICT_7X7_50=12,"
 		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}";
 }
+
+void kMouse( int event, int x, int y, int f, void* ){
+	Scalar color;
+	switch(event){
+        case  cv::EVENT_LBUTTONDOWN  :
+        	color = Scalar( 0, 0, 255 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+        case cv::EVENT_RBUTTONDOWN   :
+        	color = Scalar( 0, 255, 0 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+        case cv::EVENT_MBUTTONDOWN   :
+        	color = Scalar( 255, 0, 0 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+    }
+}
+
 
 int main(int argc, char *argv[]){
     CommandLineParser parser(argc, argv, keys);
@@ -94,14 +123,16 @@ int main(int argc, char *argv[]){
 	bool bool_bcCreate = mode == "BC_CREATE";
 	bool bool_bcPred = mode == "BC_PRED";
 	bool bool_testing = mode == "TESTING";
+	bool bool_ws = mode == "WS";
 
 	if(bool_testing){
-
+		/*
 		Mat inputImage = imread(parser.get<string>("i"));
 		Mat msk = imread(parser.get<string>("b"),0);
 		Mat mask;
 		threshold(msk,mask,25,255,THRESH_BINARY);
 		trainBoost(inputImage, mask, parser.get<string>("s"));
+		*/
 
 		/*
 		Mat inputImage = imread(parser.get<string>("i"));
@@ -114,6 +145,201 @@ int main(int argc, char *argv[]){
 		//Mat nirImage = imread(parser.get<string>("i"),0);
     	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
+	}
+	else if(bool_ws){
+		Mat inputImage = imread(parser.get<string>("i"));
+		Mat response = predictBC(inputImage,parser.get<string>("s"));
+		Mat r_thresh;
+		threshold(response,r_thresh,127,255,THRESH_BINARY);
+
+		src = imread(parser.get<string>("i"));
+		roi_size = parser.get<int>("size");
+		kionaMat = Mat::zeros(src.size(),src.type());
+
+		namedWindow("Image",WINDOW_NORMAL);
+		setMouseCallback("Image",kMouse,NULL );
+		resizeWindow("Image",src.cols,src.rows);
+		imshow("Image",src);
+		waitKey(0);
+
+		vector<Mat> roi_bgr(3);
+		split(kionaMat,roi_bgr);
+
+		vector<vector<Point> > b_contours, g_contours, r_contours, pred_contours;
+		vector<Vec4i> b_hierarchy, g_hierarchy, r_hierarchy, pred_hierarchy;
+	    findContours( roi_bgr[0], b_contours, b_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+	    findContours( roi_bgr[1], g_contours, g_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+	    findContours( roi_bgr[2], r_contours, r_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+	    findContours( r_thresh, pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+	    Mat lab;
+   		cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
+   		vector<Mat> split_lab;
+   		split(lab, split_lab);
+
+   		Mat map=inputImage;
+
+	    bool found = false;
+	    Mat kept = Mat::zeros(src.size(),src.type());
+	    for(unsigned int i=0; i < pred_contours.size(); i++){
+	    	found=false;
+	      	for(unsigned int j=0; j<pred_contours[i].size(); j++){
+
+	      		for(unsigned int b=0; b<b_contours.size(); b++){
+		      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
+		      		if(test==1 || test == 0){
+		      			found = true;
+		      			drawContours(kept, pred_contours, i, Scalar(255,0,0), cv::FILLED);
+		      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
+
+		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+
+		    		    Moments m = moments(b_contours[b],true);
+		    		    Point p(m.m10/m.m00, m.m01/m.m00);
+		                putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    		    Mat tmask = z;
+		    			Mat mask;
+		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		    			vector<double> shapes_data = get_shapes(cc,mask);
+		    			Mat gray_data = get_nir(split_lab[0], mask);
+
+		    			//-- Write shapes to file
+		    			string name_shape= "shapes.txt";
+		    			ofstream shape_file;
+		    			shape_file.open(name_shape.c_str(),ios_base::app);
+		    			shape_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
+		    			for(int i=0;i<20;i++){
+		    				shape_file << shapes_data[i];
+		    				if(i != 19){
+		    					shape_file << " ";
+		    				}
+		    			}
+		    			shape_file << endl;
+		    			shape_file.close();
+
+		    			//-- Write color to file
+		    			string name_gray= "gray.txt";
+		    			ofstream gray_file;
+		    			gray_file.open(name_gray.c_str(),ios_base::app);
+		    			gray_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
+		    			for(int i=0;i<255;i++){
+		    				gray_file << gray_data.at<float>(i,0) << " ";
+		    			}
+		    			gray_file << endl;
+		    			gray_file.close();
+
+		      			break;
+		      		}
+	      		}
+	      		if(found){break;};
+	      		for(unsigned int g=0; g<g_contours.size(); g++){
+		      		int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
+		      		if(test==1 || test == 0){
+		      			found = true;
+		      			drawContours(kept, pred_contours, i, Scalar(0,255,0), cv::FILLED);
+		      			drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
+
+		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+		    		    Moments m = moments(g_contours[g],true);
+
+		    		    Point p(m.m10/m.m00, m.m01/m.m00);
+		                putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    		    Mat tmask = z;
+		    			Mat mask;
+		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		    			vector<double> shapes_data = get_shapes(cc,mask);
+		    			Mat gray_data = get_nir(split_lab[0], mask);
+
+		    			//-- Write shapes to file
+		    			string name_shape= "shapes.txt";
+		    			ofstream shape_file;
+		    			shape_file.open(name_shape.c_str(),ios_base::app);
+		    			shape_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
+		    			for(int i=0;i<20;i++){
+		    				shape_file << shapes_data[i];
+		    				if(i != 19){
+		    					shape_file << " ";
+		    				}
+		    			}
+		    			shape_file << endl;
+		    			shape_file.close();
+
+		    			//-- Write color to file
+		    			string name_gray= "gray.txt";
+		    			ofstream gray_file;
+		    			gray_file.open(name_gray.c_str(),ios_base::app);
+		    			gray_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
+		    			for(int i=0;i<255;i++){
+		    				gray_file << gray_data.at<float>(i,0) << " ";
+		    			}
+		    			gray_file << endl;
+		    			gray_file.close();
+
+		      			break;
+		      		}
+	      		}
+	      		if(found){break;};
+	      		for(unsigned int r=0; r<r_contours.size(); r++){
+		      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
+		      		if(test==1 || test == 0){
+		      			found = true;
+		      			drawContours(kept, pred_contours, i, Scalar(0,0,255), cv::FILLED);
+		      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
+
+		    		    Mat z = Mat::zeros(src.size(),CV_8UC1);
+		    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+		    		    Moments m = moments(r_contours[r],true);
+
+		    		    Point p(m.m10/m.m00, m.m01/m.m00);
+		                putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		    		    Mat tmask = z;
+		    			Mat mask;
+		    			vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		    			vector<double> shapes_data = get_shapes(cc,mask);
+		    			Mat gray_data = get_nir(split_lab[0], mask);
+
+		    			//-- Write shapes to file
+		    			string name_shape= "shapes.txt";
+		    			ofstream shape_file;
+		    			shape_file.open(name_shape.c_str(),ios_base::app);
+		    			shape_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
+		    			for(int i=0;i<20;i++){
+		    				shape_file << shapes_data[i];
+		    				if(i != 19){
+		    					shape_file << " ";
+		    				}
+		    			}
+		    			shape_file << endl;
+		    			shape_file.close();
+
+		    			//-- Write color to file
+		    			string name_gray= "gray.txt";
+		    			ofstream gray_file;
+		    			gray_file.open(name_gray.c_str(),ios_base::app);
+		    			gray_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
+		    			for(int i=0;i<255;i++){
+		    				gray_file << gray_data.at<float>(i,0) << " ";
+		    			}
+		    			gray_file << endl;
+		    			gray_file.close();
+
+		      			break;
+		      		}
+	      		}
+	      		if(found){break;};
+	      	}
+	    }
+		vector<string> sub_str;
+		const string full_str = string(parser.get<string>("i"));
+		char del = '.';
+		split(full_str,del,sub_str);
+		string new_name = sub_str[0]+"_colorMap.png";
+		imwrite(new_name,map);
 	}
 	else if(bool_bcCreate){
 		if(!(parser.has("i") && parser.has("b") && parser.has("s"))){

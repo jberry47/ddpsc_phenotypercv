@@ -25,7 +25,9 @@ using namespace ximgproc;
 
 extern int roi_size;
 extern Mat src;
+extern Mat kionaMat;
 extern int counter;
+extern int rcount, gcount, bcount;
 
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
