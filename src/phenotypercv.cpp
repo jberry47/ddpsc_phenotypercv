@@ -132,6 +132,10 @@ int main(int argc, char *argv[]){
 			roi_size = parser.get<int>("size");
 			kionaMat = Mat::zeros(src.size(),src.type());
 
+			cout << "\n\e[1mLeft\e[0m - Red\n"
+					"\e[1mMiddle\e[0m - Blue\n"
+					"\e[1mRight\e[0m - Green\n" << endl;
+
 			namedWindow("Image",WINDOW_NORMAL);
 			setMouseCallback("Image",kMouse,NULL );
 			resizeWindow("Image",src.cols,src.rows);
@@ -258,7 +262,7 @@ int main(int argc, char *argv[]){
 	  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
 			      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
 			      		if(test==1 || test == 0){
-			      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
+			      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
 			    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
 			      			break;
 			      		}
