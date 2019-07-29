@@ -72,34 +72,6 @@ const char* keys  =
 		        "DICT_7X7_100=13, DICT_7X7_250=14, DICT_7X7_1000=15, DICT_ARUCO_ORIGINAL = 16}";
 }
 
-void kMouse( int event, int x, int y, int f, void* ){
-	Scalar color;
-	switch(event){
-        case  cv::EVENT_LBUTTONDOWN  :
-        	color = Scalar( 0, 0, 255 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
-            waitKey(1);
-            break;
-        case cv::EVENT_RBUTTONDOWN   :
-        	color = Scalar( 0, 255, 0 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
-            waitKey(1);
-            break;
-        case cv::EVENT_MBUTTONDOWN   :
-        	color = Scalar( 255, 0, 0 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
-            imshow("Image",src);
-            waitKey(1);
-            break;
-    }
-}
-
-
 int main(int argc, char *argv[]){
     CommandLineParser parser(argc, argv, keys);
 	string mode;
@@ -336,7 +308,6 @@ int main(int argc, char *argv[]){
 			string new_name = sub_str[0]+"_colorMap.png";
 			imwrite(new_name,map);
 		}
-
 	}
 	else if(bool_bcCreate){
 		if(!(parser.has("i") && parser.has("b") && parser.has("s"))){
@@ -808,7 +779,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
-		cout << "USAGE:" << endl << "\tThere are ten modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
+		cout << "USAGE:" << endl << "\tThere are fourteen modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS, CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, SVM_CREATE, SVM_PRED, and AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV -m=[MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt"<<endl << endl;
@@ -820,6 +791,10 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mCHARUCO_CREATE\e[0m - Creates a nx by ny ChArUco board with mw marker width and aw aruco chip width using d dictionary." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CREATE -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02" << endl << endl;
 		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=calib_list.txt -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
 		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=test_imgs/plate.jpg -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
+		cout << "\t\e[1mBC_CREATE\e[0m - Creates and outputs a naive bayes classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_CREATE -i=input_image.png -b=labeled_image.png -s=bayes_classifier.yaml" << endl << endl;
+		cout << "\t\e[1mBC_PRED\e[0m - Classifies an input image by using a pre-trained bayes classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_PRED -i=input_image.png -s=bayes_classifier.yaml" << endl << endl;
+		cout << "\t\e[1mSVM_CREATE\e[0m - Creates and outputs a support vector machine classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_CREATE -i=input_image.png -b=labeled_image.png -s=bayes_classifier.yaml" << endl << endl;
+		cout << "\t\e[1mSVM_PRED\e[0m - Classifies an input image by using a pre-trained SVM classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_PRED -i=input_image.png -s=svm_classifier.yaml" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
 		cout << "\tColor Correction VIS Pipeline:" << endl;
@@ -835,7 +810,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, or AVG_IMGS" << endl;
+    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, SVM_CREATE, SVM_PRED or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
 

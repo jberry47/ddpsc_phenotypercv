@@ -36,6 +36,33 @@ void onMouse( int event, int x, int y, int f, void* ){
     }
 }
 
+void kMouse( int event, int x, int y, int f, void* ){
+	Scalar color;
+	switch(event){
+        case  cv::EVENT_LBUTTONDOWN  :
+        	color = Scalar( 0, 0, 255 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+        case cv::EVENT_RBUTTONDOWN   :
+        	color = Scalar( 0, 255, 0 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+        case cv::EVENT_MBUTTONDOWN   :
+        	color = Scalar( 255, 0, 0 );
+            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Image",src);
+            waitKey(1);
+            break;
+    }
+}
+
 void split(const string& s, char c, vector<string>& v) {
    string::size_type i = 0;
    string::size_type j = s.find(c);
