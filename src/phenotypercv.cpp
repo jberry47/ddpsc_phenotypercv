@@ -355,7 +355,7 @@ int main(int argc, char *argv[]){
 			cout << "Using mode SVM_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
-			Mat response = predictSVM(inputImage,parser.get<string>("s"));
+			Mat response = 255-predictSVM(inputImage,parser.get<string>("s"));
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
 			char del = '.';

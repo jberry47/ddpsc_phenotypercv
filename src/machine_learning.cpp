@@ -62,7 +62,7 @@ void trainSVM(Mat img, Mat mask, string fname){
 
 Mat predictSVM(Mat img,string fname){
 	Mat imageR;
-	resize(img, imageR, Size(512,512), 0, 0, INTER_LINEAR);
+	resize(img, imageR, Size(512*2,512*2), 0, 0, INTER_LINEAR);
 	cout << "Loading..." << endl;
 	Ptr<SVM> svm = SVM::load(fname);
 
