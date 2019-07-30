@@ -56,6 +56,7 @@ const char* keys  =
         "{b        |       | Background image }"
         "{size     |       | Square size (pixels) for DRAW_ROI mode}"
         "{class    |       | Square size (pixels) for DRAW_ROI mode}"
+        "{prob     |       | Probability for WS thresh}"
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
 		"{ci       |       | ChArUco calibrate input file }"
@@ -120,13 +121,14 @@ int main(int argc, char *argv[]){
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
 	}
 	else if(bool_ws){
-		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c"))){
-			cout << "Using mode WS requires input: -i=inputImage -class=bayes_classifier.txt -size=number(10) -s=shapes_output.txt -c=gray_output.txt" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("prob"))){
+			cout << "Using mode WS requires input: -i=inputImage -class=bayes_classifier.txt -size=number(10) -s=shapes_output.txt -c=gray_output.txt -prob=0.8" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat response = predictBC(inputImage,parser.get<string>("class"));
 			Mat r_thresh;
-			threshold(response,r_thresh,127,255,THRESH_BINARY);
+			int val = parser.get<float>("prob")*255;
+			threshold(response,r_thresh,val,255,THRESH_BINARY);
 
 			src = imread(parser.get<string>("i"));
 			roi_size = parser.get<int>("size");
