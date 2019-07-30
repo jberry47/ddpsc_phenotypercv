@@ -38,23 +38,46 @@ In both the VIS and VIS_CH, the plant is segmented using the following protocol:
 
 
 ### Building the program
-PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`  
-1. First clone the repository
+PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
+
+##### Getting Eigen3 and installing
+```bash
+wget "http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
+tar -xf eigen-3.3.7.tar
+cd eigen-eigen-323c052e1731
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+sudo make install
+sudo cp -r /usr/include/eigen3/Eigen /usr/include/
+```
+
+##### Getting OpenCV extra modules
+```bash
+wget https://github.com/opencv/opencv_contrib/archive/4.1.1.tar.gz -O"opencv_contrib-4.1.1.tar.gz"
+tar -xzf opencv_contrib-4.1.1.tar.gz
+cd opencv_contrib-4.1.1/modules
+$ rm -rv !("aruco"|"ximgproc") 
+```
+
+##### Getting OpenCV
+```bash
+wget https://github.com/opencv/opencv/archive/4.1.1.tar.gz -O"opencv-4.1.1.tar.gz"
+tar -xzf opencv-4.1.1.tar.gz
+cd opencv-4.1.1
+mkdir build && cd build
+cmake .. -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.1.1/modules
+make -j8
+sudo make install
+```
+
+##### Getting PhenotyperCV
 ```bash
 git clone https://github.com/jberry47/ddpsc_phenotypercv
-```
-2. Create a build directory
-```bash
 cd ddpsc_phenotypercv && mkdir build && cd build
-```
-3. Initialize the build
-```bash
 cmake ..
-```
-4. If there were no errors or warnings then you can build the program
-```bash
 make
 ```
+
 If you have an unconventional installation of Eigen you'll need to comment out the find_packages for Eigen in the CMakeList.txt and manually add the path to your installation with `-DCMAKE_MODULE_PATH=/path/to/install/eigen/Eigen` 
 
 ### Building the program on DDPSC Infrastructure
