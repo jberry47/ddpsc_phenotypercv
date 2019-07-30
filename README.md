@@ -59,7 +59,7 @@ cd opencv_contrib-4.1.1/modules
 $ rm -rv !("aruco"|"ximgproc") 
 ```
 
-##### Getting OpenCV
+##### Getting OpenCV and installing
 ```bash
 wget https://github.com/opencv/opencv/archive/4.1.1.tar.gz -O"opencv-4.1.1.tar.gz"
 tar -xzf opencv-4.1.1.tar.gz
@@ -70,7 +70,7 @@ make -j8
 sudo make install
 ```
 
-##### Getting PhenotyperCV
+##### Getting PhenotyperCV and building
 ```bash
 git clone https://github.com/jberry47/ddpsc_phenotypercv
 cd ddpsc_phenotypercv && mkdir build && cd build
