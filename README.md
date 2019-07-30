@@ -40,6 +40,12 @@ In both the VIS and VIS_CH, the plant is segmented using the following protocol:
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
 
+##### Making a directory for all builds
+```bash
+mkdir big_build && cd big_build
+export my_path=$(pwd)
+```
+
 ##### Getting Eigen3 and installing
 ```bash
 wget "http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
@@ -56,7 +62,7 @@ sudo cp -r /usr/include/eigen3/Eigen /usr/include/
 wget https://github.com/opencv/opencv_contrib/archive/4.1.1.tar.gz -O"opencv_contrib-4.1.1.tar.gz"
 tar -xzf opencv_contrib-4.1.1.tar.gz
 cd opencv_contrib-4.1.1/modules
-$ rm -rv !("aruco"|"ximgproc") 
+rm -rv !("aruco"|"ximgproc") 
 ```
 
 ##### Getting OpenCV and installing
@@ -65,7 +71,7 @@ wget https://github.com/opencv/opencv/archive/4.1.1.tar.gz -O"opencv-4.1.1.tar.g
 tar -xzf opencv-4.1.1.tar.gz
 cd opencv-4.1.1
 mkdir build && cd build
-cmake .. -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.1.1/modules
+cmake .. -DOPENCV_EXTRA_MODULES_PATH=$my_path/opencv_contrib-4.1.1/modules
 make -j8
 sudo make install
 ```
