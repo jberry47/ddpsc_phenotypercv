@@ -82,6 +82,7 @@ git clone https://github.com/jberry47/ddpsc_phenotypercv
 cd ddpsc_phenotypercv && mkdir build && cd build
 cmake ..
 make
+export PATH=$PATH:$my_path/ddpsc_phenotypercv/build
 ```
 
 If you have an unconventional installation of Eigen you'll need to comment out the find_packages for Eigen in the CMakeList.txt and manually add the path to your installation with `-DCMAKE_MODULE_PATH=/path/to/install/eigen/Eigen` 
