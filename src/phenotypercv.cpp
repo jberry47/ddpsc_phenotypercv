@@ -55,7 +55,7 @@ const char* keys  =
         "{i        |       | Input image }"
         "{b        |       | Background image }"
         "{size     |       | Square size (pixels) for DRAW_ROI mode}"
-        "{class    |       | Square size (pixels) for DRAW_ROI mode}"
+        "{class    |       | machine learning classifier}"
         "{prob     |       | Probability for WS thresh}"
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
@@ -65,7 +65,6 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
-		"{size     |       | Kiona size }"
 		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
@@ -122,7 +121,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(bool_ws){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("prob"))){
-			cout << "Using mode WS requires input: -i=inputImage -class=bayes_classifier.txt -size=number(10) -s=shapes_output.txt -c=gray_output.txt -prob=0.8" << endl;
+			cout << "Using mode WS requires input: -i=inputImage -class=bayes_classifier.txt -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat response = predictBC(inputImage,parser.get<string>("class"));
