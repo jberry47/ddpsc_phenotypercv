@@ -32,10 +32,36 @@ This program has multiple features that are selected for using `-m` flag indicat
 In both the VIS and VIS_CH, the plant is segmented using the following protocol: 
 <img src="www/pheno3_segmentation.png"></img>
 
+Example output of the shapes, color, and leaves are shown here:
+###### Shapes
+> VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 78513 448624 0.175008 13860.8 673 1282 1407.28 584.593 21 1998.52 1499.91 2606.46 1262.9 164.149 1.01536 0.0051354 0.484527 2.06387 1.46097 0 -0.100173
+
+Each line in the file has meta data: image name, area, hull_area, solidity, perimeter, width, height, center of mass x, center of mass y, hull verticies, ellipse center x, ellipse center y, ellipse major axis, ellipse minor axis, ellipse angle, ellipse eccentricity, circularity, roundness, aspect ratio, fractal dimension, out of frame, image quality.
+
+###### Color
+> VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 0 0 0 2 1 2 4 15 17 30 35 39 61 69 117 119 125 152 159 198 241 299 336 462 500 584 721 810 899 1033 907 1120 1170 1326 1550 1904 2190 2576 3375 3882 4653 5805 6750 7630 7640 7807 4866 3273 1586 773 309 150 82 32 34 23 14 18 9 9 2 5 6 3 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+Each line in the file has meta data: image name, hue histogram from 0-180 in bins of two.
+
+###### Leaves
+>VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 0 868 29.1548 65 2.22948
+VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 1 3781 255.039 270 1.05866
+VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 2 5668 377.69 429 1.13585
+VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 3 18556 611.756 832 1.36002
+VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 4 23309 320.295 340 1.06152
+VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 5 23309 353.99 354 1.00003
+
+For each image processed multiple entries are created, one for each leaf blade found. The meta data for this file is: image name, leaf blade number, area, euclidean distance from branch to tip, geodesic distance from branch to tip, tortuosity. 
+
 ### NIR Workflow
 1. Average together all the empty pots using AVG_IMGS
 2. Run the analysis with the averaged image as background using NIR
 
+Example output of the NIR color is shown here:
+
+> NIR_SV_0_z1_h1_g0_e18000_v500_103283_0.png 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 3 4 6 2 8 13 26 24 33 52 37 48 30 43 56 84 98 117 124 109 113 136 154 170 195 216 218 212 227 245 243 215 194 232 230 211 202 212 207 218 234 260 230 211 225 193 162 153 128 115 118 114 131 125 98 97 59 47 52 37 25 13 4 1 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+Each line in the file has meta data: image name, grayscale histogram from 0-255
 
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
