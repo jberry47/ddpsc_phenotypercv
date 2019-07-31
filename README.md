@@ -33,17 +33,17 @@ In both the VIS and VIS_CH, the plant is segmented using the following protocol:
 <img src="www/pheno3_segmentation.png"></img>
 
 Example output of the shapes, color, and leaves are shown here:
-###### Shapes
+##### Shapes
 > VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 78513 448624 0.175008 13860.8 673 1282 1407.28 584.593 21 1998.52 1499.91 2606.46 1262.9 164.149 1.01536 0.0051354 0.484527 2.06387 1.46097 0 -0.100173
 
 Each line in the file has meta data: image name, area, hull_area, solidity, perimeter, width, height, center of mass x, center of mass y, hull verticies, ellipse center x, ellipse center y, ellipse major axis, ellipse minor axis, ellipse angle, ellipse eccentricity, circularity, roundness, aspect ratio, fractal dimension, out of frame, image quality.
 
-###### Color
+##### Color
 > VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 0 0 0 2 1 2 4 15 17 30 35 39 61 69 117 119 125 152 159 198 241 299 336 462 500 584 721 810 899 1033 907 1120 1170 1326 1550 1904 2190 2576 3375 3882 4653 5805 6750 7630 7640 7807 4866 3273 1586 773 309 150 82 32 34 23 14 18 9 9 2 5 6 3 1 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 Each line in the file has meta data: image name, hue histogram from 0-180 in bins of two.
 
-###### Leaves
+##### Leaves
 >VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 0 868 29.1548 65 2.22948
 VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 1 3781 255.039 270 1.05866
 VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 2 5668 377.69 429 1.13585
