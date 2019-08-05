@@ -25,13 +25,13 @@ using namespace ximgproc;
 
 extern int roi_size;
 extern Mat src;
-extern Mat kionaMat;
+extern Mat selMat;
 extern int counter;
-extern int rcount, gcount, bcount;
 
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
 void kMouse( int event, int x, int y, int f, void* );
 void showImage(Mat img);
+void selectionGUI(Mat orig, string orig_fname,Mat mask, int size, string shape_fname, string color_fname);
 
 #endif /* MISCELLANEOUS_H_ */

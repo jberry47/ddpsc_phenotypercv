@@ -7,15 +7,16 @@
 #include <math.h>
 #include <Eigen/Dense>
 
+#include <feature_extraction.h>
+
 using namespace cv;
 using namespace std;
 using namespace Eigen;
 
 int roi_size;
 Mat src;
-Mat kionaMat;
+Mat selMat;
 int counter=1;
-int rcount=0, gcount=0, bcount=0;
 
 void onMouse( int event, int x, int y, int f, void* ){
     switch(event){
@@ -41,21 +42,21 @@ void kMouse( int event, int x, int y, int f, void* ){
 	switch(event){
         case  cv::EVENT_LBUTTONDOWN  :
         	color = Scalar( 0, 0, 255 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(selMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             imshow("Select spots",src);
             waitKey(1);
             break;
         case cv::EVENT_RBUTTONDOWN   :
         	color = Scalar( 0, 255, 0 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(selMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             imshow("Select spots",src);
             waitKey(1);
             break;
         case cv::EVENT_MBUTTONDOWN   :
         	color = Scalar( 255, 0, 0 );
-            rectangle(kionaMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            rectangle(selMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
             imshow("Select spots",src);
             waitKey(1);
@@ -75,6 +76,192 @@ void split(const string& s, char c, vector<string>& v) {
       if (j == string::npos)
          v.push_back(s.substr(i, s.length()));
    }
+}
+
+void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname){
+	src = orig.clone();
+	roi_size = size;
+	selMat = Mat::zeros(src.size(),src.type());
+
+	cout << "\n\e[1mLeft\e[0m - Red\n"
+			"\e[1mMiddle\e[0m - Blue\n"
+			"\e[1mRight\e[0m - Green\n" << endl;
+
+	namedWindow("Select spots",WINDOW_NORMAL);
+	setMouseCallback("Select spots",kMouse,NULL );
+	resizeWindow("Select spots",src.cols,src.rows);
+	imshow("Select spots",src);
+	waitKey(0);
+
+	vector<Mat> roi_bgr(3);
+	split(selMat,roi_bgr);
+
+	vector<vector<Point> > b_contours, g_contours, r_contours, pred_contours;
+	vector<Vec4i> b_hierarchy, g_hierarchy, r_hierarchy, pred_hierarchy;
+    findContours( roi_bgr[0], b_contours, b_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( roi_bgr[1], g_contours, g_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( roi_bgr[2], r_contours, r_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( mask, pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+    Mat lab;
+	cvtColor(src.clone(), lab, cv::COLOR_BGR2Lab);
+	vector<Mat> split_lab;
+	split(lab, split_lab);
+
+		Mat map=orig.clone();
+		for(unsigned int b=0; b<b_contours.size(); b++){
+	    Mat z = Mat::zeros(src.size(),CV_8UC1);
+			for(unsigned int i=0; i < pred_contours.size(); i++){
+				for(unsigned int j=0; j<pred_contours[i].size(); j++){
+	      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
+	      		if(test==1 || test == 0){
+	      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
+	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+	      			break;
+	      		}
+				}
+			}
+
+	    Moments m = moments(z,true);
+	    Point p(m.m10/m.m00, m.m01/m.m00);
+        putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+	    Mat tmask = z;
+		Mat mask;
+		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		vector<double> shapes_data = get_shapes(cc,mask);
+		Mat gray_data = get_nir(split_lab[0], mask);
+
+		//-- Write shapes to file
+		string name_shape= shape_fname;
+		ofstream shape_file;
+		shape_file.open(name_shape.c_str(),ios_base::app);
+		shape_file << orig_fname << " " << "blue" << " " << b << " ";
+		for(int i=0;i<20;i++){
+			shape_file << shapes_data[i];
+			if(i != 19){
+				shape_file << " ";
+			}
+		}
+		shape_file << endl;
+		shape_file.close();
+
+		//-- Write color to file
+		string name_gray= color_fname;
+		ofstream gray_file;
+		gray_file.open(name_gray.c_str(),ios_base::app);
+		gray_file << orig_fname << " " << "blue" << " " << b << " ";
+		for(int i=0;i<255;i++){
+			gray_file << gray_data.at<float>(i,0) << " ";
+		}
+		gray_file << endl;
+		gray_file.close();
+		}
+
+		for(unsigned int g=0; g<g_contours.size(); g++){
+	    Mat z = Mat::zeros(src.size(),CV_8UC1);
+			for(unsigned int i=0; i < pred_contours.size(); i++){
+				for(unsigned int j=0; j<pred_contours[i].size(); j++){
+	      		int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
+	      		if(test==1 || test == 0){
+	      			drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
+	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+	      			break;
+	      		}
+				}
+			}
+
+	    Moments m = moments(z,true);
+	    Point p(m.m10/m.m00, m.m01/m.m00);
+        putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+	    Mat tmask = z;
+		Mat mask;
+		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		vector<double> shapes_data = get_shapes(cc,mask);
+		Mat gray_data = get_nir(split_lab[0], mask);
+
+		//-- Write shapes to file
+		string name_shape= shape_fname;
+		ofstream shape_file;
+		shape_file.open(name_shape.c_str(),ios_base::app);
+		shape_file << orig_fname << " " << "green" << " " << g << " ";
+		for(int i=0;i<20;i++){
+			shape_file << shapes_data[i];
+			if(i != 19){
+				shape_file << " ";
+			}
+		}
+		shape_file << endl;
+		shape_file.close();
+
+		//-- Write color to file
+		string name_gray= color_fname;
+		ofstream gray_file;
+		gray_file.open(name_gray.c_str(),ios_base::app);
+		gray_file << orig_fname << " " << "green" << " " << g << " ";
+		for(int i=0;i<255;i++){
+			gray_file << gray_data.at<float>(i,0) << " ";
+		}
+		gray_file << endl;
+		gray_file.close();
+		}
+
+		for(unsigned int r=0; r<r_contours.size(); r++){
+	    Mat z = Mat::zeros(src.size(),CV_8UC1);
+			for(unsigned int i=0; i < pred_contours.size(); i++){
+				for(unsigned int j=0; j<pred_contours[i].size(); j++){
+	      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
+	      		if(test==1 || test == 0){
+	      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
+	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
+	      			break;
+	      		}
+				}
+			}
+
+	    Moments m = moments(z,true);
+	    Point p(m.m10/m.m00, m.m01/m.m00);
+        putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+	    Mat tmask = z;
+		Mat mask;
+		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		vector<double> shapes_data = get_shapes(cc,mask);
+		Mat gray_data = get_nir(split_lab[0], mask);
+
+		//-- Write shapes to file
+		string name_shape= shape_fname;
+		ofstream shape_file;
+		shape_file.open(name_shape.c_str(),ios_base::app);
+		shape_file << orig_fname << " " << "red" << " " << r << " ";
+		for(int i=0;i<20;i++){
+			shape_file << shapes_data[i];
+			if(i != 19){
+				shape_file << " ";
+			}
+		}
+		shape_file << endl;
+		shape_file.close();
+
+		//-- Write color to file
+		string name_gray= color_fname;
+		ofstream gray_file;
+		gray_file.open(name_gray.c_str(),ios_base::app);
+		gray_file << orig_fname << " " << "red" << " " << r << " ";
+		for(int i=0;i<255;i++){
+			gray_file << gray_data.at<float>(i,0) << " ";
+		}
+		gray_file << endl;
+		gray_file.close();
+		}
+
+	vector<string> sub_str;
+	const string full_str = orig_fname;
+	char del = '.';
+	split(full_str,del,sub_str);
+	string new_name = sub_str[0]+"_colorMap.png";
+	imwrite(new_name,map);
 }
 
 void showImage(Mat img){

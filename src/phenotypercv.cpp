@@ -99,6 +99,46 @@ int main(int argc, char *argv[]){
 	bool bool_ws = mode == "WS";
 
 	if(bool_testing){
+		Mat inputImage = imread(parser.get<string>("i"));
+	    Mat lab;
+   		cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
+   		vector<Mat> split_lab;
+   		split(lab, split_lab);
+
+   		//-- necrotic_mask
+   		Mat l_thresh;
+   		threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
+		Mat a_thresh;
+		threshold(split_lab[1],a_thresh,119,255,THRESH_BINARY_INV);
+		Mat mask1 = l_thresh - (l_thresh & a_thresh);
+		Mat b_thresh;
+		threshold(split_lab[2],b_thresh,145,255,THRESH_BINARY);
+		Mat mask2 = ((255-b_thresh) & l_thresh);
+		Mat nec = mask1-(mask2 & mask1);
+		Mat n_erode0;
+		erode(nec,n_erode0, Mat(), Point(-1, -1), 2, 1, 1);
+		Mat n_dilate;
+		dilate(n_erode0, n_dilate, Mat(), Point(-1, -1), 6, 1, 1);
+		Mat nec_mask;
+		erode(n_dilate,nec_mask, Mat(), Point(-1, -1), 4, 1, 1);
+
+		//-- watersoaking mask
+		Mat w_thresh;
+   		threshold(split_lab[0],w_thresh,65,255,THRESH_BINARY_INV);
+		Mat w_dilate0;
+		dilate(w_thresh, w_dilate0, Mat(), Point(-1, -1), 6, 1, 1);
+		Mat w_erode1;
+		erode(w_dilate0,w_erode1, Mat(), Point(-1, -1), 5, 1, 1);
+		Mat w_mask = w_erode1 | nec_mask;
+   		Mat l_thresh1;
+   		threshold(split_lab[0],l_thresh1,20,255,THRESH_BINARY_INV);
+   		Mat m_or = w_mask-l_thresh1;
+   		Mat m_erode0;
+		erode(m_or,m_erode0, Mat(), Point(-1, -1), 4, 1, 1);
+		Mat m_dilate;
+		dilate(m_erode0, m_dilate, Mat(), Point(-1, -1), 4, 1, 1);
+		selectionGUI(inputImage,parser.get<string>("i"),m_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+
 		/*
 		Mat inputImage = imread(parser.get<string>("i"));
 		Mat msk = imread(parser.get<string>("b"),0);
@@ -128,190 +168,11 @@ int main(int argc, char *argv[]){
 			Mat r_thresh;
 			int val = parser.get<float>("prob")*255;
 			threshold(response,r_thresh,val,255,THRESH_BINARY);
-
-			src = imread(parser.get<string>("i"));
-			roi_size = parser.get<int>("size");
-			kionaMat = Mat::zeros(src.size(),src.type());
-
-			cout << "\n\e[1mLeft\e[0m - Red\n"
-					"\e[1mMiddle\e[0m - Blue\n"
-					"\e[1mRight\e[0m - Green\n" << endl;
-
-			namedWindow("Select spots",WINDOW_NORMAL);
-			setMouseCallback("Select spots",kMouse,NULL );
-			resizeWindow("Select spots",src.cols,src.rows);
-			imshow("Select spots",src);
-			waitKey(0);
-
-			vector<Mat> roi_bgr(3);
-			split(kionaMat,roi_bgr);
-
-			vector<vector<Point> > b_contours, g_contours, r_contours, pred_contours;
-			vector<Vec4i> b_hierarchy, g_hierarchy, r_hierarchy, pred_hierarchy;
-		    findContours( roi_bgr[0], b_contours, b_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-		    findContours( roi_bgr[1], g_contours, g_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-		    findContours( roi_bgr[2], r_contours, r_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-		    findContours( r_thresh, pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-
-		    Mat lab;
-	   		cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
-	   		vector<Mat> split_lab;
-	   		split(lab, split_lab);
-
-	   		Mat map=inputImage;
-	  		for(unsigned int b=0; b<b_contours.size(); b++){
-			    Mat z = Mat::zeros(src.size(),CV_8UC1);
-	  			for(unsigned int i=0; i < pred_contours.size(); i++){
-	  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-			      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
-			      		if(test==1 || test == 0){
-			      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
-			    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-			      			break;
-			      		}
-	  				}
-	  			}
-
-			    Moments m = moments(z,true);
-			    Point p(m.m10/m.m00, m.m01/m.m00);
-	            putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-			    Mat tmask = z;
-				Mat mask;
-				vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-				vector<double> shapes_data = get_shapes(cc,mask);
-				Mat gray_data = get_nir(split_lab[0], mask);
-
-				//-- Write shapes to file
-				string name_shape= parser.get<string>("s");
-				ofstream shape_file;
-				shape_file.open(name_shape.c_str(),ios_base::app);
-				shape_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
-				for(int i=0;i<20;i++){
-					shape_file << shapes_data[i];
-					if(i != 19){
-						shape_file << " ";
-					}
-				}
-				shape_file << endl;
-				shape_file.close();
-
-				//-- Write color to file
-				string name_gray= parser.get<string>("c");
-				ofstream gray_file;
-				gray_file.open(name_gray.c_str(),ios_base::app);
-				gray_file << parser.get<string>("i") << " " << "blue" << " " << b << " ";
-				for(int i=0;i<255;i++){
-					gray_file << gray_data.at<float>(i,0) << " ";
-				}
-				gray_file << endl;
-				gray_file.close();
-	  		}
-
-	  		for(unsigned int g=0; g<g_contours.size(); g++){
-			    Mat z = Mat::zeros(src.size(),CV_8UC1);
-	  			for(unsigned int i=0; i < pred_contours.size(); i++){
-	  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-			      		int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
-			      		if(test==1 || test == 0){
-			      			drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
-			    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-			      			break;
-			      		}
-	  				}
-	  			}
-
-			    Moments m = moments(z,true);
-			    Point p(m.m10/m.m00, m.m01/m.m00);
-	            putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-			    Mat tmask = z;
-				Mat mask;
-				vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-				vector<double> shapes_data = get_shapes(cc,mask);
-				Mat gray_data = get_nir(split_lab[0], mask);
-
-				//-- Write shapes to file
-				string name_shape= "shapes.txt";
-				ofstream shape_file;
-				shape_file.open(name_shape.c_str(),ios_base::app);
-				shape_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
-				for(int i=0;i<20;i++){
-					shape_file << shapes_data[i];
-					if(i != 19){
-						shape_file << " ";
-					}
-				}
-				shape_file << endl;
-				shape_file.close();
-
-				//-- Write color to file
-				string name_gray= "gray.txt";
-				ofstream gray_file;
-				gray_file.open(name_gray.c_str(),ios_base::app);
-				gray_file << parser.get<string>("i") << " " << "green" << " " << g << " ";
-				for(int i=0;i<255;i++){
-					gray_file << gray_data.at<float>(i,0) << " ";
-				}
-				gray_file << endl;
-				gray_file.close();
-	  		}
-
-	  		for(unsigned int r=0; r<r_contours.size(); r++){
-			    Mat z = Mat::zeros(src.size(),CV_8UC1);
-	  			for(unsigned int i=0; i < pred_contours.size(); i++){
-	  				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-			      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
-			      		if(test==1 || test == 0){
-			      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
-			    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-			      			break;
-			      		}
-	  				}
-	  			}
-
-			    Moments m = moments(z,true);
-			    Point p(m.m10/m.m00, m.m01/m.m00);
-	            putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-			    Mat tmask = z;
-				Mat mask;
-				vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-				vector<double> shapes_data = get_shapes(cc,mask);
-				Mat gray_data = get_nir(split_lab[0], mask);
-
-				//-- Write shapes to file
-				string name_shape= "shapes.txt";
-				ofstream shape_file;
-				shape_file.open(name_shape.c_str(),ios_base::app);
-				shape_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
-				for(int i=0;i<20;i++){
-					shape_file << shapes_data[i];
-					if(i != 19){
-						shape_file << " ";
-					}
-				}
-				shape_file << endl;
-				shape_file.close();
-
-				//-- Write color to file
-				string name_gray= "gray.txt";
-				ofstream gray_file;
-				gray_file.open(name_gray.c_str(),ios_base::app);
-				gray_file << parser.get<string>("i") << " " << "red" << " " << r << " ";
-				for(int i=0;i<255;i++){
-					gray_file << gray_data.at<float>(i,0) << " ";
-				}
-				gray_file << endl;
-				gray_file.close();
-	  		}
-
-			vector<string> sub_str;
-			const string full_str = string(parser.get<string>("i"));
-			char del = '.';
-			split(full_str,del,sub_str);
-			string new_name = sub_str[0]+"_colorMap.png";
-			imwrite(new_name,map);
+			Mat r_erode;
+			erode(r_thresh,r_erode, Mat(), Point(-1, -1), 3, 1, 1);
+			Mat r_dilate;
+			dilate(r_erode, r_dilate, Mat(), Point(-1, -1), 3, 1, 1);
+			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 		}
 	}
 	else if(bool_bcCreate){

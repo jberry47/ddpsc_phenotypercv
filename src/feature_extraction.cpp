@@ -213,4 +213,3 @@ Mat get_nir(Mat img,Mat mask){
 	calcHist(&img,1,0,mask,hist, dims, &histSize, &ranges	,true ,false);
 	return hist;
 }
-
