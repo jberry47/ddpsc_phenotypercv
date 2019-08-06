@@ -101,7 +101,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
     findContours( roi_bgr[0], b_contours, b_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
     findContours( roi_bgr[1], g_contours, g_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
     findContours( roi_bgr[2], r_contours, r_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    findContours( mask, pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    findContours( mask.clone(), pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
     Mat lab;
 	cvtColor(src.clone(), lab, cv::COLOR_BGR2Lab);
