@@ -168,11 +168,13 @@ int main(int argc, char *argv[]){
 			Mat r_thresh;
 			int val = parser.get<float>("prob")*255;
 			threshold(response,r_thresh,val,255,THRESH_BINARY);
+			/*
 			Mat r_erode;
 			erode(r_thresh,r_erode, Mat(), Point(-1, -1), 3, 1, 1);
 			Mat r_dilate;
 			dilate(r_erode, r_dilate, Mat(), Point(-1, -1), 4, 1, 1);
-			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+			*/
+			selectionGUI(inputImage,parser.get<string>("i"),r_thresh,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 		}
 	}
 	else if(bool_bcCreate){
