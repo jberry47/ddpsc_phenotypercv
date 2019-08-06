@@ -165,10 +165,13 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat response = predictBC(inputImage,parser.get<string>("class"));
+
+			Mat filt;
+			bilateralFilter(response,filt,30,50,50);
+
 			Mat r_thresh;
 			int val = parser.get<float>("prob")*255;
-			threshold(response,r_thresh,val,255,THRESH_BINARY);
-
+			threshold(filt,r_thresh,val,255,THRESH_BINARY);
 			Mat r_dilate;
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
 
