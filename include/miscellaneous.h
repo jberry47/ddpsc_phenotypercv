@@ -31,7 +31,7 @@ extern int counter;
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
 void kMouse( int event, int x, int y, int f, void* );
-void showImage(Mat img);
+void showImage(Mat img, string title);
 void selectionGUI(Mat orig, string orig_fname,Mat mask, int size, string shape_fname, string color_fname);
 
 #endif /* MISCELLANEOUS_H_ */

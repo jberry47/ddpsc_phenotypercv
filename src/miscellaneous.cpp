@@ -264,9 +264,9 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 	imwrite(new_name,map);
 }
 
-void showImage(Mat img){
-	namedWindow("Image",WINDOW_NORMAL);
-	        	    resizeWindow("Image",800,800);
-	        	    imshow("Image", img);
+void showImage(Mat img, string title){
+	namedWindow(title,WINDOW_NORMAL);
+	        	    resizeWindow(title,800,800);
+	        	    imshow(title, img);
 	waitKey(0);
 }
