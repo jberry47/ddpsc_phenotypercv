@@ -171,7 +171,7 @@ int main(int argc, char *argv[]){
 			Mat r_erode;
 			erode(r_thresh,r_erode, Mat(), Point(-1, -1), 3, 1, 1);
 			Mat r_dilate;
-			dilate(r_erode, r_dilate, Mat(), Point(-1, -1), 3, 1, 1);
+			dilate(r_erode, r_dilate, Mat(), Point(-1, -1), 4, 1, 1);
 			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 		}
 	}
