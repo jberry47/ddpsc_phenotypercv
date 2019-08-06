@@ -168,7 +168,6 @@ int main(int argc, char *argv[]){
 			Mat r_thresh;
 			int val = parser.get<float>("prob")*255;
 			threshold(response,r_thresh,val,255,THRESH_BINARY);
-			showImage(r_thresh,"r_thresh");
 
 			Mat r_dilate;
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
