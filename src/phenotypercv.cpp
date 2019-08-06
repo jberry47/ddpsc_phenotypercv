@@ -171,12 +171,15 @@ int main(int argc, char *argv[]){
 
 			Mat r_dilate;
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
-			Mat r_erode;
-			erode(r_dilate, r_erode, Mat(), Point(-1, -1), 4, 1, 1);
-			Mat r_dilate1;
-			dilate(r_erode,r_dilate1, Mat(), Point(-1, -1), 1, 1, 1);
 
 			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+
+			vector<string> sub_str;
+			const string full_str = string(parser.get<string>("i"));
+			char del = '.';
+			split(full_str,del,sub_str);
+			string new_name = sub_str[0]+"_bayes_pred.png";
+			imwrite(new_name,response);
 		}
 	}
 	else if(bool_bcCreate){
