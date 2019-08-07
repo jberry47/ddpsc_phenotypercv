@@ -7,6 +7,8 @@
 #include <math.h>
 #include <Eigen/Dense>
 
+#include <miscellaneous.h>
+
 using namespace cv;
 using namespace std;
 using namespace Eigen;
@@ -179,3 +181,27 @@ Mat CLAHE_correct_gray(Mat img){
     clahe->collectGarbage();
     return(dst);
 }
+
+Mat nonUniformCorrect(Mat img, int kernel_size){
+	Mat hsv;
+	cvtColor(img, hsv, cv::COLOR_BGR2HSV);
+
+	Mat kernel = Mat::ones( kernel_size, kernel_size, CV_32F );
+	vector<Mat> split_hsv;
+
+	split(hsv, split_hsv);
+	Mat open, blur;
+	Scalar avg;
+
+	morphologyEx(split_hsv[2],open,MORPH_OPEN,kernel);
+	GaussianBlur(open, blur, Size(kernel_size,kernel_size),0);
+	avg = mean(blur);
+	split_hsv[2] = split_hsv[2] - blur + avg;
+
+	Mat corrected;
+	merge(split_hsv,corrected);
+	cvtColor(corrected, corrected, COLOR_HSV2BGR);
+
+	return(corrected);
+}
+

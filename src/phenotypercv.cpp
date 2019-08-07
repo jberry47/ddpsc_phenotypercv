@@ -100,6 +100,11 @@ int main(int argc, char *argv[]){
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
+		Mat corrected = nonUniformCorrect(inputImage,25);
+		showImage(inputImage,"original");
+		showImage(corrected, "corrected");
+		/* for taylor
+		Mat inputImage = imread(parser.get<string>("i"));
 	    Mat lab;
    		cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
    		vector<Mat> split_lab;
@@ -138,6 +143,7 @@ int main(int argc, char *argv[]){
 		Mat m_dilate;
 		dilate(m_erode0, m_dilate, Mat(), Point(-1, -1), 4, 1, 1);
 		selectionGUI(inputImage,parser.get<string>("i"),m_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+		*/
 
 		/*
 		Mat inputImage = imread(parser.get<string>("i"));
