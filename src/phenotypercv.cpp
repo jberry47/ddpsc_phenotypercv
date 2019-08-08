@@ -100,9 +100,8 @@ int main(int argc, char *argv[]){
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
-		Mat corrected = nonUniformCorrect(inputImage,25);
-		showImage(inputImage,"original");
-		showImage(corrected, "corrected");
+		Mat corrected = nonUniformCorrect(inputImage,15);
+		imwrite("nu_corrected.png",corrected);
 		/* for taylor
 		Mat inputImage = imread(parser.get<string>("i"));
 	    Mat lab;
@@ -167,10 +166,10 @@ int main(int argc, char *argv[]){
 	}
 	else if(bool_ws){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("prob"))){
-			cout << "Using mode WS requires input: -i=inputImage -class=input_bayes_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1)" << endl;
+			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
-			Mat response = predictBC(inputImage,parser.get<string>("class"));
+			Mat response = predictSVM(inputImage,parser.get<string>("class"));
 
 			Mat filt;
 			bilateralFilter(response,filt,30,50,50);
@@ -207,6 +206,7 @@ int main(int argc, char *argv[]){
 			cout << "Using mode BC_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
+			//Mat corrected = nonUniformCorrect(inputImage,5);
 			Mat response = predictBC(inputImage,parser.get<string>("s"));
 
 			vector<string> sub_str;

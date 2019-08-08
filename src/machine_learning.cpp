@@ -17,6 +17,18 @@ using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
 
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
+
+void printProgress (double percentage)
+{
+    int val = (int) (percentage * 100);
+    int lpad = (int) (percentage * PBWIDTH);
+    int rpad = PBWIDTH - lpad;
+    printf ("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+    fflush (stdout);
+}
+
 void trainSVM(Mat img, Mat mask, string fname){
 	Mat imageR, maskR;
 	resize(img.clone(), imageR, Size(512,512), 0, 0, INTER_LINEAR);
@@ -72,15 +84,21 @@ Mat predictSVM(Mat img,string fname){
 	split(labMat, lab);
 
 	cout << "Predicting..." << endl;
+	double n_pixels = imageR.rows * imageR.cols;
+	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
 	for(unsigned int i=0; i<imageR.rows; i++){
 		for(unsigned int j=0; j<imageR.cols; j++){
+			pixel_counter=pixel_counter+1;
+			double perc = pixel_counter/n_pixels;
+			printProgress(perc);
 			float arr[3] = {lab[0].at<uchar>(i,j),lab[1].at<uchar>(i,j),lab[2].at<uchar>(i,j)};
 			Mat arrM(1,3,CV_32F,arr);
 		    float back = svm->predict(arrM);
 		    response.at<uchar>(i,j) = back*255;
 		}
 	}
+	cout << endl;
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
 	return(output);
@@ -139,15 +157,21 @@ Mat predictBC(Mat img,string fname){
 	split(labMat, lab);
 
 	cout << "Predicting..." << endl;
+	double n_pixels = imageR.rows * imageR.cols;
+	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
 	for(unsigned int i=0; i<imageR.rows; i++){
 		for(unsigned int j=0; j<imageR.cols; j++){
+			pixel_counter=pixel_counter+1;
+			double perc = pixel_counter/n_pixels;
+			printProgress(perc);
 			float arr[3] = {lab[0].at<uchar>(i,j),lab[1].at<uchar>(i,j),lab[2].at<uchar>(i,j)};
 			Mat arrM(1,3,CV_32F,arr);
 		    float back = classifier->predict(arrM);
 		    response.at<uchar>(i,j) = back;
 		}
 	}
+	cout << endl;
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
 	return(output);
