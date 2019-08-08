@@ -65,6 +65,7 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
+		"{method   |       | bayes or svm for mode=WS }"
 		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
@@ -165,11 +166,19 @@ int main(int argc, char *argv[]){
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
 	}
 	else if(bool_ws){
-		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("prob"))){
-			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1)" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("prob") && parser.has("method"))){
+			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1) -method=[bayes,svm]" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
-			Mat response = predictSVM(inputImage,parser.get<string>("class"));
+			Mat response;
+			if(parser.get<string>("method") == "bayes"){
+				response = predictBC(inputImage,parser.get<string>("class"));
+			}else if(parser.get<string>("method") == "svm"){
+				response = predictSVM(inputImage,parser.get<string>("class"));
+			}else{
+				cout << "Unknown method: expecting either bayes or svm" << endl;
+				return(1);
+			}
 
 			Mat filt;
 			bilateralFilter(response.clone(),filt,30,50,50);
