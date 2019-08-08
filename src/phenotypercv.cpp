@@ -172,7 +172,7 @@ int main(int argc, char *argv[]){
 			Mat response = predictSVM(inputImage,parser.get<string>("class"));
 
 			Mat filt;
-			bilateralFilter(response,filt,30,50,50);
+			bilateralFilter(response.clone(),filt,30,50,50);
 
 			Mat r_thresh;
 			int val = parser.get<float>("prob")*255;
@@ -186,8 +186,8 @@ int main(int argc, char *argv[]){
 			const string full_str = string(parser.get<string>("i"));
 			char del = '.';
 			split(full_str,del,sub_str);
-			string new_name = sub_str[0]+"_bayes_pred.png";
-			imwrite(new_name,response);
+			string new_name = sub_str[0]+"_svm_pred.png";
+			imwrite(new_name,255-filt);
 		}
 	}
 	else if(bool_bcCreate){
