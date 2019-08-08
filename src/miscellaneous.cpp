@@ -18,6 +18,13 @@ Mat src;
 Mat selMat;
 int counter=1;
 
+void showImage(Mat img, string title){
+	namedWindow(title,WINDOW_NORMAL);
+	        	    resizeWindow(title,800,800);
+	        	    imshow(title, img);
+	waitKey(0);
+}
+
 void onMouse( int event, int x, int y, int f, void* ){
     switch(event){
         case  cv::EVENT_LBUTTONDOWN  :
@@ -64,6 +71,19 @@ void kMouse( int event, int x, int y, int f, void* ){
     }
 }
 
+void pMouse( int event, int x, int y, int f, void* ){
+	Scalar color;
+	switch(event){
+        case  cv::EVENT_LBUTTONDOWN  :
+        	color = Scalar( 255, 255, 255 );
+            rectangle(selMat,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),255,cv::FILLED);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),color,cv::FILLED);
+            imshow("Select spots",src);
+            waitKey(1);
+            break;
+    }
+}
+
 void split(const string& s, char c, vector<string>& v) {
    string::size_type i = 0;
    string::size_type j = s.find(c);
@@ -76,6 +96,57 @@ void split(const string& s, char c, vector<string>& v) {
       if (j == string::npos)
          v.push_back(s.substr(i, s.length()));
    }
+}
+
+void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
+	src = orig.clone();
+	roi_size = size;
+	selMat = Mat::zeros(src.size(),CV_8UC1);
+
+	namedWindow("Select spots",WINDOW_NORMAL);
+	setMouseCallback("Select spots",pMouse,NULL );
+	resizeWindow("Select spots",src.cols,src.rows);
+	imshow("Select spots",src);
+	waitKey(0);
+
+	vector<vector<Point> > sel_contours;
+	vector<Vec4i> sel_hierarchy;
+    findContours( selMat, sel_contours, sel_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+
+    double confusion[4] = {0};
+    for(unsigned int i=0; i < sel_contours.size(); i++){
+      	for(unsigned int j=0; j<sel_contours[i].size(); j++){
+      	    Mat temp = Mat::zeros(orig.size(),CV_8UC1);
+      		drawContours(temp, sel_contours, i, 255, cv::FILLED);
+      		confusion[0] = confusion[0] + sum(temp & (predicted & labeled))[0]/255;
+      		confusion[1] = confusion[1] + sum(temp & ((255-predicted) & labeled))[0]/255;
+      		confusion[2] = confusion[2] + sum(temp & (predicted & (255-labeled)))[0]/255;
+      		confusion[3] = confusion[3] + sum(temp & ((255-predicted) & (255-labeled)))[0]/255;
+      	}
+    }
+
+    double tp,fp,tn,fn;
+    tp = confusion[0];
+    fp = confusion[2];
+    fn = confusion[1];
+    tn = confusion[3];
+
+    cout << endl << "Classifier summary" << endl;
+    cout << "------------------------------------------" << endl;
+    cout << "True Positive: " << tp << endl <<
+    		"False Positive: "<< fp << endl <<
+    		"False Negative: "<< fn << endl <<
+    		"True Negative: "<< tn << endl << endl;
+
+    cout << "Precision: " << tp/(tp+fp) << endl;
+    cout << "Recall: " << tp/(tp+fn) << endl;
+    cout << "Accuracy: " << (tp+tn)/(tp+tn+fp+fn) << endl << endl;
+
+    cout << "True positive rate: " << tp/(tp+fn) << endl;
+    cout << "False postive rate: " <<  fp/(fp+tn)<< endl;
+    cout << "True negative rate: " << tn/(tn+fp) << endl;
+    cout << "False negative rate: " << fn/(fn+tp) << endl;
+    cout << "False discovery rate: " << fp/(fp+tp) << endl;
 }
 
 void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname){
@@ -262,11 +333,4 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 	split(full_str,del,sub_str);
 	string new_name = sub_str[0]+"_colorMap.png";
 	imwrite(new_name,map);
-}
-
-void showImage(Mat img, string title){
-	namedWindow(title,WINDOW_NORMAL);
-	        	    resizeWindow(title,800,800);
-	        	    imshow(title, img);
-	waitKey(0);
 }
