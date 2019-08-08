@@ -171,9 +171,12 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat response;
+			string suffix;
 			if(parser.get<string>("method") == "bayes"){
+				suffix = "_bayes_pred.png";
 				response = predictBC(inputImage,parser.get<string>("class"));
 			}else if(parser.get<string>("method") == "svm"){
+				suffix = "_svm_pred.png";
 				response = predictSVM(inputImage,parser.get<string>("class"));
 			}else{
 				cout << "Unknown method: expecting either bayes or svm" << endl;
@@ -191,12 +194,15 @@ int main(int argc, char *argv[]){
 
 			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 
+			if(parser.get<string>("method") == "svm"){
+				filt = 255-filt;
+			}
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
 			char del = '.';
 			split(full_str,del,sub_str);
-			string new_name = sub_str[0]+"_svm_pred.png";
-			imwrite(new_name,255-filt);
+			string new_name = sub_str[0]+suffix;
+			imwrite(new_name,filt);
 		}
 	}
 	else if(bool_bcCreate){
