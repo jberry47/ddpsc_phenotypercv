@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
 			Mat r_dilate;
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
 
-			selectionGUI(inputImage,parser.get<string>("i"),r_dilate,parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+			selectionGUI(inputImage,parser.get<string>("i"),r_dilate.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 
 			if(parser.get<string>("method") == "svm"){
 				filt = 255-filt;
