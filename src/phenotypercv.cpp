@@ -179,7 +179,7 @@ int main(int argc, char *argv[]){
 				response = predictBC(inputImage,parser.get<string>("class"));
 			}else if(parser.get<string>("method") == "svm"){
 				suffix = "_svm_pred.png";
-				response = predictSVM(inputImage,parser.get<string>("class"));
+				response = 255-predictSVM(inputImage,parser.get<string>("class"));
 			}else{
 				cout << "Unknown method: expecting either bayes or svm" << endl;
 				return(1);
@@ -196,9 +196,6 @@ int main(int argc, char *argv[]){
 
 			selectionGUI(inputImage,parser.get<string>("i"),r_dilate.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 
-			if(parser.get<string>("method") == "svm"){
-				filt = 255-filt;
-			}
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
 			char del = '.';
