@@ -285,7 +285,7 @@ int main(int argc, char *argv[]){
 			int val = parser.get<float>("prob")*255;
 			threshold(filt,r_thresh,val,255,THRESH_BINARY);
 			threshold(labels,l_thresh,25,255,THRESH_BINARY);
-			confusionGUI(inputImage, 255-r_thresh, l_thresh, parser.get<int>("size"));
+			confusionGUI(inputImage, r_thresh, l_thresh, parser.get<int>("size"));
 		}
 	}
 	else if(bool_charucoCreate){
