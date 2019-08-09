@@ -73,6 +73,13 @@ void trainSVM(Mat img, Mat mask, string fname){
 	svm->save(fname);
 }
 
+float calcSVM(Vec3b pixel,Ptr<SVM> svm){
+	float arr[3] = {pixel[0],pixel[1],pixel[2]};
+	Mat arrM(1,3,CV_32F,arr);
+    float back = svm->predict(arrM);
+    return(back);
+};
+
 Mat predictSVM(Mat img,string fname){
 	Mat imageR;
 	resize(img, imageR, Size(512*2,512*2), 0, 0, INTER_LINEAR);
@@ -81,9 +88,27 @@ Mat predictSVM(Mat img,string fname){
 
 	Mat labMat;
 	cvtColor(imageR, labMat, cv::COLOR_BGR2Lab);
+
+	cout << "Predicting..." << endl;
+	labMat.forEach<Vec3b>
+	(
+		[&svm](Vec3b &pixel, const int * position) -> void
+		{
+			float res = calcSVM(pixel,svm);
+			pixel[0] = res;
+			pixel[1] = res;
+			pixel[2] = res;
+		}
+	);
+
 	vector<Mat> lab;
 	split(labMat, lab);
+	Mat response = 255-lab[0];
+	Mat output;
+	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
+	return(output);
 
+	/*
 	cout << "Predicting..." << endl;
 	double n_pixels = imageR.rows * imageR.cols;
 	double pixel_counter = 0.0;
@@ -103,6 +128,7 @@ Mat predictSVM(Mat img,string fname){
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
 	return(output);
+	*/
 }
 
 void trainBC(Mat img, Mat mask, string fname){
