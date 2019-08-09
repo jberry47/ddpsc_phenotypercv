@@ -8,7 +8,6 @@
 #include <string>
 #include <math.h>
 #include <Eigen/Dense>
-#include <thread>
 
 #include <miscellaneous.h>
 
