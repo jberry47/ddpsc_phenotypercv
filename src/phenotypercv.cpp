@@ -223,7 +223,7 @@ int main(int argc, char *argv[]){
 			Mat labels = imread(parser.get<string>("b"),0);
 			//Mat mask;
 			//threshold(msk,mask,25,255,THRESH_BINARY);
-			trainBC(inputImage, labels, parser.get<string>("s"));
+			trainBC(inputImage, labels, parser.get<string>("class"));
 		}
 	}
 	else if(bool_bcPred){
@@ -232,7 +232,7 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			//Mat corrected = nonUniformCorrect(inputImage,5);
-			Mat response = predictBC(inputImage,parser.get<string>("s"));
+			Mat response = predictBC(inputImage,parser.get<string>("class"));
 
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
-			Mat response = predictBC(inputImage,parser.get<string>("s"));
+			Mat response = predictBC(inputImage,parser.get<string>("class"));
 			Mat filt;
 			bilateralFilter(response.clone(),filt,30,50,50);
 			Mat r_thresh,l_thresh;
@@ -266,7 +266,7 @@ int main(int argc, char *argv[]){
 			Mat labels = imread(parser.get<string>("b"),0);
 			//Mat mask;
 			//threshold(msk,mask,25,255,THRESH_BINARY_INV);
-			trainSVM(inputImage, labels, parser.get<string>("s"));
+			trainSVM(inputImage, labels, parser.get<string>("class"));
 		}
 	}
 	else if(bool_svmPred){
@@ -274,7 +274,7 @@ int main(int argc, char *argv[]){
 			cout << "Using mode SVM_PRED requires input: -i=inputImage -class=classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
-			Mat response = predictSVM(inputImage,parser.get<string>("s"));
+			Mat response = predictSVM(inputImage,parser.get<string>("class"));
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
 			char del = '.';
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]){
 			erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
 
 			Mat labels = imread(parser.get<string>("b"),0);
-			Mat response = predictSVM(inputImage,parser.get<string>("s"));
+			Mat response = predictSVM(inputImage,parser.get<string>("class"));
 			Mat filt;
 			bilateralFilter(response.clone(),filt,30,50,50);
 			Mat r_thresh,label_thresh;
