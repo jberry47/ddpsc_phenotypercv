@@ -102,7 +102,6 @@ Mat predictSVM(Mat img,string fname){
 
 			float res = calcSVM(pixel,svm);
 			response.at<uchar>(position[0],position[1]) = res*255;
-
 		}
 	);
 	printProgress(1);
