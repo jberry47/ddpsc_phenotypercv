@@ -90,45 +90,27 @@ Mat predictSVM(Mat img,string fname){
 	cvtColor(imageR, labMat, cv::COLOR_BGR2Lab);
 
 	cout << "Predicting..." << endl;
-	labMat.forEach<Vec3b>
-	(
-		[&svm](Vec3b &pixel, const int * position) -> void
-		{
-			float res = calcSVM(pixel,svm);
-			pixel[0] = res;
-			pixel[1] = res;
-			pixel[2] = res;
-		}
-	);
-
-	vector<Mat> lab;
-	split(labMat, lab);
-	Mat response = 255-lab[0];
-	Mat output;
-	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
-	return(output);
-
-	/*
-	cout << "Predicting..." << endl;
 	double n_pixels = imageR.rows * imageR.cols;
 	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
-	for(unsigned int i=0; i<imageR.rows; i++){
-		for(unsigned int j=0; j<imageR.cols; j++){
+	labMat.forEach<Vec3b>
+	(
+		[&svm, &response, &n_pixels, &pixel_counter](Vec3b &pixel, const int * position) -> void
+		{
 			pixel_counter=pixel_counter+1;
 			double perc = pixel_counter/n_pixels;
 			printProgress(perc);
-			float arr[3] = {lab[0].at<uchar>(i,j),lab[1].at<uchar>(i,j),lab[2].at<uchar>(i,j)};
-			Mat arrM(1,3,CV_32F,arr);
-		    float back = svm->predict(arrM);
-		    response.at<uchar>(i,j) = back*255;
+
+			float res = calcSVM(pixel,svm);
+			response.at<uchar>(position[0],position[1]) = res*255;
+
 		}
-	}
-	cout << endl;
+	);
+	cout << endl << "Done" << endl;
+
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
-	return(output);
-	*/
+	return(255-output);
 }
 
 void trainBC(Mat img, Mat mask, string fname){
@@ -171,12 +153,19 @@ void trainBC(Mat img, Mat mask, string fname){
 	classifier->save(fname);
 }
 
+float calcBC(Vec3b pixel,Ptr<NormalBayesClassifier> classifier){
+	float arr[3] = {pixel[0],pixel[1],pixel[2]};
+	Mat arrM(1,3,CV_32F,arr);
+    float back = classifier->predict(arrM);
+    return(back);
+};
+
 Mat predictBC(Mat img,string fname){
 	Mat imageR;
 	resize(img.clone(), imageR, Size(512*2,512*2), 0, 0, INTER_LINEAR);
 
 	cout << "Loading..." << endl;
-	Ptr<NormalBayesClassifier> classifier = NormalBayesClassifier::load(fname);
+	Ptr<NormalBayesClassifier> bc = NormalBayesClassifier::load(fname);
 
 	Mat labMat;
 	cvtColor(imageR, labMat, cv::COLOR_BGR2Lab);
@@ -187,18 +176,20 @@ Mat predictBC(Mat img,string fname){
 	double n_pixels = imageR.rows * imageR.cols;
 	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
-	for(unsigned int i=0; i<imageR.rows; i++){
-		for(unsigned int j=0; j<imageR.cols; j++){
+
+	labMat.forEach<Vec3b>
+	(
+		[&bc, &response, &n_pixels, &pixel_counter](Vec3b &pixel, const int * position) -> void
+		{
 			pixel_counter=pixel_counter+1;
 			double perc = pixel_counter/n_pixels;
 			printProgress(perc);
-			float arr[3] = {lab[0].at<uchar>(i,j),lab[1].at<uchar>(i,j),lab[2].at<uchar>(i,j)};
-			Mat arrM(1,3,CV_32F,arr);
-		    float back = classifier->predict(arrM);
-		    response.at<uchar>(i,j) = back;
+
+			float res = calcBC(pixel,bc);
+			response.at<uchar>(position[0],position[1]) = res;
 		}
-	}
-	cout << endl;
+	);
+	cout << endl << "Done" << endl;
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
 	return(output);

@@ -26,8 +26,12 @@ using namespace Eigen;
 
 void trainSVM(Mat img, Mat mask, string fname);
 Mat predictSVM(Mat img, string fname);
+float calcSVM(Vec3b pixel,Ptr<SVM> svm);
+
 void trainBC(Mat img, Mat mask, string fname);
 Mat predictBC(Mat img, string fname);
+float calcBC(Vec3b pixel,Ptr<SVM> bc);
+
 void trainBoost(Mat img, Mat mask, string fname);
 Mat predictBoost(Mat img, string fname);
 
