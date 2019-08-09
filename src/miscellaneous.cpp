@@ -133,20 +133,22 @@ void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
 
     cout << endl << "Classifier summary" << endl;
     cout << "------------------------------------------" << endl;
-    cout << "True Positive: " << tp << endl <<
-    		"False Positive: "<< fp << endl <<
-    		"False Negative: "<< fn << endl <<
-    		"True Negative: "<< tn << endl << endl;
+    cout << "True Positives: " << tp << endl <<
+    		"False Positives: "<< fp << endl <<
+    		"False Negatives: "<< fn << endl <<
+    		"True Negatives: "<< tn << endl << endl;
 
     cout << "Precision: " << tp/(tp+fp) << endl;
     cout << "Recall: " << tp/(tp+fn) << endl;
     cout << "Accuracy: " << (tp+tn)/(tp+tn+fp+fn) << endl << endl;
 
     cout << "True positive rate: " << tp/(tp+fn) << endl;
+    cout << "False negative rate: " << fn/(fn+tp) << endl << endl;
+
+    cout << "True negative rate: " << tn/(tn+fp) << endl << endl;
     cout << "False postive rate: " <<  fp/(fp+tn)<< endl;
-    cout << "True negative rate: " << tn/(tn+fp) << endl;
-    cout << "False negative rate: " << fn/(fn+tp) << endl;
-    cout << "False discovery rate: " << fp/(fp+tp) << endl;
+
+    cout << "False discovery rate: " << fp/(fp+tp) << endl << endl;
 }
 
 void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname){
