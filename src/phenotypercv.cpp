@@ -216,8 +216,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_bcCreate){
-		if(!(parser.has("i") && parser.has("b") && parser.has("s"))){
-			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage -s=output_classifier.yaml" << endl;
+		if(!(parser.has("i") && parser.has("b") && parser.has("class"))){
+			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
@@ -227,8 +227,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_bcPred){
-		if(!(parser.has("i") && parser.has("s"))){
-			cout << "Using mode BC_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
+		if(!(parser.has("i") && parser.has("class"))){
+			cout << "Using mode BC_PRED requires input: -i=inputImage -class=classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			//Mat corrected = nonUniformCorrect(inputImage,5);
@@ -243,8 +243,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_bcStat){
-		if(!(parser.has("i") && parser.has("s") && parser.has("b") && parser.has("prob") && parser.has("size"))){
-			cout << "Using mode BC_STAT requires input: -i=inputImage -b=labeledImage -s=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("prob") && parser.has("size"))){
+			cout << "Using mode BC_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
@@ -259,8 +259,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_svmCreate){
-		if(!(parser.has("i") && parser.has("b") && parser.has("s"))){
-			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -s=output_classifier.yaml -size=box_size -prob=decimal(range 0-1)" << endl;
+		if(!(parser.has("i") && parser.has("b") && parser.has("class"))){
+			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml -size=box_size -prob=decimal(range 0-1)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
@@ -270,8 +270,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_svmPred){
-		if(!(parser.has("i") && parser.has("s"))){
-			cout << "Using mode SVM_PRED requires input: -i=inputImage -s=classifier.yaml" << endl;
+		if(!(parser.has("i") && parser.has("class"))){
+			cout << "Using mode SVM_PRED requires input: -i=inputImage -class=classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat response = predictSVM(inputImage,parser.get<string>("s"));
@@ -284,8 +284,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_svmStat){
-		if(!(parser.has("i") && parser.has("s") && parser.has("b") && parser.has("prob") && parser.has("size"))){
-			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -s=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("prob") && parser.has("size"))){
+			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat lab;
