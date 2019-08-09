@@ -145,8 +145,8 @@ void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
     cout << "True positive rate: " << tp/(tp+fn) << endl;
     cout << "False negative rate: " << fn/(fn+tp) << endl << endl;
 
-    cout << "True negative rate: " << tn/(tn+fp) << endl << endl;
-    cout << "False postive rate: " <<  fp/(fp+tn)<< endl;
+    cout << "True negative rate: " << tn/(tn+fp) << endl;
+    cout << "False postive rate: " <<  fp/(fp+tn)<< endl << endl;
 
     cout << "False discovery rate: " << fp/(fp+tp) << endl << endl;
 }
