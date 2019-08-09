@@ -106,6 +106,7 @@ Mat predictSVM(Mat img,string fname){
 
 		}
 	);
+	printProgress(1);
 	cout << endl << "Done" << endl;
 
 	Mat output;
@@ -189,6 +190,7 @@ Mat predictBC(Mat img,string fname){
 			response.at<uchar>(position[0],position[1]) = res;
 		}
 	);
+	printProgress(1);
 	cout << endl << "Done" << endl;
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
