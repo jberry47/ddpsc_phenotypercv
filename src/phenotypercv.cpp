@@ -172,6 +172,15 @@ int main(int argc, char *argv[]){
 			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -prob=decimal(range 0-1) -method=[bayes,svm]" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
+			Mat lab;
+			cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
+			vector<Mat> split_lab;
+			split(lab, split_lab);
+			Mat l_thresh;
+			threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
+			Mat l_erode;
+			erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
+
 			Mat response;
 			string suffix;
 			if(parser.get<string>("method") == "bayes"){
@@ -193,8 +202,10 @@ int main(int argc, char *argv[]){
 			threshold(filt,r_thresh,val,255,THRESH_BINARY);
 			Mat r_dilate;
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
+			Mat pred_thresh = r_dilate & l_erode;
+			showImage(pred_thresh,"pred_thresh");
 
-			selectionGUI(inputImage,parser.get<string>("i"),r_dilate.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+		    selectionGUI(inputImage,parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
@@ -277,15 +288,26 @@ int main(int argc, char *argv[]){
 			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -s=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
+			Mat lab;
+			cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
+			vector<Mat> split_lab;
+			split(lab, split_lab);
+			Mat l_thresh;
+			threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
+			Mat l_erode;
+			erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
+
 			Mat labels = imread(parser.get<string>("b"),0);
 			Mat response = predictSVM(inputImage,parser.get<string>("s"));
 			Mat filt;
 			bilateralFilter(response.clone(),filt,30,50,50);
-			Mat r_thresh,l_thresh;
+			Mat r_thresh,label_thresh;
 			int val = parser.get<float>("prob")*255;
 			threshold(filt,r_thresh,val,255,THRESH_BINARY);
-			threshold(labels,l_thresh,25,255,THRESH_BINARY);
-			confusionGUI(inputImage, r_thresh, l_thresh, parser.get<int>("size"));
+			threshold(labels,label_thresh,25,255,THRESH_BINARY);
+			Mat pred_thresh = r_thresh & l_erode;
+
+			confusionGUI(inputImage, pred_thresh, label_thresh, parser.get<int>("size"));
 		}
 	}
 	else if(bool_charucoCreate){
