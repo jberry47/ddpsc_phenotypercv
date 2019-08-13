@@ -24,9 +24,14 @@ using namespace Eigen;
 using namespace ximgproc;
 
 extern int roi_size;
-extern Mat src;
-extern Mat selMat;
+extern Mat src, src1, dst, selMat;
 extern int counter;
+
+extern int threshold_value;
+extern int threshold_type;
+extern int max_value;
+extern int max_type;
+extern int max_BINARY_value;
 
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
@@ -34,5 +39,6 @@ void kMouse( int event, int x, int y, int f, void* );
 void showImage(Mat img, string title);
 void selectionGUI(Mat orig, string orig_fname,Mat mask, int size, string shape_fname, string color_fname);
 void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size);
+void thresholdGUI( int, void* );
 
 #endif /* MISCELLANEOUS_H_ */

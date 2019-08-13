@@ -17,12 +17,25 @@ int roi_size;
 Mat src;
 Mat selMat;
 int counter=1;
+Mat src1, dst;
+
+int threshold_value = 0;
+int threshold_type = 0;
+int max_value = 255;
+int max_type = 4;
+int max_BINARY_value = 255;
 
 void showImage(Mat img, string title){
 	namedWindow(title,WINDOW_NORMAL);
 	        	    resizeWindow(title,800,800);
 	        	    imshow(title, img);
-	waitKey(0);
+	while(true){
+		int c;
+	    c = waitKey();
+	    if( (char)c == 27 ){
+	    	break;
+	    }
+	}
 }
 
 void onMouse( int event, int x, int y, int f, void* ){
@@ -98,6 +111,18 @@ void split(const string& s, char c, vector<string>& v) {
    }
 }
 
+void thresholdGUI( int, void* ){
+  /* 0: Binary
+     1: Binary Inverted
+     2: Threshold Truncated
+     3: Threshold to Zero
+     4: Threshold to Zero Inverted
+   */
+
+  threshold( src1, dst, threshold_value, max_BINARY_value,threshold_type );
+  imshow( "threshold", dst );
+}
+
 void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
 	src = orig.clone();
 	roi_size = size;
@@ -107,7 +132,13 @@ void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
 	setMouseCallback("Select spots",pMouse,NULL );
 	resizeWindow("Select spots",src.cols,src.rows);
 	imshow("Select spots",src);
-	waitKey(0);
+	while(true){
+	    int c;
+	    c = waitKey();
+	    if( (char)c == 27 ){
+	    	break;
+	    }
+	}
 
 	vector<vector<Point> > sel_contours;
 	vector<Vec4i> sel_hierarchy;
@@ -164,7 +195,13 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 	setMouseCallback("Select spots",kMouse,NULL );
 	resizeWindow("Select spots",src.cols,src.rows);
 	imshow("Select spots",src);
-	waitKey(0);
+	while(true){
+	    int c;
+	    c = waitKey();
+	    if( (char)c == 27 ){
+	    	break;
+	    }
+	}
 
 	vector<Mat> roi_bgr(3);
 	split(selMat,roi_bgr);
