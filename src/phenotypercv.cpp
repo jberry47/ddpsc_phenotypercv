@@ -251,22 +251,35 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_bcStat){
-		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("prob") && parser.has("size"))){
-			cout << "Using mode BC_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("size"))){
+			cout << "Using mode BC_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
 			Mat response = predictBC(inputImage,parser.get<string>("class"));
 			Mat r_thresh,l_thresh;
-			int val = parser.get<float>("prob")*255;
-			threshold(response,r_thresh,val,255,THRESH_BINARY);
+
+			src1 = response;
+			namedWindow("threshold", WINDOW_AUTOSIZE );
+			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
+			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );
+			thresholdGUI(0,0);
+			while(true){
+			    int c;
+			    c = waitKey();
+			    if( (char)c == 27 ){
+			    	break;
+			    }
+			}
+
+			threshold(response,r_thresh,threshold_value,255,threshold_type);
 			threshold(labels,l_thresh,25,255,THRESH_BINARY);
 			confusionGUI(inputImage, r_thresh, l_thresh, parser.get<int>("size"));
 		}
 	}
 	else if(bool_svmCreate){
 		if(!(parser.has("i") && parser.has("b") && parser.has("class"))){
-			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml -size=box_size -prob=decimal(range 0-1)" << endl;
+			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
@@ -290,8 +303,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_svmStat){
-		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("prob") && parser.has("size"))){
-			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -prob=decimal(range 0-1) -size=integer(range 0-20)" << endl;
+		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("size"))){
+			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat lab;
@@ -306,8 +319,21 @@ int main(int argc, char *argv[]){
 			Mat labels = imread(parser.get<string>("b"),0);
 			Mat response = predictSVM(inputImage,parser.get<string>("class"));
 			Mat r_thresh,label_thresh;
-			int val = parser.get<float>("prob")*255;
-			threshold(response,r_thresh,val,255,THRESH_BINARY);
+
+			src1 = response;
+			namedWindow("threshold", WINDOW_AUTOSIZE );
+			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
+			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );
+			thresholdGUI(0,0);
+			while(true){
+			    int c;
+			    c = waitKey();
+			    if( (char)c == 27 ){
+			    	break;
+			    }
+			}
+
+			threshold(response,r_thresh,threshold_value,255,threshold_type);
 			threshold(labels,label_thresh,25,255,THRESH_BINARY);
 			Mat pred_thresh = r_thresh & l_erode;
 
@@ -747,10 +773,10 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=test_imgs/plate.jpg -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
 		cout << "\t\e[1mBC_CREATE\e[0m - Creates and outputs a naive bayes classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_CREATE -i=input_image.png -b=labeled_image.png -class=bayes_classifier.yaml" << endl << endl;
 		cout << "\t\e[1mBC_PRED\e[0m - Classifies an input image by using a pre-trained bayes classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_PRED -i=input_image.png -class=bayes_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mBC_STAT\e[0m - Outputs Bayes classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_bayes_classifier_v3.yaml -size=8 -prob=0.85" << endl << endl;
+		cout << "\t\e[1mBC_STAT\e[0m - Outputs Bayes classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_bayes_classifier_v3.yaml -size=8" << endl << endl;
 		cout << "\t\e[1mSVM_CREATE\e[0m - Creates and outputs a support vector machine classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_CREATE -i=input_image.png -b=labeled_image.png -class=svm_classifier.yaml" << endl << endl;
 		cout << "\t\e[1mSVM_PRED\e[0m - Classifies an input image by using a pre-trained SVM classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_PRED -i=input_image.png -class=svm_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mSVM_STAT\e[0m - Outputs svm classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_svm_classifier_v3.yaml -size=8 -prob=0.85" << endl << endl;
+		cout << "\t\e[1mSVM_STAT\e[0m - Outputs svm classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_svm_classifier_v3.yaml -size=8" << endl << endl;
 		cout << "\t\e[1mWS\e[0m - Takes classifier and input image and outputs measurements of objects within user selected regions." << endl << "\t\t" << "Example: ./PhenotyperCV -m=WS -i=test_combine.png -class=comb_svm_classifier_v3.yaml -size=8 -s=shapes.txt -c=gray.txt -method=svm" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
