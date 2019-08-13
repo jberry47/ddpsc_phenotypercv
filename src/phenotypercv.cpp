@@ -195,6 +195,7 @@ int main(int argc, char *argv[]){
 			}
 
 			src1 = response;
+			gray = inputImage.clone();
 			namedWindow("threshold", WINDOW_AUTOSIZE );
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
 			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );

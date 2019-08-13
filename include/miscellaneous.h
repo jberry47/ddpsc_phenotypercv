@@ -24,7 +24,7 @@ using namespace Eigen;
 using namespace ximgproc;
 
 extern int roi_size;
-extern Mat src, src1, dst, selMat;
+extern Mat src, src1, dst, selMat,gray;
 extern int counter;
 
 extern int threshold_value;

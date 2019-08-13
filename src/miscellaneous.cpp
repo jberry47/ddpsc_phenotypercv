@@ -17,9 +17,9 @@ int roi_size;
 Mat src;
 Mat selMat;
 int counter=1;
-Mat src1, dst;
+Mat src1, dst, gray;
 
-int threshold_value = 0;
+int threshold_value = 255;
 int threshold_type = 0;
 int max_value = 255;
 int max_type = 4;
@@ -120,7 +120,23 @@ void thresholdGUI( int, void* ){
    */
 
   threshold( src1, dst, threshold_value, max_BINARY_value,threshold_type );
-  imshow( "threshold", dst );
+  Mat dst_inv = 255-dst;
+
+  vector<Mat> split_bgr;
+  split(gray, split_bgr);
+
+  Mat b,g,r;
+  split_bgr[0].copyTo(b,dst_inv);
+  split_bgr[1].copyTo(g,dst_inv);
+  split_bgr[2].copyTo(r,dst_inv);
+
+  split_bgr[0] = b;
+  split_bgr[1] = g;
+  split_bgr[2] = r;
+
+  Mat out;
+  merge(split_bgr,out);
+  imshow( "threshold", out );
 }
 
 void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
