@@ -194,7 +194,7 @@ int main(int argc, char *argv[]){
 				return(1);
 			}
 
-			src1 = response;
+			src1 = response.clone();
 			gray = inputImage.clone();
 			namedWindow("threshold", WINDOW_AUTOSIZE );
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]){
 			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
 			Mat pred_thresh = r_dilate & l_erode;
 
-			selectionGUI(inputImage,parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+			selectionGUI(inputImage.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
