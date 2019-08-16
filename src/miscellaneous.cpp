@@ -299,6 +299,8 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 			}
 		}
 
+		//z = z & mask;
+
 	    Moments m = moments(z,true);
 	    Point p(m.m10/m.m00, m.m01/m.m00);
         putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
@@ -347,6 +349,8 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 				}
 			}
 		}
+
+		//z = z & mask;
 
 	    Moments m = moments(z,true);
 	    Point p(m.m10/m.m00, m.m01/m.m00);
