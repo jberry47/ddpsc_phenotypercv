@@ -198,7 +198,7 @@ void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
     cout << "False discovery rate: " << fp/(fp+tp) << endl << endl;
 }
 
-void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname){
+void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname, int threshold_value){
 	src = orig.clone();
 	roi_size = size;
 	selMat = Mat::zeros(src.size(),src.type());
@@ -264,7 +264,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_shape= shape_fname;
 		ofstream shape_file;
 		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "blue" << " " << b << " ";
+		shape_file << orig_fname << " " << "blue" << " " << b << " " << threshold_value << " ";
 		for(int i=0;i<20;i++){
 			shape_file << shapes_data[i];
 				if(i != 19){
@@ -278,7 +278,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_gray= color_fname;
 		ofstream gray_file;
 		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "blue" << " " << b << " ";
+		gray_file << orig_fname << " " << "blue" << " " << b << " " << threshold_value << " ";
 		for(int i=0;i<255;i++){
 			gray_file << gray_data.at<float>(i,0) << " ";
 		}
@@ -315,7 +315,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_shape= shape_fname;
 		ofstream shape_file;
 		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "green" << " " << g << " ";
+		shape_file << orig_fname << " " << "green" << " " << g << " " << threshold_value << " ";
 		for(int i=0;i<20;i++){
 			shape_file << shapes_data[i];
 			if(i != 19){
@@ -329,7 +329,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_gray= color_fname;
 		ofstream gray_file;
 		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "green" << " " << g << " ";
+		gray_file << orig_fname << " " << "green" << " " << g << " " << threshold_value << " ";
 		for(int i=0;i<255;i++){
 			gray_file << gray_data.at<float>(i,0) << " ";
 		}
@@ -366,7 +366,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_shape= shape_fname;
 		ofstream shape_file;
 		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "red" << " " << r << " ";
+		shape_file << orig_fname << " " << "red" << " " << r << " " << threshold_value << " ";
 		for(int i=0;i<20;i++){
 			shape_file << shapes_data[i];
 			if(i != 19){
@@ -380,7 +380,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		string name_gray= color_fname;
 		ofstream gray_file;
 		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "red" << " " << r << " ";
+		gray_file << orig_fname << " " << "red" << " " << r << " " << threshold_value << " ";
 		for(int i=0;i<255;i++){
 			gray_file << gray_data.at<float>(i,0) << " ";
 		}

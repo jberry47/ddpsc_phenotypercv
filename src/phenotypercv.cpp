@@ -212,7 +212,7 @@ int main(int argc, char *argv[]){
 			threshold(response,r_thresh,threshold_value,255,threshold_type);
 			Mat pred_thresh = r_thresh & l_erode;
 
-			selectionGUI(inputImage.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
+			selectionGUI(inputImage.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"),threshold_value);
 
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
