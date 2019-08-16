@@ -210,9 +210,7 @@ int main(int argc, char *argv[]){
 
 			Mat r_thresh;
 			threshold(response,r_thresh,threshold_value,255,threshold_type);
-			Mat r_dilate;
-			dilate(r_thresh,r_dilate, Mat(), Point(-1, -1), 1, 1, 1);
-			Mat pred_thresh = r_dilate & l_erode;
+			Mat pred_thresh = r_thresh & l_erode;
 
 			selectionGUI(inputImage.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"));
 

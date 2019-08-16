@@ -241,12 +241,14 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 				for(unsigned int j=0; j<pred_contours[i].size(); j++){
 	      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
 	      		if(test==1 || test == 0){
-	      			drawContours(map, pred_contours, i, Scalar(255,0,0), cv::FILLED);
+	      			drawContours(map, pred_contours, i, Scalar(255,0,0),cv::FILLED);
 	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
 	      			break;
 	      		}
 				}
 			}
+
+		//z = z & mask;
 
 	    Moments m = moments(z,true);
 	    Point p(m.m10/m.m00, m.m01/m.m00);
