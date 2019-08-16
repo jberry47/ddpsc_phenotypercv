@@ -260,7 +260,7 @@ int main(int argc, char *argv[]){
 			Mat r_thresh,l_thresh;
 
 			src1 = response;
-			namedWindow("threshold", WINDOW_AUTOSIZE );
+			namedWindow("threshold", WINDOW_NORMAL );
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
 			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );
 			thresholdGUI(0,0);
@@ -321,7 +321,7 @@ int main(int argc, char *argv[]){
 			Mat r_thresh,label_thresh;
 
 			src1 = response;
-			namedWindow("threshold", WINDOW_AUTOSIZE );
+			namedWindow("threshold", WINDOW_NORMAL );
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
 			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );
 			thresholdGUI(0,0);
