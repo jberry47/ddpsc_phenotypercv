@@ -234,27 +234,27 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 	vector<Mat> split_lab;
 	split(lab, split_lab);
 
-		Mat map=orig.clone();
-		for(unsigned int b=0; b<b_contours.size(); b++){
-	    Mat z = Mat::zeros(src.size(),CV_8UC1);
-			for(unsigned int i=0; i < pred_contours.size(); i++){
-				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-	      		int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
-	      		if(test==1 || test == 0){
-	      			drawContours(map, pred_contours, i, Scalar(255,0,0),cv::FILLED);
-	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-	      			break;
-	      		}
+	Mat map=orig.clone();
+	for(unsigned int b=0; b<b_contours.size(); b++){
+		Mat z = Mat::zeros(src.size(),CV_8UC1);
+		for(unsigned int i=0; i < pred_contours.size(); i++){
+			for(unsigned int j=0; j<pred_contours[i].size(); j++){
+				int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
+				if(test==1 || test == 0){
+					drawContours(map, pred_contours, i, Scalar(255,0,0),cv::FILLED);
+					drawContours(z, pred_contours, i, 255, cv::FILLED);
+					break;
 				}
 			}
+		}
 
 		//z = z & mask;
 
-	    Moments m = moments(z,true);
-	    Point p(m.m10/m.m00, m.m01/m.m00);
-        putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+		Moments m = moments(z,true);
+		Point p(m.m10/m.m00, m.m01/m.m00);
+		putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
 
-	    Mat tmask = z;
+		Mat tmask = z;
 		Mat mask;
 		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
 		vector<double> shapes_data = get_shapes(cc,mask);
@@ -267,9 +267,9 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		shape_file << orig_fname << " " << "blue" << " " << b << " ";
 		for(int i=0;i<20;i++){
 			shape_file << shapes_data[i];
-			if(i != 19){
-				shape_file << " ";
-			}
+				if(i != 19){
+					shape_file << " ";
+				}
 		}
 		shape_file << endl;
 		shape_file.close();
@@ -284,20 +284,20 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		}
 		gray_file << endl;
 		gray_file.close();
-		}
+	}
 
-		for(unsigned int g=0; g<g_contours.size(); g++){
+	for(unsigned int g=0; g<g_contours.size(); g++){
 	    Mat z = Mat::zeros(src.size(),CV_8UC1);
-			for(unsigned int i=0; i < pred_contours.size(); i++){
-				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-	      		int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
-	      		if(test==1 || test == 0){
-	      			drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
-	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-	      			break;
-	      		}
+		for(unsigned int i=0; i < pred_contours.size(); i++){
+			for(unsigned int j=0; j<pred_contours[i].size(); j++){
+				int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
+				if(test==1 || test == 0){
+					drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
+					drawContours(z, pred_contours, i, 255, cv::FILLED);
+					break;
 				}
 			}
+		}
 
 	    Moments m = moments(z,true);
 	    Point p(m.m10/m.m00, m.m01/m.m00);
@@ -333,20 +333,20 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		}
 		gray_file << endl;
 		gray_file.close();
-		}
+	}
 
-		for(unsigned int r=0; r<r_contours.size(); r++){
+	for(unsigned int r=0; r<r_contours.size(); r++){
 	    Mat z = Mat::zeros(src.size(),CV_8UC1);
-			for(unsigned int i=0; i < pred_contours.size(); i++){
-				for(unsigned int j=0; j<pred_contours[i].size(); j++){
-	      		int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
-	      		if(test==1 || test == 0){
-	      			drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
-	    		    drawContours(z, pred_contours, i, 255, cv::FILLED);
-	      			break;
-	      		}
+		for(unsigned int i=0; i < pred_contours.size(); i++){
+			for(unsigned int j=0; j<pred_contours[i].size(); j++){
+				int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
+				if(test==1 || test == 0){
+					drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
+					drawContours(z, pred_contours, i, 255, cv::FILLED);
+					break;
 				}
 			}
+		}
 
 	    Moments m = moments(z,true);
 	    Point p(m.m10/m.m00, m.m01/m.m00);
@@ -382,7 +382,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 		}
 		gray_file << endl;
 		gray_file.close();
-		}
+	}
 
 	vector<string> sub_str;
 	const string full_str = orig_fname;
