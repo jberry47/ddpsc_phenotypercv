@@ -198,6 +198,70 @@ void confusionGUI(Mat orig, Mat predicted, Mat labeled, int size){
     cout << "False discovery rate: " << fp/(fp+tp) << endl << endl;
 }
 
+void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vector<Point> > pred_contours, string color, Mat &map, int threshold_value,string shape_fname, string color_fname, string orig_fname,vector<Mat> split_lab){
+	Scalar col;
+	if(color == "red"){
+		col = Scalar(0,0,255);
+	}else if(color == "green"){
+		col = Scalar(0,255,0);
+	}else if(color == "blue"){
+		col = Scalar(255,0,0);
+	}else{
+		col = Scalar(255,255,255);
+	}
+
+	for(unsigned int b=0; b<sel_contours.size(); b++){
+		Mat z = Mat::zeros(src.size(),CV_8UC1);
+		for(unsigned int i=0; i < pred_contours.size(); i++){
+			for(unsigned int j=0; j<pred_contours[i].size(); j++){
+				int test = pointPolygonTest(sel_contours[b],Point2f(pred_contours[i][j]),false);
+				if(test==1 || test == 0){
+					drawContours(map, pred_contours, i, col,cv::FILLED);
+					drawContours(z, pred_contours, i, 255, cv::FILLED);
+					break;
+				}
+			}
+		}
+
+		//z = z & mask;
+
+		Moments m = moments(z,true);
+		Point p(m.m10/m.m00, m.m01/m.m00);
+		putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
+
+		Mat tmask = z;
+		Mat mask;
+		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
+		vector<double> shapes_data = get_shapes(cc,mask);
+		Mat gray_data = get_nir(split_lab[0], mask);
+
+		//-- Write shapes to file
+		string name_shape= shape_fname;
+		ofstream shape_file;
+		shape_file.open(name_shape.c_str(),ios_base::app);
+		shape_file << orig_fname << " " << color << " " << b << " " << threshold_value << " ";
+		for(unsigned int i=0;i<shapes_data.size();i++){
+			shape_file << shapes_data[i];
+				if(i != 19){
+					shape_file << " ";
+				}
+		}
+		shape_file << endl;
+		shape_file.close();
+
+		//-- Write color to file
+		string name_gray= color_fname;
+		ofstream gray_file;
+		gray_file.open(name_gray.c_str(),ios_base::app);
+		gray_file << orig_fname << " " << color << " " << b << " " << threshold_value << " ";
+		for(int i=0;i<gray_data.rows;i++){
+			gray_file << gray_data.at<float>(i,0) << " ";
+		}
+		gray_file << endl;
+		gray_file.close();
+	}
+}
+
 void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_fname, string color_fname, int threshold_value){
 	src = orig.clone();
 	roi_size = size;
@@ -235,158 +299,9 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
 	split(lab, split_lab);
 
 	Mat map=orig.clone();
-	for(unsigned int b=0; b<b_contours.size(); b++){
-		Mat z = Mat::zeros(src.size(),CV_8UC1);
-		for(unsigned int i=0; i < pred_contours.size(); i++){
-			for(unsigned int j=0; j<pred_contours[i].size(); j++){
-				int test = pointPolygonTest(b_contours[b],Point2f(pred_contours[i][j]),false);
-				if(test==1 || test == 0){
-					drawContours(map, pred_contours, i, Scalar(255,0,0),cv::FILLED);
-					drawContours(z, pred_contours, i, 255, cv::FILLED);
-					break;
-				}
-			}
-		}
-
-		//z = z & mask;
-
-		Moments m = moments(z,true);
-		Point p(m.m10/m.m00, m.m01/m.m00);
-		putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-		Mat tmask = z;
-		Mat mask;
-		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		vector<double> shapes_data = get_shapes(cc,mask);
-		Mat gray_data = get_nir(split_lab[0], mask);
-
-		//-- Write shapes to file
-		string name_shape= shape_fname;
-		ofstream shape_file;
-		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "blue" << " " << b << " " << threshold_value << " ";
-		for(int i=0;i<20;i++){
-			shape_file << shapes_data[i];
-				if(i != 19){
-					shape_file << " ";
-				}
-		}
-		shape_file << endl;
-		shape_file.close();
-
-		//-- Write color to file
-		string name_gray= color_fname;
-		ofstream gray_file;
-		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "blue" << " " << b << " " << threshold_value << " ";
-		for(int i=0;i<255;i++){
-			gray_file << gray_data.at<float>(i,0) << " ";
-		}
-		gray_file << endl;
-		gray_file.close();
-	}
-
-	for(unsigned int g=0; g<g_contours.size(); g++){
-	    Mat z = Mat::zeros(src.size(),CV_8UC1);
-		for(unsigned int i=0; i < pred_contours.size(); i++){
-			for(unsigned int j=0; j<pred_contours[i].size(); j++){
-				int test = pointPolygonTest(g_contours[g],Point2f(pred_contours[i][j]),false);
-				if(test==1 || test == 0){
-					drawContours(map, pred_contours, i, Scalar(0,255,0), cv::FILLED);
-					drawContours(z, pred_contours, i, 255, cv::FILLED);
-					break;
-				}
-			}
-		}
-
-		//z = z & mask;
-
-	    Moments m = moments(z,true);
-	    Point p(m.m10/m.m00, m.m01/m.m00);
-        putText(map,to_string(g),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-	    Mat tmask = z;
-		Mat mask;
-		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		vector<double> shapes_data = get_shapes(cc,mask);
-		Mat gray_data = get_nir(split_lab[0], mask);
-
-		//-- Write shapes to file
-		string name_shape= shape_fname;
-		ofstream shape_file;
-		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "green" << " " << g << " " << threshold_value << " ";
-		for(int i=0;i<20;i++){
-			shape_file << shapes_data[i];
-			if(i != 19){
-				shape_file << " ";
-			}
-		}
-		shape_file << endl;
-		shape_file.close();
-
-		//-- Write color to file
-		string name_gray= color_fname;
-		ofstream gray_file;
-		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "green" << " " << g << " " << threshold_value << " ";
-		for(int i=0;i<255;i++){
-			gray_file << gray_data.at<float>(i,0) << " ";
-		}
-		gray_file << endl;
-		gray_file.close();
-	}
-
-	for(unsigned int r=0; r<r_contours.size(); r++){
-	    Mat z = Mat::zeros(src.size(),CV_8UC1);
-		for(unsigned int i=0; i < pred_contours.size(); i++){
-			for(unsigned int j=0; j<pred_contours[i].size(); j++){
-				int test = pointPolygonTest(r_contours[r],Point2f(pred_contours[i][j]),false);
-				if(test==1 || test == 0){
-					drawContours(map, pred_contours, i, Scalar(0,0,255), cv::FILLED);
-					drawContours(z, pred_contours, i, 255, cv::FILLED);
-					break;
-				}
-			}
-		}
-
-		//z = z & mask;
-
-	    Moments m = moments(z,true);
-	    Point p(m.m10/m.m00, m.m01/m.m00);
-        putText(map,to_string(r),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
-
-	    Mat tmask = z;
-		Mat mask;
-		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		vector<double> shapes_data = get_shapes(cc,mask);
-		Mat gray_data = get_nir(split_lab[0], mask);
-
-		//-- Write shapes to file
-		string name_shape= shape_fname;
-		ofstream shape_file;
-		shape_file.open(name_shape.c_str(),ios_base::app);
-		shape_file << orig_fname << " " << "red" << " " << r << " " << threshold_value << " ";
-		for(int i=0;i<20;i++){
-			shape_file << shapes_data[i];
-			if(i != 19){
-				shape_file << " ";
-			}
-		}
-		shape_file << endl;
-		shape_file.close();
-
-		//-- Write color to file
-		string name_gray= color_fname;
-		ofstream gray_file;
-		gray_file.open(name_gray.c_str(),ios_base::app);
-		gray_file << orig_fname << " " << "red" << " " << r << " " << threshold_value << " ";
-		for(int i=0;i<255;i++){
-			gray_file << gray_data.at<float>(i,0) << " ";
-		}
-		gray_file << endl;
-		gray_file.close();
-	}
+	find_and_measure_selection(b_contours,pred_contours,"blue",map,threshold_value,shape_fname,color_fname,orig_fname,split_lab);
+	find_and_measure_selection(g_contours,pred_contours,"green",map,threshold_value,shape_fname,color_fname,orig_fname,split_lab);
+	find_and_measure_selection(r_contours,pred_contours,"red",map,threshold_value,shape_fname,color_fname,orig_fname,split_lab);
 
 	vector<string> sub_str;
 	const string full_str = orig_fname;
