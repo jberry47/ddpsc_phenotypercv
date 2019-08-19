@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 
 #include <feature_extraction.h>
+#include <color_calibration.h>
 
 using namespace cv;
 using namespace std;
@@ -96,6 +97,33 @@ void pMouse( int event, int x, int y, int f, void* ){
             break;
     }
 }
+
+vector<float> grays;
+void grayMouse( int event, int x, int y, int f, void* ){
+    switch(event){
+        case  cv::EVENT_LBUTTONDOWN  :
+    		vector<Mat> bgr;
+    		split(src, bgr);
+    		Mat b = bgr[0];
+    		Mat g = bgr[1];
+    		Mat r = bgr[2];
+
+        	Mat temp = Mat::zeros(src.size(),CV_8UC1);
+            rectangle(src,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),Scalar( 255, 255, 255 ),cv::FILLED);
+        	rectangle(temp,Point(x-roi_size,y-roi_size),Point(x+roi_size,y+roi_size),255,cv::FILLED);
+            imshow("Select Chips",src);
+
+        	Mat cc;
+	   		threshold(temp,cc,90,255,THRESH_BINARY);
+	   		float b_avg = extractRGB_chips(b, cc);
+	   		float g_avg = extractRGB_chips(g, cc);
+	   		float r_avg = extractRGB_chips(r, cc);
+	   		float mm = (b_avg+g_avg+r_avg)/3;
+	   		grays.push_back(mm);
+	   		break;
+    }
+}
+
 
 void split(const string& s, char c, vector<string>& v) {
    string::size_type i = 0;

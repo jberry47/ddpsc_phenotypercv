@@ -103,8 +103,17 @@ int main(int argc, char *argv[]){
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
-		Mat corrected = nonUniformCorrect(inputImage,15);
-		imwrite("nu_corrected.png",corrected);
+
+		roi_size = parser.get<int>("s");
+		src = inputImage.clone();
+
+		Mat corrected = grayCorrect(inputImage);
+   		imwrite("gray_corrected.png",corrected);
+
+		//Mat inputImage = imread(parser.get<string>("i"));
+		//Mat corrected = nonUniformCorrect(inputImage,15);
+		//imwrite("nu_corrected.png",corrected);
+
 		/* for taylor
 		Mat inputImage = imread(parser.get<string>("i"));
 	    Mat lab;
@@ -172,8 +181,13 @@ int main(int argc, char *argv[]){
 			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -method=[bayes,svm]" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
+
+			roi_size = parser.get<int>("size");
+			src = inputImage.clone();
+
+			Mat corrected = grayCorrect(inputImage);
 			Mat lab;
-			cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
+			cvtColor(corrected, lab, cv::COLOR_BGR2Lab);
 			vector<Mat> split_lab;
 			split(lab, split_lab);
 			Mat l_thresh;
@@ -185,17 +199,17 @@ int main(int argc, char *argv[]){
 			string suffix;
 			if(parser.get<string>("method") == "bayes"){
 				suffix = "_bayes_pred.png";
-				response = predictBC(inputImage,parser.get<string>("class"));
+				response = predictBC(corrected,parser.get<string>("class"));
 			}else if(parser.get<string>("method") == "svm"){
 				suffix = "_svm_pred.png";
-				response = predictSVM(inputImage,parser.get<string>("class"));
+				response = predictSVM(corrected,parser.get<string>("class"));
 			}else{
 				cout << "Unknown method: expecting either bayes or svm" << endl;
 				return(1);
 			}
 
 			src1 = response.clone();
-			gray = inputImage.clone();
+			gray = corrected.clone();
 			namedWindow("threshold", WINDOW_NORMAL );
 			resizeWindow("threshold",src1.cols,src1.rows);
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
@@ -205,6 +219,7 @@ int main(int argc, char *argv[]){
 			    int c;
 			    c = waitKey();
 			    if( (char)c == 27 ){
+			    	destroyWindow("threshold");
 			    	break;
 			    }
 			}
@@ -213,7 +228,7 @@ int main(int argc, char *argv[]){
 			threshold(response,r_thresh,threshold_value,255,threshold_type);
 			Mat pred_thresh = r_thresh & l_erode;
 
-			selectionGUI(inputImage.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"),threshold_value);
+			selectionGUI(corrected.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"),threshold_value);
 
 			vector<string> sub_str;
 			const string full_str = string(parser.get<string>("i"));
@@ -221,6 +236,8 @@ int main(int argc, char *argv[]){
 			split(full_str,del,sub_str);
 			string new_name = sub_str[0]+suffix;
 			imwrite(new_name,response);
+			new_name = sub_str[0]+"_grayCorrect.png";
+			imwrite(new_name,corrected);
 		}
 	}
 	else if(bool_bcCreate){

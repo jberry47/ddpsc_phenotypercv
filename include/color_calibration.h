@@ -30,6 +30,7 @@ Mat color_homography(Mat img, MatrixXd r_coef,MatrixXd g_coef,MatrixXd b_coef);
 Mat CLAHE_correct_rgb(Mat img);
 Mat CLAHE_correct_gray(Mat img);
 Mat nonUniformCorrect(Mat img, int kernel_siz);
+Mat grayCorrect(Mat img);
 
 
 #endif /* COLOR_CALIBRATION_H_ */

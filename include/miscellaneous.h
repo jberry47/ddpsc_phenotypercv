@@ -26,6 +26,7 @@ using namespace ximgproc;
 extern int roi_size;
 extern Mat src, src1, dst, selMat,gray;
 extern int counter;
+extern vector<float> grays;
 
 extern int threshold_value;
 extern int threshold_type;
@@ -36,6 +37,7 @@ extern int max_BINARY_value;
 void split(const string& s, char c, vector<string>& v);
 void onMouse( int event, int x, int y, int f, void* );
 void kMouse( int event, int x, int y, int f, void* );
+void grayMouse( int event, int x, int y, int f, void* );
 void showImage(Mat img, string title);
 void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vector<Point> > pred_contours, string color, Mat &map, int threshold_value,string shape_fname, string color_fname, string orig_fname,vector<Mat> split_lab);
 void selectionGUI(Mat orig, string orig_fname,Mat mask, int size, string shape_fname, string color_fname, int threshold_value);

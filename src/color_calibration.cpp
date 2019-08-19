@@ -205,3 +205,41 @@ Mat nonUniformCorrect(Mat img, int kernel_size){
 	return(corrected);
 }
 
+Mat grayCorrect(Mat img){
+	namedWindow("Select Chips",WINDOW_NORMAL);
+	setMouseCallback("Select Chips",grayMouse,NULL );
+	resizeWindow("Select Chips",img.cols,img.rows);
+	imshow("Select Chips",src);
+	while(true){
+		int c;
+	    c = waitKey();
+	    if( (char)c == 27 ){
+	    	destroyWindow("Select Chips");
+	    	break;
+	    }
+	}
+
+	int which_max=0;
+	for(unsigned int i=0; i<grays.size(); i++){
+		if(i < grays.size()-1){
+			if(grays[i+1]-grays[i] <30){
+				which_max = i;
+				break;
+			}
+		}
+	}
+
+	int ref[6]={52,85,122,160,200,243};
+	float slope = (ref[which_max]-ref[0])/(grays[which_max]-grays[0]);
+	Mat temp;
+	cvtColor(img,temp,COLOR_BGR2HSV);
+    vector<Mat> split_hsv;
+    split(temp, split_hsv);
+    Mat v=split_hsv[2]*slope;
+    split_hsv[2] = v;
+    Mat hsv;
+    merge(split_hsv,hsv);
+    Mat corrected;
+	cvtColor(hsv,corrected,COLOR_HSV2BGR);
+	return(corrected);
+}
