@@ -222,14 +222,14 @@ Mat grayCorrect(Mat img){
 	int which_max=0;
 	for(unsigned int i=0; i<grays.size(); i++){
 		if(i < grays.size()-1){
-			if(grays[i+1]-grays[i] <30){
+			if(grays[i+1]-grays[i] <20){
 				which_max = i;
 				break;
 			}
 		}
 	}
 
-	int ref[6]={52,85,122,160,200,243};
+	int ref[6]={30,67,117,178,228,234};
 	float slope = (ref[which_max]-ref[0])/(grays[which_max]-grays[0]);
 	Mat temp;
 	cvtColor(img,temp,COLOR_BGR2HSV);
