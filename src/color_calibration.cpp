@@ -230,7 +230,8 @@ Mat grayCorrect(Mat img){
 	}
 
 	int ref[6]={30,67,117,178,228,234};
-	float slope = (ref[which_max]-ref[0])/(grays[which_max]-grays[0]);
+	//float slope = (ref[which_max]-ref[0])/(grays[which_max]-grays[0]);
+	float slope = ref[which_max]/grays[which_max];
 	Mat temp;
 	cvtColor(img,temp,COLOR_BGR2HSV);
     vector<Mat> split_hsv;
