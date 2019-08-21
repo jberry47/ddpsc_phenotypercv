@@ -75,7 +75,7 @@ Each line in the file has meta data: image name, grayscale histogram from 0-255
 6. Check the classifier prediction using either BC_PRED or SVM_PRED
 7. If prediction is satisfactory, process images using WS specifying classifier type
 
-<img src="www/machine_learning_graphic.png" width="99%"></img>
+<img src="www/machine_learning_graphic.png" width="816" height="260"></img>
 
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
