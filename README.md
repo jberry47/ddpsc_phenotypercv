@@ -77,6 +77,13 @@ Each line in the file has meta data: image name, grayscale histogram from 0-255
 
 <img src="www/machine_learning_graphic.png" width="816" height="260"></img>
 
+The processing step consists of four phases:
+1. Click only the gray scale color chips from black to white
+2. Feature prediction of input image
+3. Threshold the prediction to isolate features
+4. Click on the features to measure
+If there are different types of features that you'd like to consider separate, currently only three different features are supported and you can specify them by which type of mouse click you use. Left = red, right = green, middle = blue. 
+
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
 
