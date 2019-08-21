@@ -22,20 +22,25 @@ This program has multiple features that are selected for using `-m` flag indicat
 * **BC_STAT** - Outputs bayes classifier statistics from labeled image and classifier input
 * **WS** - Takes classifier and input image and outputs measurements of objects within user selected regions
 
-### VIS_CH Workflow
+### Bellweather Workflows
+##### VIS_CH Workflow
 1. Average together all the empty pots using AVG_IMGS
 2. Create card_masks directory and use DRAW_ROIS to create the chip masks
 3. Set the averaged image to target for color correction using SET_TARGET
 4. Run the analysis with the averaged image as background using VIS_CH
 
-### VIS Workflow
+##### VIS Workflow
 1. Average together all the empty pots using AVG_IMGS
 2. Run the analysis with the averaged image as background using VIS
+
+##### NIR Workflow
+1. Average together all the empty pots using AVG_IMGS
+2. Run the analysis with the averaged image as background using NIR
 
 In both the VIS and VIS_CH, the plant is segmented using the following protocol: 
 <img src="www/pheno3_segmentation.png"></img>
 
-Example output of the shapes, color, and leaves are shown here:
+### Output files
 ##### Shapes
 > VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 78513 448624 0.175008 13860.8 673 1282 1407.28 584.593 21 1998.52 1499.91 2606.46 1262.9 164.149 1.01536 0.0051354 0.484527 2.06387 1.46097 0 -0.100173
 
@@ -56,12 +61,7 @@ VIS_SV_0_z1_h1_g0_e65_v500_new_145496_0.png 5 23309 353.99 354 1.00003
 
 For each image processed multiple entries are created, one for each leaf blade found. The meta data for this file is: image name, leaf blade number, area, euclidean distance from branch to tip, geodesic distance from branch to tip, tortuosity. 
 
-### NIR Workflow
-1. Average together all the empty pots using AVG_IMGS
-2. Run the analysis with the averaged image as background using NIR
-
-Example output of the NIR color is shown here:
-
+##### NIR
 > NIR_SV_0_z1_h1_g0_e18000_v500_103283_0.png 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 3 4 6 2 8 13 26 24 33 52 37 48 30 43 56 84 98 117 124 109 113 136 154 170 195 216 218 212 227 245 243 215 194 232 230 211 202 212 207 218 234 260 230 211 225 193 162 153 128 115 118 114 131 125 98 97 59 47 52 37 25 13 4 1 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 
 Each line in the file has meta data: image name, grayscale histogram from 0-255
