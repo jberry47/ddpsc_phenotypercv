@@ -240,6 +240,9 @@ void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vecto
 
 	for(unsigned int b=0; b<sel_contours.size(); b++){
 		Mat z = Mat::zeros(src.size(),CV_8UC1);
+		Mat z_sel = Mat::zeros(src.size(),CV_8UC1);
+		drawContours(z_sel, sel_contours, b, 255,cv::FILLED);
+
 		for(unsigned int i=0; i < pred_contours.size(); i++){
 			for(unsigned int j=0; j<pred_contours[i].size(); j++){
 				int test = pointPolygonTest(sel_contours[b],Point2f(pred_contours[i][j]),false);
@@ -261,7 +264,7 @@ void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vecto
 		Mat mask;
 		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
 		vector<double> shapes_data = get_shapes(cc,mask);
-		Mat gray_data = get_nir(split_lab[0], mask);
+		Mat gray_data = get_nir(split_lab[0], z_sel);
 
 		//-- Write shapes to file
 		string name_shape= shape_fname;
@@ -322,7 +325,7 @@ void selectionGUI(Mat orig, string orig_fname, Mat mask, int size, string shape_
     findContours( mask.clone(), pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
     Mat lab;
-	cvtColor(src.clone(), lab, cv::COLOR_BGR2Lab);
+	cvtColor(orig.clone(), lab, cv::COLOR_BGR2Lab);
 	vector<Mat> split_lab;
 	split(lab, split_lab);
 
