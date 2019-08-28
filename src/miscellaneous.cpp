@@ -241,7 +241,10 @@ void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vecto
 	for(unsigned int b=0; b<sel_contours.size(); b++){
 		Mat z = Mat::zeros(src.size(),CV_8UC1);
 		Mat z_sel = Mat::zeros(src.size(),CV_8UC1);
+		Mat z_sel_bgr = Mat::zeros(src.size(),CV_8UC3);
 		drawContours(z_sel, sel_contours, b, 255,cv::FILLED);
+		drawContours(z_sel_bgr, sel_contours, b, Scalar(70,60,70),cv::FILLED);
+		addWeighted(map,1,z_sel_bgr,0.2,0,map);
 
 		for(unsigned int i=0; i < pred_contours.size(); i++){
 			for(unsigned int j=0; j<pred_contours[i].size(); j++){
