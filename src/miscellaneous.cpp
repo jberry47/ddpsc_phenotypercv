@@ -256,7 +256,7 @@ void find_and_measure_selection(vector<vector<Point> > sel_contours,vector<vecto
 
 		//z = z & mask;
 
-		Moments m = moments(z,true);
+		Moments m = moments(z_sel,true);
 		Point p(m.m10/m.m00, m.m01/m.m00);
 		putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
 
