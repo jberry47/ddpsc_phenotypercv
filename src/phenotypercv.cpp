@@ -260,6 +260,7 @@ int main(int argc, char *argv[]){
 			Mat inputImage = imread(parser.get<string>("i"));
 			//Mat corrected = nonUniformCorrect(inputImage,5);
 			if(parser.get<string>("method") == "bayes"){
+				suffix = "_bayes_pred.png";
 				Mat response = predictBC(inputImage,parser.get<string>("class"));
 				vector<string> sub_str;
 				const string full_str = string(parser.get<string>("i"));
@@ -268,17 +269,18 @@ int main(int argc, char *argv[]){
 				string new_name = sub_str[0]+"_bayes_pred.png";
 				imwrite(new_name,response);
 			}else if(parser.get<string>("method") == "svm"){
+				suffix = "_svm_pred.png";
 				Mat response = predictSVM(inputImage,parser.get<string>("class"));
-				vector<string> sub_str;
-				const string full_str = string(parser.get<string>("i"));
-				char del = '.';
-				split(full_str,del,sub_str);
-				string new_name = sub_str[0]+"_svm_pred.png";
-				imwrite(new_name,response);
 			}else{
 				cout << "Unknown method: expecting either bayes or svm" << endl;
 				return(1);
 			}
+			vector<string> sub_str;
+			const string full_str = string(parser.get<string>("i"));
+			char del = '.';
+			split(full_str,del,sub_str);
+			string new_name = sub_str[0]+suffix;
+			imwrite(new_name,response);
 		}
 	}
 	else if(bool_mlStat){
@@ -333,6 +335,7 @@ int main(int argc, char *argv[]){
 			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID -cc=camera_calibration_outfile.yaml -nx=num_board_spacesX -ny=num_board_spacesX -mw=marker_width -aw=aruco_width" << endl;
 		}else{
 		    bool check = charuco_calibrate(parser.get<string>("cc"),parser.get<string>("ci"),parser.get<int>("d"),parser.get<int>("nx"),parser.get<int>("ny"),parser.get<float>("mw"),parser.get<float>("aw"));
+			return(check);
 		}
 	}
 	else if(bool_charuco_est){
@@ -603,55 +606,55 @@ int main(int argc, char *argv[]){
 			cout << "Using mode NIR requires input: -i=inputImage -b=backgroundImage -c=nir_color_file.txt" << endl;
 		}else{
 			//-- Read in image and background
-			    	Mat nirImage = imread(parser.get<string>("i"),0);
-			    	//Mat nir_fixed = 1.591*nirImage-31.803;
+	    	Mat nirImage = imread(parser.get<string>("i"),0);
+	    	//Mat nir_fixed = 1.591*nirImage-31.803;
 
-			    	Mat nirBackground = imread(parser.get<string>("b"),0);
+	    	Mat nirBackground = imread(parser.get<string>("b"),0);
 
-			    	//-- Difference between image and background
-					Mat dest_nir;
-					absdiff(nirBackground,nirImage,dest_nir);
-					Mat dest_nir_thresh;
-					inRange(dest_nir,20,255,dest_nir_thresh);
+	    	//-- Difference between image and background
+			Mat dest_nir;
+			absdiff(nirBackground,nirImage,dest_nir);
+			Mat dest_nir_thresh;
+			inRange(dest_nir,20,255,dest_nir_thresh);
 
-					//-- Remove white stake
-					Mat dest_stake;
-					inRange(dest_nir,60,255,dest_stake);
-					Mat dest_stake_dil;
-					dilate(dest_stake, dest_stake_dil, Mat(), Point(-1, -1), 2, 1, 1);
-					Mat kept_stake;
-			    	vector<Point> cc = keep_roi(dest_stake_dil,Point(270,183),Point(350,375),kept_stake);
-			    	Mat dest_sub = dest_nir_thresh - kept_stake;
+			//-- Remove white stake
+			Mat dest_stake;
+			inRange(dest_nir,60,255,dest_stake);
+			Mat dest_stake_dil;
+			dilate(dest_stake, dest_stake_dil, Mat(), Point(-1, -1), 2, 1, 1);
+			Mat kept_stake;
+	    	vector<Point> cc = keep_roi(dest_stake_dil,Point(270,183),Point(350,375),kept_stake);
+	    	Mat dest_sub = dest_nir_thresh - kept_stake;
 
-			        //-- ROI selector
-			    	Mat kept_mask_nir;
-			    	cc = keep_roi(dest_sub,Point(171,102),Point(470,363),kept_mask_nir);
+	        //-- ROI selector
+	    	Mat kept_mask_nir;
+	    	cc = keep_roi(dest_sub,Point(171,102),Point(470,363),kept_mask_nir);
 
-			        //-- Getting numerical data
-			    	Mat nir_data = get_nir(nirImage, kept_mask_nir);
+	        //-- Getting numerical data
+	    	Mat nir_data = get_nir(nirImage, kept_mask_nir);
 
-			        //-- Writing numerical data
-			    	string name_nir= parser.get<string>("c");
-			   		ofstream nir_file;
-			   		nir_file.open(name_nir.c_str(),ios_base::app);
-			   		nir_file << argv[2] << " ";
-			   		for(int i=0;i<nir_data.rows;i++){
-			   		   	nir_file << nir_data.at<float>(i,0);
-						if(i != nir_data.rows){
-							nir_file << " ";
-						}
-			   		}
-			   		nir_file << endl;
-			   		nir_file.close();
+	        //-- Writing numerical data
+	    	string name_nir= parser.get<string>("c");
+	   		ofstream nir_file;
+	   		nir_file.open(name_nir.c_str(),ios_base::app);
+	   		nir_file << argv[2] << " ";
+	   		for(int i=0;i<nir_data.rows;i++){
+	   		   	nir_file << nir_data.at<float>(i,0);
+				if(i != nir_data.rows){
+					nir_file << " ";
+				}
+	   		}
+	   		nir_file << endl;
+	   		nir_file.close();
 
-			   		if(parser.has("debug")){
-						vector<string> sub_str;
-						const string full_str = string(parser.get<string>("i"));
-						char del = '.';
-						split(full_str,del,sub_str);
-						string new_name = sub_str[0]+"_mask.png";
-						imwrite(new_name,kept_mask_nir);
-					}
+	   		if(parser.has("debug")){
+				vector<string> sub_str;
+				const string full_str = string(parser.get<string>("i"));
+				char del = '.';
+				split(full_str,del,sub_str);
+				string new_name = sub_str[0]+"_mask.png";
+				imwrite(new_name,kept_mask_nir);
+			}
 		}
 	}
 	else if(bool_getCH){
@@ -661,28 +664,28 @@ int main(int argc, char *argv[]){
 			cout << "Redirect this output to 'target_homography.csv' for VIS_CH and VIS_CH_CHECK modes to work" << endl;
 		}else{
 			//-- Getting RGB components of each chip in the reference picture
-					Mat inputImage = imread(parser.get<string>("i"));
-					vector<Mat> bgr;
-					split(inputImage, bgr);
-					Mat b = bgr[0];
-					Mat g = bgr[1];
-					Mat r = bgr[2];
-					for(unsigned int i=1;i<23;i++){
-					    	stringstream ss;
-					    	ss << i;
-					    	string str = ss.str();
-					    	string file_name = "card_masks/"+str+"_mask.png";
-					    	Mat mask = imread(file_name,0);
-					    	Mat cc;
-					   		threshold(mask,cc,90,255,THRESH_BINARY);
+			Mat inputImage = imread(parser.get<string>("i"));
+			vector<Mat> bgr;
+			split(inputImage, bgr);
+			Mat b = bgr[0];
+			Mat g = bgr[1];
+			Mat r = bgr[2];
+			for(unsigned int i=1;i<23;i++){
+				stringstream ss;
+			    ss << i;
+		    	string str = ss.str();
+		    	string file_name = "card_masks/"+str+"_mask.png";
+		    	Mat mask = imread(file_name,0);
+		    	Mat cc;
+		   		threshold(mask,cc,90,255,THRESH_BINARY);
 
-					    	float b_avg = extractRGB_chips(b, cc);
-					    	float g_avg = extractRGB_chips(g, cc);
-					    	float r_avg = extractRGB_chips(r, cc);
+		   		float b_avg = extractRGB_chips(b, cc);
+		    	float g_avg = extractRGB_chips(g, cc);
+		    	float r_avg = extractRGB_chips(r, cc);
 
-					    	//-- Write histogram averages to cout
-					    	cout  << r_avg << ","<< g_avg << "," << b_avg << endl;
-					}
+		    	//-- Write histogram averages to cout
+		    	cout  << r_avg << ","<< g_avg << "," << b_avg << endl;
+			}
 		}
     }
 	else if(bool_drawROIS){
@@ -705,38 +708,38 @@ int main(int argc, char *argv[]){
 			cout << "Using mode AVG_IMGS requires only that a list of images to be averaged is piped in" << endl;
 		}else{
 			 //-- Taking list of pictures that are piped in and averaging them
-					string line;
-					Mat avg;
-					vector<Mat> avg_bgr(3);
-					int counter = 0;
-					while(cin) {
-						if(getline(cin,line)) {
-							if(counter == 0){
-					    		avg=imread(line);
-					    		avg.convertTo(avg, CV_64F);
-					   			split(avg,avg_bgr);
-					    		counter++;
-					    	}else{
-					        	Mat inputImage = imread(line);
-					        	inputImage.convertTo(inputImage, CV_64F);
-					    		vector<Mat> in_bgr(3);
-				    			split(inputImage,in_bgr);
-				    			avg_bgr[0] = (avg_bgr[0]+in_bgr[0]);
-				    			avg_bgr[1] = (avg_bgr[1]+in_bgr[1]);
-				    			avg_bgr[2] = (avg_bgr[2]+in_bgr[2]);
-					        	counter++;
-					    	}
-					    }
-					}
-					avg_bgr[0] = (avg_bgr[0])/counter;
-					avg_bgr[1] = (avg_bgr[1])/counter;
-					avg_bgr[2] = (avg_bgr[2])/counter;
-					Mat adjImage;
-					merge(avg_bgr,adjImage);
-					adjImage.convertTo(adjImage, CV_64F);
+			string line;
+			Mat avg;
+			vector<Mat> avg_bgr(3);
+			int counter = 0;
+			while(cin) {
+				if(getline(cin,line)) {
+					if(counter == 0){
+			    		avg=imread(line);
+			    		avg.convertTo(avg, CV_64F);
+			   			split(avg,avg_bgr);
+			    		counter++;
+			    	}else{
+			        	Mat inputImage = imread(line);
+			        	inputImage.convertTo(inputImage, CV_64F);
+			    		vector<Mat> in_bgr(3);
+		    			split(inputImage,in_bgr);
+		    			avg_bgr[0] = (avg_bgr[0]+in_bgr[0]);
+		    			avg_bgr[1] = (avg_bgr[1]+in_bgr[1]);
+		    			avg_bgr[2] = (avg_bgr[2]+in_bgr[2]);
+			        	counter++;
+			    	}
+			    }
+			}
+			avg_bgr[0] = (avg_bgr[0])/counter;
+			avg_bgr[1] = (avg_bgr[1])/counter;
+			avg_bgr[2] = (avg_bgr[2])/counter;
+			Mat adjImage;
+			merge(avg_bgr,adjImage);
+			adjImage.convertTo(adjImage, CV_64F);
 
-					//-- Writing out averaged image
-					imwrite("average_images.png",adjImage);
+			//-- Writing out averaged image
+			imwrite("average_images.png",adjImage);
 		}
 	}
 	else if(parser.has("h")){
@@ -775,8 +778,7 @@ int main(int argc, char *argv[]){
     	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, ML_CREATE, ML_PRED, ML_STAT, ML_PROC, or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
-
-	return 0;
+	return(0);
 }
 
 
