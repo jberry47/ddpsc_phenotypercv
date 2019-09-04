@@ -14,13 +14,10 @@ This program has multiple features that are selected for using `-m` flag indicat
 * **CHARUCO_CREATE** - Creates a ChArUco board with specified sizes and dictionary
 * **CHARUCO_CALIB** - Camera calibration using multiple viewpoints of a ChArUco board
 * **CHARUCO_EST** - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
-* **SVM_CREATE** - Creates a SVM classifier from input image and respective labeled image
-* **SVM_PRED** - Uses provided SVM classifier to predict features in input image
-* **SVM_STAT** - Outputs svm classifier statistics from labeled image and classifier input
-* **BC_CREATE** - Creates a Bayesian classifer from input image and respective labeled image
-* **BC_PRED** - Uses provided Bayes classifier to predict features in input image
-* **BC_STAT** - Outputs bayes classifier statistics from labeled image and classifier input
-* **ML** - Takes classifier and input image and outputs measurements of objects within user selected regions
+* **ML_CREATE** - Creates a classifier from input image and respective labeled image
+* **ML_PRED** - Uses provided classifier to predict features in input image
+* **ML_STAT** - Outputs classifier statistics from labeled image and classifier input
+* **ML_PROC** - Takes classifier and input image and outputs measurements of objects within user selected regions
 
 ### Bellweather Workflows
 ##### VIS_CH Workflow
@@ -71,9 +68,9 @@ Each line in the file has meta data: image name, grayscale histogram from 0-255
 2. Use the pencil tool in ImageJ and draw over all features of interest
 3. Convert to Lab, split channels, and find L
 4. Threshold the image to get the feature mask and save it
-5. Train naive Bayes or SVM using either BC_CREATE or SVM_CREATE
-6. Check the classifier prediction using either BC_PRED or SVM_PRED
-7. If prediction is satisfactory, process images using ML specifying classifier type
+5. Train naive Bayes or SVM using ML_CREATE specifying classifier type
+6. Check the classifier prediction using either ML_PRED specifying classifier type
+7. If prediction is satisfactory, process images using ML_PROC specifying classifier type
 
 <img src="www/machine_learning_graphic.png" width="816" height="250"></img>
 
