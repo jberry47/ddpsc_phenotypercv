@@ -56,7 +56,7 @@ const char* keys  =
         "{b        |       | Background image }"
         "{size     |       | Square size (pixels) for DRAW_ROI mode}"
         "{class    |       | machine learning classifier}"
-        "{prob     |       | Probability for ML thresh}"
+        "{prob     |       | Probability for ML_PROC thresh}"
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
 		"{ci       |       | ChArUco calibrate input file }"
@@ -65,7 +65,7 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
-		"{method   |       | bayes or svm for mode=ML }"
+		"{method   |       | bayes or svm for machine learning }"
 		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
@@ -92,14 +92,11 @@ int main(int argc, char *argv[]){
 	bool bool_charucoCalib = mode == "CHARUCO_CALIB";
 	bool bool_charuco_est = mode == "CHARUCO_EST";
 	bool bool_charucoCreate = mode == "CHARUCO_CREATE";
-	bool bool_svmCreate = mode == "SVM_CREATE";
-	bool bool_svmPred = mode == "SVM_PRED";
-	bool bool_svmStat = mode == "SVM_STAT";
-	bool bool_bcCreate = mode == "BC_CREATE";
-	bool bool_bcPred = mode == "BC_PRED";
-	bool bool_bcStat = mode == "BC_STAT";
+	bool bool_mlProc = mode == "ML_PROC";
+	bool bool_mlPred = mode == "ML_PRED";
+	bool bool_mlCreate = mode == "ML_CREATE";
+	bool bool_mlStat = mode == "ML_STAT";
 	bool bool_testing = mode == "TESTING";
-	bool bool_ml = mode == "ML";
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
@@ -176,9 +173,9 @@ int main(int argc, char *argv[]){
     	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
 	}
-	else if(bool_ml){
+	else if(bool_mlProc){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("method"))){
-			cout << "Using mode ML requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -method=[bayes,svm]" << endl;
+			cout << "Using mode ML_PROC requires input: -method=[bayes,svm] -i=inputImage -class=input_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 
@@ -240,42 +237,67 @@ int main(int argc, char *argv[]){
 			imwrite(new_name,corrected);
 		}
 	}
-	else if(bool_bcCreate){
-		if(!(parser.has("i") && parser.has("b") && parser.has("class"))){
-			cout << "Using mode BC_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml" << endl;
+	else if(bool_mlCreate){
+		if(!(parser.has("i") && parser.has("b") && parser.has("class") && parser.has("method"))){
+			cout << "Using mode ML_CREATE requires input: -method=[bayes,svm] -i=inputImage -b=labeledImage -class=output_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
-			//Mat mask;
-			//threshold(msk,mask,25,255,THRESH_BINARY);
-			trainBC(inputImage, labels, parser.get<string>("class"));
+			if(parser.get<string>("method") == "bayes"){
+				trainBC(inputImage, labels, parser.get<string>("class"));
+			}else if(parser.get<string>("method") == "svm"){
+				trainSVM(inputImage, labels, parser.get<string>("class"));
+			}else{
+				cout << "Unknown method: expecting either bayes or svm" << endl;
+				return(1);
+			}
 		}
 	}
-	else if(bool_bcPred){
-		if(!(parser.has("i") && parser.has("class"))){
-			cout << "Using mode BC_PRED requires input: -i=inputImage -class=classifier.yaml" << endl;
+	else if(bool_mlPred){
+		if(!(parser.has("i") && parser.has("class") && parser.has("method"))){
+			cout << "Using mode ML_PRED requires input: -method=[bayes,svm] -i=inputImage -class=input_classifier.yaml" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			//Mat corrected = nonUniformCorrect(inputImage,5);
-			Mat response = predictBC(inputImage,parser.get<string>("class"));
-
-			vector<string> sub_str;
-			const string full_str = string(parser.get<string>("i"));
-			char del = '.';
-			split(full_str,del,sub_str);
-			string new_name = sub_str[0]+"_bayes_pred.png";
-			imwrite(new_name,response);
+			if(parser.get<string>("method") == "bayes"){
+				Mat response = predictBC(inputImage,parser.get<string>("class"));
+				vector<string> sub_str;
+				const string full_str = string(parser.get<string>("i"));
+				char del = '.';
+				split(full_str,del,sub_str);
+				string new_name = sub_str[0]+"_bayes_pred.png";
+				imwrite(new_name,response);
+			}else if(parser.get<string>("method") == "svm"){
+				Mat response = predictSVM(inputImage,parser.get<string>("class"));
+				vector<string> sub_str;
+				const string full_str = string(parser.get<string>("i"));
+				char del = '.';
+				split(full_str,del,sub_str);
+				string new_name = sub_str[0]+"_svm_pred.png";
+				imwrite(new_name,response);
+			}else{
+				cout << "Unknown method: expecting either bayes or svm" << endl;
+				return(1);
+			}
 		}
 	}
-	else if(bool_bcStat){
-		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("size"))){
-			cout << "Using mode BC_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -size=integer(range 0-20)" << endl;
+	else if(bool_mlStat){
+		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("size") && parser.has("method"))){
+			cout << "Using mode ML_STAT requires input: -method=[bayes,svm] -i=inputImage -b=labeledImage -class=input_classifier.yaml -size=integer(range 0-20)" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat labels = imread(parser.get<string>("b"),0);
-			Mat response = predictBC(inputImage,parser.get<string>("class"));
-			Mat r_thresh,l_thresh;
+			Mat response;
+			if(parser.get<string>("method") == "bayes"){
+				response = predictBC(inputImage,parser.get<string>("class"));
+			}else if(parser.get<string>("method") == "svm"){
+				response = predictSVM(inputImage,parser.get<string>("class"));
+			}else{
+				cout << "Unknown method: expecting either bayes or svm" << endl;
+				return(1);
+			}
 
+			Mat r_thresh,l_thresh;
 			src1 = response;
 			namedWindow("threshold", WINDOW_NORMAL );
 			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
@@ -292,69 +314,6 @@ int main(int argc, char *argv[]){
 			threshold(response,r_thresh,threshold_value,255,threshold_type);
 			threshold(labels,l_thresh,25,255,THRESH_BINARY);
 			confusionGUI(inputImage, r_thresh, l_thresh, parser.get<int>("size"));
-		}
-	}
-	else if(bool_svmCreate){
-		if(!(parser.has("i") && parser.has("b") && parser.has("class"))){
-			cout << "Using mode SVM_CREATE requires input: -i=inputImage -b=labeledImage -class=output_classifier.yaml" << endl;
-		}else{
-			Mat inputImage = imread(parser.get<string>("i"));
-			Mat labels = imread(parser.get<string>("b"),0);
-			//Mat mask;
-			//threshold(msk,mask,25,255,THRESH_BINARY_INV);
-			trainSVM(inputImage, labels, parser.get<string>("class"));
-		}
-	}
-	else if(bool_svmPred){
-		if(!(parser.has("i") && parser.has("class"))){
-			cout << "Using mode SVM_PRED requires input: -i=inputImage -class=classifier.yaml" << endl;
-		}else{
-			Mat inputImage = imread(parser.get<string>("i"));
-			Mat response = predictSVM(inputImage,parser.get<string>("class"));
-			vector<string> sub_str;
-			const string full_str = string(parser.get<string>("i"));
-			char del = '.';
-			split(full_str,del,sub_str);
-			string new_name = sub_str[0]+"_svm_pred.png";
-			imwrite(new_name,response);
-		}
-	}
-	else if(bool_svmStat){
-		if(!(parser.has("i") && parser.has("class") && parser.has("b") && parser.has("size"))){
-			cout << "Using mode SVM_STAT requires input: -i=inputImage -b=labeledImage -class=classifier.yaml -size=integer(range 0-20)" << endl;
-		}else{
-			Mat inputImage = imread(parser.get<string>("i"));
-			Mat lab;
-			cvtColor(inputImage, lab, cv::COLOR_BGR2Lab);
-			vector<Mat> split_lab;
-			split(lab, split_lab);
-			Mat l_thresh;
-			threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
-			Mat l_erode;
-			erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
-
-			Mat labels = imread(parser.get<string>("b"),0);
-			Mat response = predictSVM(inputImage,parser.get<string>("class"));
-			Mat r_thresh,label_thresh;
-
-			src1 = response;
-			namedWindow("threshold", WINDOW_NORMAL );
-			createTrackbar( "trackbar_type", "threshold", &threshold_type, max_type, thresholdGUI );
-			createTrackbar( "trackbar_value", "threshold", &threshold_value, max_value, thresholdGUI );
-			thresholdGUI(0,0);
-			while(true){
-			    int c;
-			    c = waitKey();
-			    if( (char)c == 27 ){
-			    	break;
-			    }
-			}
-
-			threshold(response,r_thresh,threshold_value,255,threshold_type);
-			threshold(labels,label_thresh,25,255,THRESH_BINARY);
-			Mat pred_thresh = r_thresh & l_erode;
-
-			confusionGUI(inputImage, pred_thresh, label_thresh, parser.get<int>("size"));
 		}
 	}
 	else if(bool_charucoCreate){
@@ -782,7 +741,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
-		cout << "USAGE:" << endl << "\tThere are seventeen modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, ML, or AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
+		cout << "USAGE:" << endl << "\tThere are fourteen modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, ML_CREATE, ML_PRED, ML_STAT, ML_PROC, or AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV -m=[MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt -d=leaves.txt"<<endl << endl;
@@ -794,13 +753,10 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mCHARUCO_CREATE\e[0m - Creates a nx by ny ChArUco board with mw marker width and aw aruco chip width using d dictionary." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CREATE -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02" << endl << endl;
 		cout << "\t\e[1mCHARUCO_CALIB\e[0m - Camera calibration using multiple viewpoints of a ChArUco board. It is recommended to take enough pictures where combined the entire scene had been accounted for by the board. The images are passed into the program by means of a file of 1 column where each row is the path to each image. One output file called camera_calibration.txt is produced when running this method" << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_CALIB -ci=calib_list.txt -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
 		cout << "\t\e[1mCHARUCO_EST\e[0m - After calibrating the camera using only CHARUCO_CALIB, this mode takes an image with the same board in the scene and warps the image to the orthogonal plane projection. The camera_calibration.txt file must be in the current working directory to be read in correctly. Two images are produced: 1) The same input image but with the pose of the board overlaid, and 2) is the orthogonal plane projection." << endl << "\t\t" << "Example: ./PhenotyperCV -m=CHARUCO_EST -i=test_imgs/plate.jpg -d=10 -nx=5 -ny=7 -mw=0.04 -aw=0.02 -cc=camera_calibration.yaml" << endl << endl;
-		cout << "\t\e[1mBC_CREATE\e[0m - Creates and outputs a naive bayes classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_CREATE -i=input_image.png -b=labeled_image.png -class=bayes_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mBC_PRED\e[0m - Classifies an input image by using a pre-trained bayes classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_PRED -i=input_image.png -class=bayes_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mBC_STAT\e[0m - Outputs Bayes classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=BC_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_bayes_classifier_v3.yaml -size=8" << endl << endl;
-		cout << "\t\e[1mSVM_CREATE\e[0m - Creates and outputs a support vector machine classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_CREATE -i=input_image.png -b=labeled_image.png -class=svm_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mSVM_PRED\e[0m - Classifies an input image by using a pre-trained SVM classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_PRED -i=input_image.png -class=svm_classifier.yaml" << endl << endl;
-		cout << "\t\e[1mSVM_STAT\e[0m - Outputs svm classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_svm_classifier_v3.yaml -size=8" << endl << endl;
-		cout << "\t\e[1mML\e[0m - Takes classifier and input image and outputs measurements of objects within user selected regions." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML -i=test_combine.png -class=comb_svm_classifier_v3.yaml -size=8 -s=shapes.txt -c=gray.txt -method=svm" << endl << endl;
+		cout << "\t\e[1mML_CREATE\e[0m - Creates and outputs a classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML_CREATE -method=bayes -i=input_image.png -b=labeled_image.png -class=output_bayes_classifier.yaml" << endl << endl;
+		cout << "\t\e[1mML_PRED\e[0m - Classifies an input image by using a trained classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML_PRED -method=bayes -i=input_image.png -class=input_bayes_classifier.yaml" << endl << endl;
+		cout << "\t\e[1mML_STAT\e[0m - Outputs classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML_STAT -method=bayes -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=input_bayes_classifier.yaml -size=8" << endl << endl;
+		cout << "\t\e[1mML_PROC\e[0m - Takes classifier and input image and outputs measurements of objects within user selected regions." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML_PROC -method=bayes -i=test_combine.png -class=input_bayes_classifier.yaml -size=8 -s=shapes.txt -c=gray.txt" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
 		cout << "\tColor Correction VIS Pipeline:" << endl;
@@ -816,7 +772,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, ML, or AVG_IMGS" << endl;
+    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, ML_CREATE, ML_PRED, ML_STAT, ML_PROC, or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
 
