@@ -83,6 +83,8 @@ The processing step consists of four phases:
 3. Threshold the prediction to isolate features
 4. Click on the features to measure. If there are different types of features that you'd like to consider separate, currently only three different features are supported and you can specify them by which type of mouse click you use. Left = red, right = green, middle = blue. 
 
+<img src="www/machine_learning_example_graphic.png" width="816" height="700"></img>
+
 ### ChArUco Workflow
 1. Create a board using CHARUCO_CREATE
 2. Print the board and take many pictures of it from all angles and orientations
