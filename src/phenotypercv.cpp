@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
 	bool bool_bcPred = mode == "BC_PRED";
 	bool bool_bcStat = mode == "BC_STAT";
 	bool bool_testing = mode == "TESTING";
-	bool bool_ws = mode == "WS";
+	bool bool_ml = mode == "ML";
 
 	if(bool_testing){
 		Mat inputImage = imread(parser.get<string>("i"));
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]){
     	//Mat CLAHE_corrected = CLAHE_correct_gray(nirImage);
 		//imwrite("clahe_corrected.png",CLAHE_corrected);
 	}
-	else if(bool_ws){
+	else if(bool_ml){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("method"))){
 			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -method=[bayes,svm]" << endl;
 		}else{
