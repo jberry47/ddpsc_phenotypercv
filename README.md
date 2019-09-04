@@ -20,7 +20,7 @@ This program has multiple features that are selected for using `-m` flag indicat
 * **BC_CREATE** - Creates a Bayesian classifer from input image and respective labeled image
 * **BC_PRED** - Uses provided Bayes classifier to predict features in input image
 * **BC_STAT** - Outputs bayes classifier statistics from labeled image and classifier input
-* **WS** - Takes classifier and input image and outputs measurements of objects within user selected regions
+* **ML** - Takes classifier and input image and outputs measurements of objects within user selected regions
 
 ### Bellweather Workflows
 ##### VIS_CH Workflow
