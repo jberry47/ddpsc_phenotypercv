@@ -56,7 +56,7 @@ const char* keys  =
         "{b        |       | Background image }"
         "{size     |       | Square size (pixels) for DRAW_ROI mode}"
         "{class    |       | machine learning classifier}"
-        "{prob     |       | Probability for WS thresh}"
+        "{prob     |       | Probability for ML thresh}"
         "{s        |       | Shape file to write to }"
         "{c        |       | Color file to write to }"
 		"{ci       |       | ChArUco calibrate input file }"
@@ -65,7 +65,7 @@ const char* keys  =
 		"{ny       |       | Number of board spaces - y }"
 		"{mw       |       | Marker width }"
 		"{aw       |       | ArUco width }"
-		"{method   |       | bayes or svm for mode=WS }"
+		"{method   |       | bayes or svm for mode=ML }"
 		"{debug    |       | If used, write out final mask }"
 		"{d        |       | dictionary: DICT_4X4_50=0, DICT_4X4_100=1, DICT_4X4_250=2,"
 		        "DICT_4X4_1000=3, DICT_5X5_50=4, DICT_5X5_100=5, DICT_5X5_250=6, DICT_5X5_1000=7, "
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(bool_ml){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("method"))){
-			cout << "Using mode WS requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -method=[bayes,svm]" << endl;
+			cout << "Using mode ML requires input: -i=inputImage -class=input_svm_classifier.yaml -size=number(range 0-20) -s=shapes_output.txt -c=gray_output.txt -method=[bayes,svm]" << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 
@@ -782,7 +782,7 @@ int main(int argc, char *argv[]){
 	}
 	else if(parser.has("h")){
 		cout << "DESCRIPTION:" << endl << "\tThis program is for segmenting and measuring plants from the Bellweather Phenotyping Facility. Segmentation is achieved by supplying a background image that does not contain a plant and using the difference between that and a supplied image to threshold on. Further processing is done to remove artifacts that arise. After segmentation is complete, shapes and color profile are reported in corresponding user-specified files." << endl << endl;
-		cout << "USAGE:" << endl << "\tThere are seventeen modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, WS, or AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
+		cout << "USAGE:" << endl << "\tThere are seventeen modes of use (VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, ML, or AVG_IMGS). Depending on what is chosen, the required inputs change" << endl << endl;
 		cout << "SYNOPSIS:" << endl << "\t./PhenotyperCV -m=[MODE] [INPUTS]" << endl << endl;
 		cout << "MODES:"<< endl;
 		cout << "\t\e[1mVIS\e[0m - Segment and measure plant in RGB images" << endl << "\t\t" << "Example: ./PhenotyperCV -m=VIS -i=input_image.png -b=background_image.png -s=shapes.txt -c=color.txt -d=leaves.txt"<<endl << endl;
