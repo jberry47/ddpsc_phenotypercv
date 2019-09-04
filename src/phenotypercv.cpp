@@ -800,7 +800,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\e[1mSVM_CREATE\e[0m - Creates and outputs a support vector machine classifier that is trained on a RGB image and it's respective labeled image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_CREATE -i=input_image.png -b=labeled_image.png -class=svm_classifier.yaml" << endl << endl;
 		cout << "\t\e[1mSVM_PRED\e[0m - Classifies an input image by using a pre-trained SVM classifier to identify features in the image." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_PRED -i=input_image.png -class=svm_classifier.yaml" << endl << endl;
 		cout << "\t\e[1mSVM_STAT\e[0m - Outputs svm classifier statistics from labeled image and classifier input." << endl << "\t\t" << "Example: ./PhenotyperCV -m=SVM_STAT -i=test_combine.png -b=test_combine_pink_mask_with269.png -class=comb_svm_classifier_v3.yaml -size=8" << endl << endl;
-		cout << "\t\e[1mWS\e[0m - Takes classifier and input image and outputs measurements of objects within user selected regions." << endl << "\t\t" << "Example: ./PhenotyperCV -m=WS -i=test_combine.png -class=comb_svm_classifier_v3.yaml -size=8 -s=shapes.txt -c=gray.txt -method=svm" << endl << endl;
+		cout << "\t\e[1mML\e[0m - Takes classifier and input image and outputs measurements of objects within user selected regions." << endl << "\t\t" << "Example: ./PhenotyperCV -m=ML -i=test_combine.png -class=comb_svm_classifier_v3.yaml -size=8 -s=shapes.txt -c=gray.txt -method=svm" << endl << endl;
 		cout << "\t\e[1mAVG_IMGS\e[0m - takes list of input images to be averaged and outputs average_images.png" << endl << "\t\t" << "Example: cat Images/SnapshotInfo.csv | grep Fm000Z | grep VIS_SV | awk -F'[;,]' '{print \"Images/snapshot\"$2\"/\"$12\".png\"}' | ./PhenotyperCV -m=AVG_IMGS"<< endl << endl << endl;
 		cout << "PIPELINES:" << endl;
 		cout << "\tColor Correction VIS Pipeline:" << endl;
@@ -816,7 +816,7 @@ int main(int argc, char *argv[]){
 		cout << "\t\t* Run analysis with average_images.png as background using NIR" << endl << endl;
 	}
 	else{
-    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, WS, or AVG_IMGS" << endl;
+    	cout << "Mode must be either VIS, VIS_CH, VIS_CH_CHECK, NIR, SET_TARGET, DRAW_ROIS,CHARUCO_CREATE, CHARUCO_CALIB, CHARUCO_EST, BC_CREATE, BC_PRED, BC_STAT, SVM_CREATE, SVM_PRED, SVM_STAT, ML, or AVG_IMGS" << endl;
     	cout << "Use  ./PhenotyperCV -h for more information" << endl;
     }
 
