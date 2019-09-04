@@ -259,18 +259,14 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			//Mat corrected = nonUniformCorrect(inputImage,5);
+			string suffix;
+			Mat response;
 			if(parser.get<string>("method") == "bayes"){
 				suffix = "_bayes_pred.png";
-				Mat response = predictBC(inputImage,parser.get<string>("class"));
-				vector<string> sub_str;
-				const string full_str = string(parser.get<string>("i"));
-				char del = '.';
-				split(full_str,del,sub_str);
-				string new_name = sub_str[0]+"_bayes_pred.png";
-				imwrite(new_name,response);
+				response = predictBC(inputImage,parser.get<string>("class"));
 			}else if(parser.get<string>("method") == "svm"){
 				suffix = "_svm_pred.png";
-				Mat response = predictSVM(inputImage,parser.get<string>("class"));
+				response = predictSVM(inputImage,parser.get<string>("class"));
 			}else{
 				cout << "Unknown method: expecting either bayes or svm" << endl;
 				return(1);
