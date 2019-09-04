@@ -73,7 +73,7 @@ Each line in the file has meta data: image name, grayscale histogram from 0-255
 4. Threshold the image to get the feature mask and save it
 5. Train naive Bayes or SVM using either BC_CREATE or SVM_CREATE
 6. Check the classifier prediction using either BC_PRED or SVM_PRED
-7. If prediction is satisfactory, process images using WS specifying classifier type
+7. If prediction is satisfactory, process images using ML specifying classifier type
 
 <img src="www/machine_learning_graphic.png" width="816" height="250"></img>
 
