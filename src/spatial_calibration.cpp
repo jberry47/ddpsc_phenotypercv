@@ -13,11 +13,13 @@ using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
 
-static bool saveCameraParams(const string &filename, Size imageSize,
+void saveCameraParams(const string &filename, Size imageSize,
                              const Mat &cameraMatrix, const Mat &distCoeffs) {
     FileStorage fs(filename, FileStorage::WRITE);
-    if(!fs.isOpened())
-        return false;
+    if(!fs.isOpened()){
+    	cout << "Cannot write to file. Permission issues?" << endl;
+    	return;
+    }
 
     time_t tt;
     time(&tt);
@@ -32,11 +34,9 @@ static bool saveCameraParams(const string &filename, Size imageSize,
 
     fs << "camera_matrix" << cameraMatrix;
     fs << "distortion_coefficients" << distCoeffs;
-
-    return true;
 }
 
-bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, int ny, float mw, float aw){
+void charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, int ny, float mw, float aw){
 	Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(dict_id));
 		cv::Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(nx, ny, mw, aw, dictionary);
 		vector< vector< vector< Point2f > > > allCorners;
@@ -111,9 +111,8 @@ bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, i
 	            aruco::calibrateCameraCharuco(allCharucoCorners, allCharucoIds, board, imgSize,
 	                                          cameraMatrix, distCoeffs, noArray(), noArray());
 
-	    bool saveOk =  saveCameraParams(outfile, imgSize, cameraMatrix, distCoeffs);
+	    saveCameraParams(outfile, imgSize, cameraMatrix, distCoeffs);
 	    cout << "Rep Error ChArUco: " << repError << endl;
 	    cout << "Rep Error ArUco: " << arucoRepErr << endl;
 	    cout << "Calibration saved to " << outfile << endl;
-	    return(saveOk);
 }
