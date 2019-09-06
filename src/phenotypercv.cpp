@@ -330,8 +330,7 @@ int main(int argc, char *argv[]){
 		if(!(parser.has("ci") && parser.has("d") && parser.has("cc") && parser.has("nx") && parser.has("ny") && parser.has("aw") && parser.has("mw"))){
 			cout << "Using mode CHARUCO_CALIB requires input: -ci=calib_img_paths.txt -d=dictionaryID -cc=camera_calibration_outfile.yaml -nx=num_board_spacesX -ny=num_board_spacesX -mw=marker_width -aw=aruco_width" << endl;
 		}else{
-		    bool check = charuco_calibrate(parser.get<string>("cc"),parser.get<string>("ci"),parser.get<int>("d"),parser.get<int>("nx"),parser.get<int>("ny"),parser.get<float>("mw"),parser.get<float>("aw"));
-			return(check);
+		    charuco_calibrate(parser.get<string>("cc"),parser.get<string>("ci"),parser.get<int>("d"),parser.get<int>("nx"),parser.get<int>("ny"),parser.get<float>("mw"),parser.get<float>("aw"));
 		}
 	}
 	else if(bool_charuco_est){
@@ -372,37 +371,37 @@ int main(int argc, char *argv[]){
 			Vec3d rvec, tvec;
 
 			if (detectedCharucoIds.size() > 0) {
-			//-- Matching input board to perfect board
-						for (unsigned int i = 0; i < charucoIds.size(); i++) {
-							for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
-								if (charucoIds[i] == detectedCharucoIds[j]) {
-									matchedCharucoIds.push_back(charucoIds[i]);
-									matchedCharucoCorners.push_back(charucoCorners[i]);
-								}
-							}
+				//-- Matching input board to perfect board
+				for (unsigned int i = 0; i < charucoIds.size(); i++) {
+					for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
+						if (charucoIds[i] == detectedCharucoIds[j]) {
+							matchedCharucoIds.push_back(charucoIds[i]);
+							matchedCharucoCorners.push_back(charucoCorners[i]);
 						}
-			//-- Computing spatial homography and warping
-						Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
-						Mat undistoredCharuco;
-						warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
-						bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
+					}
+				}
+				//-- Computing spatial homography and warping
+				Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
+				Mat undistoredCharuco;
+				warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
+				bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
 
-						if(valid){
-							cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
-						}
+				if(valid){
+					cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
+				}
 
-						vector<string> sub_str;
-						const string full_str = parser.get<string>("i");
-						char del = '.';
+				vector<string> sub_str;
+				const string full_str = parser.get<string>("i");
+				char del = '.';
 
-						split(full_str,del,sub_str);
-						string new_name;
-						new_name= sub_str[0]+"_posed.png";
-						imwrite(new_name,inputImage);
+				split(full_str,del,sub_str);
+				string new_name;
+				new_name= sub_str[0]+"_posed.png";
+				imwrite(new_name,inputImage);
 
-						split(full_str,del,sub_str);
-						new_name = sub_str[0]+"_opp.png";
-						imwrite(new_name,undistoredCharuco);
+				split(full_str,del,sub_str);
+				new_name = sub_str[0]+"_opp.png";
+				imwrite(new_name,undistoredCharuco);
 			}
 		}
 	}
