@@ -23,9 +23,9 @@ using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
 
-static bool saveCameraParams(const string &filename, Size imageSize,
+void saveCameraParams(const string &filename, Size imageSize,
                              const Mat &cameraMatrix, const Mat &distCoeffs);
-bool charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, int ny, float mw, float aw);
+void charuco_calibrate(string outfile, string calib_imgs, int dict_id, int nx, int ny, float mw, float aw);
 
 
 
