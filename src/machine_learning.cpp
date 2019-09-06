@@ -195,6 +195,7 @@ Mat predictBC(Mat img,string fname){
 	return(output);
 }
 
+/*
 void trainBoost(Mat img, Mat mask, string fname){
 	Mat imageR, maskR;
 	resize(img.clone(), imageR, Size(512,512), 0, 0, INTER_LINEAR);
@@ -265,3 +266,4 @@ Mat predictBoost(Mat img,string fname){
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
 	return(output);
 }
+*/
