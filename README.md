@@ -1,25 +1,10 @@
 <img src="www/raw.png" width="33%"></img><img src="www/mask.png" width="33%"></img><img src="www/classified.png" width="33%"></img>
 
 # DDPSC PhenotyperCV
-This program has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Current modes are listed here and futher information can be found using the `-h` flag. 
+This program has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Futher information can be found using the `-h` flag. 
 
-### Modes
-* **VIS** - Segment and measure plant in RGB images
-* **VIS_CH** - Color correct, segment, and measure plant in RGB images
-* **VIS_CH_CHECK** - Color correct, and output image for viewing
-* **SET_TARGET** - Obtain and print to stdout the RGB information for each of the chips in the image
-* **DRAW_ROIS** - GUI for making card_masks/ images to be used by VIS_CH, VIS_CH_CHECK, and SET_TARGET
-* **AVG_IMGS** - Pipe in list of input images to be averaged and outputs average_images.png
-* **NIR** - Segment and measure plant in near-infrared images
-* **CHARUCO_CREATE** - Creates a ChArUco board with specified sizes and dictionary
-* **CHARUCO_CALIB** - Camera calibration using multiple viewpoints of a ChArUco board
-* **CHARUCO_EST** - Warps the image to the orthogonal plane projection using calibration file from CHARUCO_CALIB
-* **ML_CREATE** - Creates a classifier from input image and respective labeled image
-* **ML_PRED** - Uses provided classifier to predict features in input image
-* **ML_STAT** - Outputs classifier statistics from labeled image and classifier input
-* **ML_PROC** - Takes classifier and input image and outputs measurements of objects within user selected regions
-
-### Please visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for more info on how to use this program
+### Workflows
+Visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for more info on how to use this program
 
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
