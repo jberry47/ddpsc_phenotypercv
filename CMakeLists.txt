@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 set (CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_FLAGS -Wno-c++11-narrowing)
+set (CMAKE_CXX_FLAGS -Wno-narrowing)
 
 project (PhenotyperCV)
 
