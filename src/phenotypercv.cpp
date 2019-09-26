@@ -338,71 +338,18 @@ int main(int argc, char *argv[]){
 			cout << "Using mode CHARUCO_EST requires input: -i=inputImage -d=dictionaryID -cc=camera_calibration_infile.yaml -nx=num_board_spacesX -ny=num_board_spacesX -mw=marker_width -aw=aruco_width" << endl;
 		}else{
 			//-- Getting camera calibration details
-			Mat cameraMatrix, distCoeffs;
-			FileStorage fs;
-			fs.open(parser.get<string>("cc"), FileStorage::READ);
-			fs["camera_matrix"] >> cameraMatrix;
-			fs["distortion_coefficients"] >> distCoeffs;
-
-			//-- Getting input image and board image
 			Mat inputImage = imread(parser.get<string>("i"));
 			Ptr<aruco::Dictionary> dictionary = aruco::getPredefinedDictionary(aruco::PREDEFINED_DICTIONARY_NAME(parser.get<int>("d")));
 			Ptr<cv::aruco::CharucoBoard> board = cv::aruco::CharucoBoard::create(parser.get<int>("nx"), parser.get<int>("ny"), parser.get<float>("mw"), parser.get<float>("aw"), dictionary);
-			Mat boardImage;
-			board->draw( inputImage.size(), boardImage );
 
-			vector< cv::Point2f > charucoCorners, detectedCharucoCorners, matchedCharucoCorners;
-			vector< int > charucoIds, detectedCharucoIds, matchedCharucoIds;
+			Mat undistortedCharuco = charuco_estimate(inputImage, parser.get<string>("cc"), dictionary, board);
 
-			//-- Detecting input image board
-			vector< int > ids;
-			vector< vector< Point2f > > corners;
-			aruco::detectMarkers(inputImage, dictionary, corners, ids);
-			if(ids.size() > 0){
-				aruco::interpolateCornersCharuco(corners, ids, inputImage, board, detectedCharucoCorners, detectedCharucoIds);
-			}
-
-			//-- Detecting perfect board image
-			vector< int > markerIds;
-			vector< vector< Point2f > > markerCorners;
-			aruco::detectMarkers(boardImage, dictionary, markerCorners, markerIds);
-			aruco::interpolateCornersCharuco(markerCorners, markerIds, boardImage, board, charucoCorners, charucoIds);
-
-			Vec3d rvec, tvec;
-
-			if (detectedCharucoIds.size() > 0) {
-				//-- Matching input board to perfect board
-				for (unsigned int i = 0; i < charucoIds.size(); i++) {
-					for (unsigned int j = 0; j < detectedCharucoIds.size(); j++) {
-						if (charucoIds[i] == detectedCharucoIds[j]) {
-							matchedCharucoIds.push_back(charucoIds[i]);
-							matchedCharucoCorners.push_back(charucoCorners[i]);
-						}
-					}
-				}
-				//-- Computing spatial homography and warping
-				Mat perspectiveTransform = findHomography(detectedCharucoCorners, matchedCharucoCorners, cv::RANSAC);
-				Mat undistoredCharuco;
-				warpPerspective(inputImage, undistoredCharuco, perspectiveTransform, inputImage.size());
-				bool valid = aruco::estimatePoseCharucoBoard(detectedCharucoCorners, detectedCharucoIds, board, cameraMatrix, distCoeffs, rvec, tvec);
-
-				if(valid){
-					cv::aruco::drawAxis(inputImage, cameraMatrix, distCoeffs, rvec, tvec, 0.1);
-				}
-
-				vector<string> sub_str;
-				const string full_str = parser.get<string>("i");
-				char del = '.';
-
-				split(full_str,del,sub_str);
-				string new_name;
-				new_name= sub_str[0]+"_posed.png";
-				imwrite(new_name,inputImage);
-
-				split(full_str,del,sub_str);
-				new_name = sub_str[0]+"_opp.png";
-				imwrite(new_name,undistoredCharuco);
-			}
+			vector<string> sub_str;
+			const string full_str = string(parser.get<string>("i"));
+			char del = '.';
+			split(full_str,del,sub_str);
+			string new_name = sub_str[0]+"_opp.png";
+			imwrite(new_name,undistortedCharuco);
 		}
 	}
 	else if(bool_vis | bool_vis_CH){
