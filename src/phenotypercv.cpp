@@ -24,29 +24,8 @@
  * 	Usage NIR:
  * 		find Images/ -name 'NIR_SV*' | xargs -P8 -I{} ./PhenotyperCV -m=NIR -i={} -b=background_image.png -c=nir_color.txt
  */
-#include <opencv2/opencv.hpp>
-#include "opencv2/ximgproc.hpp"
-#include <opencv2/aruco/charuco.hpp>
-#include <opencv2/ml.hpp>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <string>
-#include <math.h>
-#include <Eigen/Dense>
 
-#include <morphology.h>
-#include <spatial_calibration.h>
-#include <color_calibration.h>
-#include <feature_extraction.h>
-#include <miscellaneous.h>
-#include <machine_learning.h>
-
-using namespace cv;
-using namespace cv::ml;
-using namespace std;
-using namespace Eigen;
-using namespace ximgproc;
+#include <phenotypercv.h>
 
 namespace {
 const char* keys  =
