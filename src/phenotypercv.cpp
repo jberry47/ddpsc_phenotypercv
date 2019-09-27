@@ -1,29 +1,9 @@
 /* Title: PhenotyperCV
  * Author: Jeffrey Berry (Bart Lab)
  *
- * Description: This program is for segmenting and measuring plants from the Bellweather Phenotyping
- * Facility. Segmentation is achieved by supplying a background image that does not contain a plant
- * and using the difference between that and a supplied image to threshold on. Further processing is
- * done to remove artifacts that arise. After segmentation is complete, shapes and color profile are
- * reported in corresponding user-specified files.
- *
  * Usage: ./PhenotyperCV --help  for more information
- *
- * Compiling on Danforth Center Bioinformatics Infrastructure:
- * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/phenotypercv.d" -MT"./ddpsc_phenotypercv/phenotypercv.d" -o "./ddpsc_phenotypercv/phenotypercv.o" "./ddpsc_phenotypercv/phenotypercv.cpp"
- * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/color_calibration.d" -MT"./ddpsc_phenotypercv/color_calibration.d" -o "./ddpsc_phenotypercv/color_calibration.o" "./ddpsc_phenotypercv/color_calibration.cpp"
- * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/spatial_calibration.d" -MT"./ddpsc_phenotypercv/spatial_calibration.d" -o "./ddpsc_phenotypercv/spatial_calibration.o" "./ddpsc_phenotypercv/spatial_calibration.cpp"
- * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/feature_extraction.d" -MT"./ddpsc_phenotypercv/feature_extraction.d" -o "./ddpsc_phenotypercv/feature_extraction.o" "./ddpsc_phenotypercv/feature_extraction.cpp"
- * g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv -O0 -g3 -Wall -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/morphology.d" -MT"./ddpsc_phenotypercv/morphology.d" -o "./ddpsc_phenotypercv/morphology.o" "./ddpsc_phenotypercv/morphology.cpp"
- * g++ -L/shares/bioinfo/installs/opencv-3.3.0/install/lib ./ddpsc_phenotypercv/color_calibration.o ./ddpsc_phenotypercv/feature_extraction.o ./ddpsc_phenotypercv/morphology.o ./ddpsc_phenotypercv/phenotypercv.o ./ddpsc_phenotypercv/spatial_calibration.o -lopencv_core -lopencv_aruco -lopencv_calib3d -lopencv_highgui -lopencv_features2d -lopencv_imgproc -lopencv_imgcodecs -o "PhenotyperCV"
- *
- * To use the program in a parallelized fashion, pipe find into xargs with the -P flag followed by
- * number of cores like this:
- * 	Usage VIS or VIS_CH:
- * 		find Images/ -name 'VIS_SV*' | xargs -P8 -I{} ./PhenotyperCV -m=VIS_CH -i={} -b=background_image.png -s=shapes.txt -c=color.txt'
- * 	Usage NIR:
- * 		find Images/ -name 'NIR_SV*' | xargs -P8 -I{} ./PhenotyperCV -m=NIR -i={} -b=background_image.png -c=nir_color.txt
- */
+ * For more info visit https://github.com/jberry47/ddpsc_phenotypercv/wiki
+*/
 
 #include <phenotypercv.h>
 
