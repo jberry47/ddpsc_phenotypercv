@@ -225,5 +225,44 @@ inline vector<Point> keep_roi(Mat img,Point tl, Point br, Mat &mask){
 	return cc;
 };
 
+inline void write_shapes(vector<double> shapes_data, string iname, string fname){
+	ofstream shape_file;
+	shape_file.open(fname.c_str(),ios_base::app);
+	shape_file << iname << " ";
+	for(unsigned int i=0;i<shapes_data.size();i++){
+		shape_file << shapes_data[i];
+		if(i != shapes_data.size()){
+			shape_file << " ";
+		}
+	}
+	shape_file << endl;
+	shape_file.close();
+};
+
+inline void write_color(Mat hue_data, string iname, string fname){
+	string name_hue= fname;
+	ofstream hue_file;
+	hue_file.open(name_hue.c_str(),ios_base::app);
+	hue_file << iname << " ";
+	for(int i=0;i<hue_data.rows;i++){
+		hue_file << hue_data.at<float>(i,0);
+		if(i != hue_data.rows){
+			hue_file << " ";
+		}
+	}
+	hue_file << endl;
+	hue_file.close();
+}
+
+inline void write_leaves(vector<vector<double> > leaf_data,string iname,string fname){
+	string name_leaf= fname;
+	ofstream leaf_file;
+	leaf_file.open(name_leaf.c_str(),ios_base::app);
+	for(unsigned int i = 0; i<leaf_data[0].size(); i++){
+		leaf_file << iname << " " << i << " " << leaf_data[0][i] << " " << leaf_data[1][i] << " " << leaf_data[2][i] << " " << leaf_data[3][i] << endl;
+	}
+	leaf_file.close();
+};
+
 
 #endif /* FEATURE_EXTRACTION_H_ */

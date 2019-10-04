@@ -420,48 +420,16 @@ int main(int argc, char *argv[]){
 
 			//-- Getting numerical data
 			vector<double> shapes_data = get_shapes(cc,mask);
+			if(bool_vis_CH){
+				shapes_data.push_back(D);
+			}
 			Mat hue_data = get_color(adjImage, mask);
 			vector<vector<double> > leaf_data = get_leaf_info(classified,filled_mask);
 
 			//-- Write shapes to file
-			string name_shape= parser.get<string>("s");
-			ofstream shape_file;
-			shape_file.open(name_shape.c_str(),ios_base::app);
-			shape_file << parser.get<string>("i") << " ";
-			for(unsigned int i=0;i<shapes_data.size();i++){
-				shape_file << shapes_data[i];
-				if(i != shapes_data.size()){
-					shape_file << " ";
-				}
-			}
-			if(bool_vis_CH){
-				shape_file << " " << D;
-			}
-			shape_file << endl;
-			shape_file.close();
-
-			//-- Write color to file
-			string name_hue= parser.get<string>("c");
-			ofstream hue_file;
-			hue_file.open(name_hue.c_str(),ios_base::app);
-			hue_file << parser.get<string>("i") << " ";
-			for(int i=0;i<hue_data.rows;i++){
-				hue_file << hue_data.at<float>(i,0);
-				if(i != hue_data.rows){
-					hue_file << " ";
-				}
-			}
-			hue_file << endl;
-			hue_file.close();
-
-			//-- Write leaf data to file
-			string name_leaf= parser.get<string>("d");
-			ofstream leaf_file;
-			leaf_file.open(name_leaf.c_str(),ios_base::app);
-			for(unsigned int i = 0; i<leaf_data[0].size(); i++){
-				leaf_file << parser.get<string>("i") << " " << i << " " << leaf_data[0][i] << " " << leaf_data[1][i] << " " << leaf_data[2][i] << " " << leaf_data[3][i] << endl;
-			}
-			leaf_file.close();
+			write_shapes(shapes_data,parser.get<string>("i"),parser.get<string>("s"));
+			write_color(hue_data,parser.get<string>("i"),parser.get<string>("c"));
+			write_leaves(leaf_data,parser.get<string>("i"),parser.get<string>("d"));
 
 			if(parser.has("debug")){
 				vector<string> sub_str;
