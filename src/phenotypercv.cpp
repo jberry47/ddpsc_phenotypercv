@@ -428,7 +428,7 @@ int main(int argc, char *argv[]){
 
 			//-- Write shapes to file
 			write_shapes(shapes_data,parser.get<string>("i"),parser.get<string>("s"));
-			write_color(hue_data,parser.get<string>("i"),parser.get<string>("c"));
+			write_hist(hue_data,parser.get<string>("i"),parser.get<string>("c"));
 			write_leaves(leaf_data,parser.get<string>("i"),parser.get<string>("d"));
 
 			if(parser.has("debug")){
@@ -503,18 +503,7 @@ int main(int argc, char *argv[]){
 	    	Mat nir_data = get_nir(nirImage, kept_mask_nir);
 
 	        //-- Writing numerical data
-	    	string name_nir= parser.get<string>("c");
-	   		ofstream nir_file;
-	   		nir_file.open(name_nir.c_str(),ios_base::app);
-	   		nir_file << argv[2] << " ";
-	   		for(int i=0;i<nir_data.rows;i++){
-	   		   	nir_file << nir_data.at<float>(i,0);
-				if(i != nir_data.rows){
-					nir_file << " ";
-				}
-	   		}
-	   		nir_file << endl;
-	   		nir_file.close();
+	    	write_hist(nir_data,parser.get<string>("i"),parser.get<string>("c"));
 
 	   		if(parser.has("debug")){
 				vector<string> sub_str;

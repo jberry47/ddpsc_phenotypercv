@@ -307,5 +307,16 @@ vector<vector<double> > get_leaf_info(Mat classified_skel, Mat filled_mask){
 	return(my_data);
 };
 
+inline void write_leaves(vector<vector<double> > leaf_data,string iname,string fname){
+	string name_leaf= fname;
+	ofstream leaf_file;
+	leaf_file.open(name_leaf.c_str(),ios_base::app);
+	for(unsigned int i = 0; i<leaf_data[0].size(); i++){
+		leaf_file << iname << " " << i << " " << leaf_data[0][i] << " " << leaf_data[1][i] << " " << leaf_data[2][i] << " " << leaf_data[3][i] << endl;
+	}
+	leaf_file.close();
+};
+
+
 
 #endif /* MORPHOLOGY_H_ */
