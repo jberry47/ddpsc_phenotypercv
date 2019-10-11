@@ -44,6 +44,17 @@ cmake .. -DOPENCV_EXTRA_MODULES_PATH=$my_path/opencv_contrib-4.1.1/modules
 make -j8
 sudo make install
 ```
+##### Getting ZBar and installing
+For Ubuntu users:
+```bash
+sudo apt-get install libzbar-dev libzbar0
+```
+For MacOSX users:
+```bash
+brew install zbar
+```
+For Windows users:
+Install ZBar according to [their documentation](http://zbar.sourceforge.net/download.html). 
 
 ##### Getting PhenotyperCV and building
 ```bash
