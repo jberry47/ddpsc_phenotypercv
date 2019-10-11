@@ -17,6 +17,7 @@
 #include <string>
 #include <math.h>
 #include <Eigen/Dense>
+#include <zbar.h>
 
 #include <feature_extraction.h>
 #include <color_calibration.h>
@@ -25,6 +26,7 @@ using namespace cv;
 using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
+using namespace zbar;
 
 int roi_size;
 Mat src,src1,dst,selMat,gray;
@@ -377,5 +379,57 @@ inline void thresholdGUI( int, void* ){
 	  imshow( "threshold", out );
 };
 
+typedef struct
+{
+  string type;
+  string data;
+  vector <Point> location;
+} decodedObject;
+
+void decodeQR(Mat &im, vector<decodedObject>&decodedObjects){
+  ImageScanner scanner;
+  scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
+
+  Mat imGray;
+  cvtColor(im, imGray,cv::COLOR_BGR2GRAY);
+
+  Image image(im.cols, im.rows, "Y800", (uchar *)imGray.data, im.cols * im.rows);
+
+  int n = scanner.scan(image);
+
+  for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol){
+    decodedObject obj;
+
+    obj.type = symbol->get_type_name();
+    obj.data = symbol->get_data();
+
+    for(int i = 0; i< symbol->get_location_size(); i++){
+      obj.location.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
+    }
+
+    decodedObjects.push_back(obj);
+  }
+}
+
+void displayQR(Mat &im, vector<decodedObject>&decodedObjects){
+  for(unsigned int i = 0; i < decodedObjects.size(); i++){
+    vector<Point> points = decodedObjects[i].location;
+    vector<Point> hull;
+
+    if(points.size() > 4){
+    	convexHull(points, hull);
+    }else{
+        hull = points;
+    }
+
+    int n = hull.size();
+    for(int j = 0; j < n; j++){
+      line(im, hull[j], hull[ (j+1) % n], Scalar(255,0,0), 3);
+    }
+  }
+
+  imshow("Results", im);
+  waitKey(0);
+}
 
 #endif /* MISCELLANEOUS_H_ */

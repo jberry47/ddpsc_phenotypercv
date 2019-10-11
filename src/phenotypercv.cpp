@@ -58,13 +58,17 @@ int main(int argc, char *argv[]){
 	bool bool_testing = mode == "TESTING";
 
 	if(bool_testing){
-		Mat inputImage = imread(parser.get<string>("i"));
+	  Mat im = imread(parser.get<string>("i"));
+	  vector<decodedObject> decodedObjects;
+	  decodeQR(im, decodedObjects);
+	  cout << "Data: " << decodedObjects[0].data << endl;
+	  displayQR(im, decodedObjects);
 
-		roi_size = parser.get<int>("s");
-		src = inputImage.clone();
+		//roi_size = parser.get<int>("s");
+		//src = inputImage.clone();
 
-		Mat corrected = grayCorrect(inputImage);
-   		imwrite("gray_corrected.png",corrected);
+		//Mat corrected = grayCorrect(inputImage);
+   		//imwrite("gray_corrected.png",corrected);
 
 		//Mat inputImage = imread(parser.get<string>("i"));
 		//Mat corrected = nonUniformCorrect(inputImage,15);

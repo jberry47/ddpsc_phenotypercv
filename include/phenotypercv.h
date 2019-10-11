@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include "opencv2/ximgproc.hpp"
 #include <opencv2/aruco/charuco.hpp>
+#include <opencv2/objdetect.hpp>
 #include <opencv2/ml.hpp>
 #include <iostream>
 #include <fstream>
@@ -18,6 +19,7 @@
 #include <string>
 #include <math.h>
 #include <Eigen/Dense>
+#include <zbar.h>
 
 #include <morphology.h>
 #include <spatial_calibration.h>
@@ -31,6 +33,7 @@ using namespace cv::ml;
 using namespace std;
 using namespace Eigen;
 using namespace ximgproc;
+using namespace zbar;
 
 
 #endif /* PHENOTYPERCV_H_ */
