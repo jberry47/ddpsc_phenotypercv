@@ -4,7 +4,7 @@ cd && cd programs/PhenotyperCV/ddpsc_phenotypercv/ && git pull
 
 printf "\nCreating shared object files...\n"
 cd && cd programs/PhenotyperCV/
-g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv/include -O0 -g3 -Wno-narrowing -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/src/phenotypercv.d" -MT"./ddpsc_phenotypercv/src/phenotypercv.d" -o "./ddpsc_phenotypercv/src/phenotypercv.o" "./ddpsc_phenotypercv/src/phenotypercv.cpp"
+g++ -I/shares/bioinfo/installs/opencv-3.3.0/install/include/ -I/shares/bioinfo/installs/zbar-0.10/zbar/include/ -I/shares/bioinfo/installs/eigen/Eigen -I/home/jberry/programs/PhenotyperCV/ddpsc_phenotypercv/include -O0 -g3 -Wno-narrowing -c -std=c++11 -MMD -MP -MF"./ddpsc_phenotypercv/src/phenotypercv.d" -MT"./ddpsc_phenotypercv/src/phenotypercv.d" -o "./ddpsc_phenotypercv/src/phenotypercv.o" "./ddpsc_phenotypercv/src/phenotypercv.cpp"
 
 printf "\nLinking shared object files...\n"
 g++ -L/shares/bioinfo/installs/opencv-3.3.0/install/lib \
