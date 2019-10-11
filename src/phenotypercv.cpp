@@ -60,9 +60,9 @@ int main(int argc, char *argv[]){
 	if(bool_testing){
 	  Mat im = imread(parser.get<string>("i"));
 	  vector<decodedObject> decodedObjects;
-	  decodeQR(im, decodedObjects);
+	  decodeSymbols(im, decodedObjects);
 	  cout << "Data: " << decodedObjects[0].data << endl;
-	  displayQR(im, decodedObjects);
+	  displaySimbols(im, decodedObjects);
 
 		//roi_size = parser.get<int>("s");
 		//src = inputImage.clone();

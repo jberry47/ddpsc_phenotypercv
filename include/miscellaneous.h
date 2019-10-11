@@ -386,7 +386,7 @@ typedef struct
   vector <Point> location;
 } decodedObject;
 
-void decodeQR(Mat &im, vector<decodedObject>&decodedObjects){
+void decodeSymbols(Mat &im, vector<decodedObject>&decodedObjects){
   ImageScanner scanner;
   scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
 
@@ -411,7 +411,7 @@ void decodeQR(Mat &im, vector<decodedObject>&decodedObjects){
   }
 }
 
-void displayQR(Mat &im, vector<decodedObject>&decodedObjects){
+void displaySymbols(Mat &im, vector<decodedObject>&decodedObjects){
   for(unsigned int i = 0; i < decodedObjects.size(); i++){
     vector<Point> points = decodedObjects[i].location;
     vector<Point> hull;
