@@ -1,0 +1,23 @@
+site_name: PhenotyperCV
+site_url: http://phenotypercv.readthedocs.io/
+site_description: Header-only C++11 library using OpenCV for high-throughput image-based plant phenotyping
+site_author: Jeffrey Berry
+repo_url: https://github.com/jberry47/ddpsc_phenotypercv
+theme: readthedocs
+
+nav:
+- Home: index.md
+- Documentation:
+  - 'Installation': installation.md
+  - 'Contributing':
+    - 'Contributing to PlantCV': CONTRIBUTING.md
+    - 'Adding/Editing Documentation': documentation.md
+  - Tutorials:
+    - 'VIS Workflow': vis_tutorial.md
+  - 'Package Plantcv':
+    - 'Analyze color': analyze_color.md
+    - 'Analyze NIR': analyze_NIR_intensity.md
+markdown_extensions:
+  - toc:
+      permalink: True
+  - admonition
