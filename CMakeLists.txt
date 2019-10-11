@@ -6,10 +6,13 @@ project (PhenotyperCV)
 
 find_package( OpenCV REQUIRED )
 find_package (Eigen3 REQUIRED NO_MODULE)
-find_package(ZBar0)
+
+find_library(ZBAR_LIBRARIES NAMES zbar)
+find_path(ZBAR_INCLUDE_DIR Decoder.h PATH_SUFFIXES zbar )
+
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
 add_executable(PhenotyperCV ${SOURCES})
-target_link_libraries( PhenotyperCV ${OpenCV_LIBS} ${ZBAR_LIBS})
+target_link_libraries( PhenotyperCV ${OpenCV_LIBS} ${ZBAR_LIBRARIES})
