@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 	  vector<decodedObject> decodedObjects;
 	  decodeSymbols(im, decodedObjects);
 	  cout << "Data: " << decodedObjects[0].data << endl;
-	  displaySimbols(im, decodedObjects);
+	  displaySymbols(im, decodedObjects);
 
 		//roi_size = parser.get<int>("s");
 		//src = inputImage.clone();
