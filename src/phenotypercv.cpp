@@ -61,8 +61,14 @@ int main(int argc, char *argv[]){
 	  Mat im = imread(parser.get<string>("i"));
 	  vector<decodedObject> decodedObjects;
 	  decodeSymbols(im, decodedObjects);
-	  cout << "Data: " << decodedObjects[0].data << endl;
-	  displaySymbols(im, decodedObjects);
+	  if(decodedObjects.size() > 0){
+		  displaySymbols(im, decodedObjects);
+		  for(unsigned int i = 0; i < decodedObjects.size(); i++){
+			  cout << "Data: " << decodedObjects[i].data << endl;
+		  }
+	  }else{
+		  cout << "No objects detected" << endl;
+	  }
 	}
 	else if(bool_mlProc){
 		if(!(parser.has("i") && parser.has("class") && parser.has("size") && parser.has("s")  && parser.has("c") && parser.has("method"))){
@@ -401,7 +407,6 @@ int main(int argc, char *argv[]){
 			imwrite(new_name,adjImage);
 		}
 	}
-    //-- Processing the NIR image
 	else if(bool_nir){
 		if(!(parser.has("i") && parser.has("b") && parser.has("c"))){
 			cout << "Using mode NIR requires input: -i=inputImage -b=backgroundImage -c=nir_color_file.txt" << endl;

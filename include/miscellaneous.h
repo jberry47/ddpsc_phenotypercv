@@ -392,22 +392,20 @@ void decodeSymbols(Mat &im, vector<decodedObject>&decodedObjects){
 
   Mat imGray;
   cvtColor(im, imGray,cv::COLOR_BGR2GRAY);
-
   Image image(im.cols, im.rows, "Y800", (uchar *)imGray.data, im.cols * im.rows);
 
   int n = scanner.scan(image);
 
-  for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol){
-    decodedObject obj;
-
-    obj.type = symbol->get_type_name();
-    obj.data = symbol->get_data();
-
-    for(int i = 0; i< symbol->get_location_size(); i++){
-      obj.location.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
-    }
-
-    decodedObjects.push_back(obj);
+  if(n > 0){
+	  for(Image::SymbolIterator symbol = image.symbol_begin(); symbol != image.symbol_end(); ++symbol){
+		  decodedObject obj;
+		  obj.type = symbol->get_type_name();
+		  obj.data = symbol->get_data();
+		  for(int i = 0; i< symbol->get_location_size(); i++){
+			  obj.location.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
+		  }
+		  decodedObjects.push_back(obj);
+	  }
   }
 }
 
