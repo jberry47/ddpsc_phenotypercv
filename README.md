@@ -21,9 +21,10 @@ wget "http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
 tar -xf eigen-3.3.7.tar
 cd eigen-eigen-323c052e1731
 mkdir build && cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make install
-sudo cp -r /usr/include/eigen3/Eigen /usr/include/
+sudo cp -r /usr/local/include/eigen3/Eigen /usr/local/include/
+cd $my_path
 ```
 
 ##### Getting OpenCV extra modules
@@ -32,6 +33,7 @@ wget https://github.com/opencv/opencv_contrib/archive/4.1.1.tar.gz -O"opencv_con
 tar -xzf opencv_contrib-4.1.1.tar.gz
 cd opencv_contrib-4.1.1/modules
 rm -rv !("aruco"|"ximgproc") 
+cd $my_path
 ```
 
 ##### Getting OpenCV and installing
@@ -43,6 +45,7 @@ mkdir build && cd build
 cmake .. -DOPENCV_EXTRA_MODULES_PATH=$my_path/opencv_contrib-4.1.1/modules
 make -j8
 sudo make install
+cd $my_path
 ```
 ##### Getting ZBar and installing
 For Ubuntu users:
