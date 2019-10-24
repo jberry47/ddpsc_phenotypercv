@@ -5,7 +5,7 @@ set (CMAKE_CXX_FLAGS -Wno-narrowing)
 project (PhenotyperCV)
 
 find_package( OpenCV REQUIRED )
-find_package (Eigen3 REQUIRED NO_MODULE)
+include_directories(/usr/local/include)
 
 find_library(ZBAR_LIBRARIES NAMES zbar)
 find_path(ZBAR_INCLUDE_DIR Decoder.h PATH_SUFFIXES zbar )
