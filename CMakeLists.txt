@@ -10,7 +10,7 @@ include_directories(/usr/local/include)
 find_library(ZBAR_LIBRARIES NAMES zbar)
 find_path(ZBAR_INCLUDE_DIR Decoder.h PATH_SUFFIXES zbar )
 
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories( ${OpenCV_INCLUDE_DIRS} ${ZBAR_INCLUDE_DIR})
 
 include_directories(include)
 file(GLOB SOURCES "src/*.cpp")
