@@ -1,7 +1,7 @@
 <img src="www/raw.png" width="33%"></img><img src="www/mask.png" width="33%"></img><img src="www/classified.png" width="33%"></img>
 
 # DDPSC PhenotyperCV
-PhenotyperCV is a header-only library that has a large range of functionality for image-based plant phenotyping. 
+PhenotyperCV is a header-only C++11 library that has a large range of functionality for image-based plant phenotyping. 
 
 Included is a single source file that, when built, has workflows for many pratical applications. The created executable has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Futher information can be found using the `-h` flag. 
 
