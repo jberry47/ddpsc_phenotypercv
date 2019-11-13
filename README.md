@@ -8,7 +8,7 @@ Included is a single source file that, when built, has workflows for many pratic
 Custom workflows, with the aid of functions in this library, are also made possible and are intended to ease the difficulty in processing images from any source. A common bottleneck of image processing is not knowing how to perform specific tasks and this library is designed with that in mind.
 
 ### Usage
-Visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for more info on how to use this program
+Visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for more info on how to use included source file and how to create your own custom workflows. 
 
 ### Building the program
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
