@@ -73,7 +73,13 @@ export PATH=$PATH:$my_path/ddpsc_phenotypercv/build
 ```
 
 ### Building the program on DDPSC Infrastructure
-Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure, `misc/pull_compile_phenocv.sh` is a bash script that MUST BE EDITED to your file paths and will first pull the repository, and execute a series of g++ commands that will create the executable and clean up all temporary files during the build. Alternatively, a pre-built executable exists already in `/home/jberry/programs/PhenotyperCV`.
+Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure there is a bash script that links to everything needed and can be run with: 
+```bash 
+cd ddpsc_phenotypercv/misc
+./pull_compile_phenocv.sh
+cd ../../
+```
+Alternatively, a pre-built executable exists already in `/home/jberry/programs/PhenotyperCV`.
 
 After a successful build, you need to include the libraries to OpenCV and ZBar in your LD_LIBRARY_PATH
 ```bash
