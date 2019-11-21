@@ -73,7 +73,7 @@ export PATH=$PATH:$my_path/ddpsc_phenotypercv/build
 ```
 
 ### Building the program on DDPSC Infrastructure
-Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure there is a bash script that links to everything needed and can be run with: 
+Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure, there is a bash script in the misc directory of this repo that links to everything needed, and can be run with: 
 ```bash 
 cd ddpsc_phenotypercv/misc
 ./pull_compile_phenocv.sh
