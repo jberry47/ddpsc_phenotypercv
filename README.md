@@ -10,7 +10,7 @@ Custom workflows, with the aid of functions in this library, are also made possi
 ### Usage
 Visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for more info on how to use included source file and how to create your own custom workflows. 
 
-### Building the program
+### Building the program on a local computer
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
 
 ##### Making a directory for all builds
@@ -75,7 +75,14 @@ export PATH=$PATH:$my_path/ddpsc_phenotypercv/build
 ### Building the program on DDPSC Infrastructure
 Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure, `misc/pull_compile_phenocv.sh` is a bash script that MUST BE EDITED to your file paths and will first pull the repository, and execute a series of g++ commands that will create the executable and clean up all temporary files during the build. Alternatively, a pre-built executable exists already in `/home/jberry/programs/PhenotyperCV`.
 
-After a successful build, you can read the help page with `./PhenotyperCV -h`
+After a successful build, you need to include the libraries to OpenCV in your LD_LIBRARY_PATH
+```bash
+export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/shares/bioinfo/installs/opencv-3.3.0/install/lib
+```
+It is recommended that you add this line to your bash_profile or bash_rc so you don't have to add the libraries every time you want to use PhenotyperCV.
+
+### Testing the build
+After you create the executable, test to make sure it can be used by running `PhenotyperCV -h` which should display a help page. 
 
 ### DDPSC Datasci Cluster Usage
 Example condor job file and accompanying executable for processing images on the DDPSC infrastructure can be found in the `misc` directory
