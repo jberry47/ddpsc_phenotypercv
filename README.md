@@ -77,7 +77,7 @@ Both OpenCV and Eigen3 depedencies are in unconventional locations that are not 
 
 After a successful build, you need to include the libraries to OpenCV and ZBar in your LD_LIBRARY_PATH
 ```bash
-export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/shares/bioinfo/installs/opencv-3.3.0/install/lib:/bioinfo/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/shares/bioinfo/installs/opencv-3.3.0/install/lib:/bioinfo/lib
 ```
 It is recommended that you add this line to your bash_profile or bash_rc so you don't have to add the libraries every time you want to use PhenotyperCV.
 
