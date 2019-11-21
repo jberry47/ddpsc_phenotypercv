@@ -75,9 +75,9 @@ export PATH=$PATH:$my_path/ddpsc_phenotypercv/build
 ### Building the program on DDPSC Infrastructure
 Both OpenCV and Eigen3 depedencies are in unconventional locations that are not found with cmake. To build the program on the infrastructure, `misc/pull_compile_phenocv.sh` is a bash script that MUST BE EDITED to your file paths and will first pull the repository, and execute a series of g++ commands that will create the executable and clean up all temporary files during the build. Alternatively, a pre-built executable exists already in `/home/jberry/programs/PhenotyperCV`.
 
-After a successful build, you need to include the libraries to OpenCV in your LD_LIBRARY_PATH
+After a successful build, you need to include the libraries to OpenCV and ZBar in your LD_LIBRARY_PATH
 ```bash
-export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/shares/bioinfo/installs/opencv-3.3.0/install/lib
+export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/shares/bioinfo/installs/opencv-3.3.0/install/lib:/bioinfo/lib
 ```
 It is recommended that you add this line to your bash_profile or bash_rc so you don't have to add the libraries every time you want to use PhenotyperCV.
 
