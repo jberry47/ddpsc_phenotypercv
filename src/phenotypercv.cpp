@@ -59,10 +59,9 @@ int main(int argc, char *argv[]){
 
 	if(bool_testing){
 	  Mat im = imread(parser.get<string>("i"));
-	  vector<decodedObject> decodedObjects;
-	  decodeSymbols(im, decodedObjects);
+	  vector<decodedObject> decodedObjects = decodeSymbols(im);
+	  // displaySymbols(im, decodedObjects);
 	  if(decodedObjects.size() > 0){
-		  displaySymbols(im, decodedObjects);
 		  for(unsigned int i = 0; i < decodedObjects.size(); i++){
 			  cout << "Data: " << decodedObjects[i].data << endl;
 		  }

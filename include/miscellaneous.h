@@ -386,7 +386,8 @@ typedef struct
   vector <Point> location;
 } decodedObject;
 
-void decodeSymbols(Mat &im, vector<decodedObject>&decodedObjects){
+vector<decodedObject> decodeSymbols(Mat &im){
+  vector<decodedObject> decodedObjects;
   ImageScanner scanner;
   scanner.set_config(ZBAR_NONE, ZBAR_CFG_ENABLE, 1);
 
@@ -407,6 +408,7 @@ void decodeSymbols(Mat &im, vector<decodedObject>&decodedObjects){
 		  decodedObjects.push_back(obj);
 	  }
   }
+  return(decodedObjects);
 }
 
 void displaySymbols(Mat &im, vector<decodedObject>&decodedObjects){
