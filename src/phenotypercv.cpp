@@ -249,10 +249,10 @@ int main(int argc, char *argv[]){
 		}
 	}
 	else if(bool_vis | bool_vis_CH){
-		if(bool_vis && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c") && parser.has("d"))){
+		if(bool_vis && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
 			cout << "Using mode VIS requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt -d=leaf_file.txt" << endl;
 		}
-		else if(bool_vis_CH && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c") && parser.has("d"))){
+		else if(bool_vis_CH && !(parser.has("i") && parser.has("b") && parser.has("s") && parser.has("c"))){
 			cout << "Using mode VIS_CH requires input: -i=inputImage -b=backgroundImage -s=shapes_file.txt -c=color_file.txt -d=leaf_file.txt" << endl;
 			cout << "In addition to this input, a directory called 'card_masks' must be present and contains binary images of each chip of the input image" << endl;
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
@@ -282,7 +282,7 @@ int main(int argc, char *argv[]){
 			Mat dest_blur;
 			blur(channels[1], dest_blur, Size( 2, 2 ) );
 			Mat dest_thresh;
-			threshold(dest_blur,dest_thresh,25,255,THRESH_BINARY);
+			threshold(dest_blur,dest_thresh,35,255,THRESH_BINARY);
 			Mat dest_dilate;
 			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 5, 1, 1);
 			Mat dest_erode;
@@ -336,24 +336,36 @@ int main(int argc, char *argv[]){
 			//-- ROI selector
 			Mat mask;
 			vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
-
-			//-- Segmenting leaves from stem
-			Mat dil;
-			dilate(mask, dil, Mat(), Point(-1, -1), 1, 1, 1);
-			Mat skel;
-			ximgproc::thinning(dil,skel,THINNING_ZHANGSUEN);
-			Mat skel_filt0 = length_filter(skel,50);
-			Mat pruned = prune(skel_filt0,5);
-			Mat seg_skel = segment_skeleton(pruned);
-			Mat tips = find_endpoints(pruned);
-		    Mat no_tips = Mat::zeros(inputImage.size(),pruned.type());
-		    rectangle(no_tips,Point(1164,1266),Point(1290,1407),255,cv::FILLED);
-		    tips = tips -(tips & no_tips);
-
-			Mat skel_filt1 = length_filter(seg_skel,12);
-			Mat leaves = find_leaves(skel_filt1,tips);
-			Mat classified = add_stem(leaves,pruned);
-			Mat filled_mask = fill_mask(dil,classified);
+      
+      if(parser.has("d")){
+        //-- Segmenting leaves from stem
+        Mat dil;
+        dilate(mask, dil, Mat(), Point(-1, -1), 1, 1, 1);
+        Mat skel;
+        ximgproc::thinning(dil,skel,THINNING_ZHANGSUEN);
+        Mat skel_filt0 = length_filter(skel,50);
+        Mat pruned = prune(skel_filt0,5);
+        Mat seg_skel = segment_skeleton(pruned);
+        Mat tips = find_endpoints(pruned);
+        Mat no_tips = Mat::zeros(inputImage.size(),pruned.type());
+        rectangle(no_tips,Point(1164,1266),Point(1290,1407),255,cv::FILLED);
+        tips = tips -(tips & no_tips);
+        
+        Mat skel_filt1 = length_filter(seg_skel,12);
+        Mat leaves = find_leaves(skel_filt1,tips);
+        Mat classified = add_stem(leaves,pruned);
+        Mat filled_mask = fill_mask(dil,classified);
+        vector<vector<double> > leaf_data = get_leaf_info(classified,filled_mask);
+        write_leaves(leaf_data,parser.get<string>("i"),parser.get<string>("d"));
+        if(parser.has("debug")){
+          vector<string> sub_str;
+          const string full_str = string(parser.get<string>("i"));
+          char del = '.';
+          split(full_str,del,sub_str);
+          string new_name = sub_str[0]+"_filled.png";
+          imwrite(new_name,filled_mask);        
+        }
+      }
 
 			//-- Getting numerical data
 			vector<double> shapes_data = get_shapes(cc,mask);
@@ -361,12 +373,10 @@ int main(int argc, char *argv[]){
 				shapes_data.push_back(D);
 			}
 			Mat hue_data = get_color(adjImage, mask);
-			vector<vector<double> > leaf_data = get_leaf_info(classified,filled_mask);
 
 			//-- Write shapes to file
 			write_shapes(shapes_data,parser.get<string>("i"),parser.get<string>("s"));
 			write_hist(hue_data,parser.get<string>("i"),parser.get<string>("c"));
-			write_leaves(leaf_data,parser.get<string>("i"),parser.get<string>("d"));
 
 			if(parser.has("debug")){
 				vector<string> sub_str;
@@ -375,8 +385,6 @@ int main(int argc, char *argv[]){
 				split(full_str,del,sub_str);
 				string new_name = sub_str[0]+"_mask.png";
 				imwrite(new_name,mask);
-				new_name = sub_str[0]+"_filled.png";
-				imwrite(new_name,filled_mask);
 			}
 		}
 	}
