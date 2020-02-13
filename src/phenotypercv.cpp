@@ -293,6 +293,7 @@ int main(int argc, char *argv[]){
 			cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
 			vector<Mat> split_lab;
 			split(lab, split_lab);
+			/*			
 			Mat b_thresh1;
 			inRange(split_lab[2],90,139,b_thresh1);
 			Mat invSrc =  cv::Scalar::all(255) - b_thresh1;
@@ -300,13 +301,15 @@ int main(int argc, char *argv[]){
 			bitwise_and(dest_erode,invSrc,mask1);
 			Mat barcode_roi;
 			vector<Point> cc_barcode = keep_roi(mask1,Point(1146,1368),Point(1359,1479),barcode_roi);
-			Mat mask2 = mask1-barcode_roi;
-
+			*/
+			Mat mask2 = dest_erode;
+			
 			//-- Remove edges of pot
+			/*
 			Mat dest_lab;
 			cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
 			vector<Mat> channels_lab;
-			split(dest_lab, channels_lab);
+			split(dest_lab, channels_lab);		
 			Mat pot_thresh1;
 			inRange(channels_lab[2],0,120,pot_thresh1);
 			Mat pot_thresh2;
@@ -321,8 +324,10 @@ int main(int argc, char *argv[]){
 			bitwise_and(pot_erode,mask2,pot_and);
 			Mat pot_roi;
 			vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
+			*/
 
 			//-- Remove blue stakes
+			/*
 			Mat b_thresh;
 			inRange(split_lab[2],80,115,b_thresh);
 			Mat b_er;
@@ -332,10 +337,12 @@ int main(int argc, char *argv[]){
 			Mat b_dil;
 			dilate(b_roi,b_dil,Mat(),Point(-1, -1), 6, 1, 1);
 			Mat b_xor = pot_roi - b_dil;
+			*/
 
 			//-- ROI selector
 			Mat mask;
-			vector<Point> cc = keep_roi(b_xor,Point(550,0),Point(1810,1410),mask);
+			vector<Point> cc = keep_roi(mask2,Point(550,0),Point(1810,1305),mask);
+
       
       if(parser.has("d")){
         //-- Segmenting leaves from stem
