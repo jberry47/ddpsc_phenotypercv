@@ -13,6 +13,21 @@ Visit [the wiki page](https://github.com/jberry47/ddpsc_phenotypercv/wiki) for m
 ### Building the program on a local computer
 PhenotyperCV is dependent on two packages: OpenCV and Eigen3. Additionally, the OpenCV installation must have been with the extra modules enabled, namely: aruco, ml, and ximgproc. This program must be compiled from source and is made easier with `cmake`
 
+##### (Mac Only) Installing Homebew
+```bash 
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+##### Installing CMake
+For Ubuntu users:
+```bash
+sudo apt-get install cmake
+```
+For MacOSX users:
+```bash
+brew install cmake
+```
+
 ##### Making a directory for all builds
 ```bash
 mkdir big_build && cd big_build
@@ -60,8 +75,6 @@ For MacOSX users:
 ```bash
 brew install zbar
 ```
-For Windows users:
-Install ZBar according to [their documentation](http://zbar.sourceforge.net/download.html). 
 
 ##### Getting PhenotyperCV and building
 ```bash
