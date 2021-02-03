@@ -36,9 +36,8 @@ export my_path=$(pwd)
 
 ##### Getting Eigen3 and installing
 ```bash
-wget "http://bitbucket.org/eigen/eigen/get/3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
+wget "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
 tar -xf eigen-3.3.7.tar
-cd eigen-eigen-323c052e1731
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make install
