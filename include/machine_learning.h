@@ -117,7 +117,7 @@ inline Mat predictSVM(Mat img, string fname){
 
 	Mat output;
 	resize(response, output, img.size(), 0, 0, INTER_LINEAR);
-	return(output);
+	return(255-output);
 };
 
 inline void trainBC(Mat img, Mat mask, string fname){
