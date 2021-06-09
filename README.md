@@ -37,7 +37,7 @@ export my_path=$(pwd)
 ##### Getting Eigen3 and installing
 ```bash
 wget "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2" -O"eigen-3.3.7.tar"
-tar -xf eigen-3.3.7.tar
+tar -xf eigen-3.3.7.tar && cd eigen-3.3.7.tar
 mkdir build && cd build
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make install
@@ -47,20 +47,20 @@ cd $my_path
 
 ##### Getting OpenCV extra modules
 ```bash
-wget https://github.com/opencv/opencv_contrib/archive/4.1.1.tar.gz -O"opencv_contrib-4.1.1.tar.gz"
-tar -xzf opencv_contrib-4.1.1.tar.gz
-cd opencv_contrib-4.1.1/modules
+wget https://github.com/opencv/opencv_contrib/archive/4.5.2.tar.gz -O"opencv_contrib-4.5.2.tar.gz"
+tar -xzf opencv_contrib-4.5.2.tar.gz
+cd opencv_contrib-4.5.2/modules
 rm -rv !("aruco"|"ximgproc") 
 cd $my_path
 ```
 
 ##### Getting OpenCV and installing
 ```bash
-wget https://github.com/opencv/opencv/archive/4.1.1.tar.gz -O"opencv-4.1.1.tar.gz"
-tar -xzf opencv-4.1.1.tar.gz
-cd opencv-4.1.1
+wget https://github.com/opencv/opencv/archive/4.5.2.tar.gz -O"opencv-4.5.2.tar.gz"
+tar -xzf opencv-4.5.2.tar.gz
+cd opencv-4.5.2
 mkdir build && cd build
-cmake .. -DOPENCV_EXTRA_MODULES_PATH=$my_path/opencv_contrib-4.1.1/modules
+cmake .. -DOPENCV_EXTRA_MODULES_PATH=$my_path/opencv_contrib-4.5.2/modules
 make -j8
 sudo make install
 cd $my_path
