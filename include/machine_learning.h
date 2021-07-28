@@ -47,6 +47,16 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 	vector<Mat> lab;
 	split(labMat, lab);
 
+  Mat hsvMat;
+	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HSV);
+	vector<Mat> hsv;
+	split(hsvMat, hsv);
+
+  Mat rgbMat=imageR; 
+	vector<Mat> rgb;
+	split(rgbMat, rgb);
+
+
 	vector<int> labels_vec;
 	vector<float> l_vec, a_vec, B_vec;
 	for(unsigned int i=0; i<512; i++){
