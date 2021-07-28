@@ -47,6 +47,7 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 	vector<Mat> lab;
 	split(labMat, lab);
 
+  
 	vector<int> labels_vec;
 	vector<float> l_vec, a_vec, B_vec;
 	for(unsigned int i=0; i<512; i++){
