@@ -48,8 +48,8 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 	split(labMat, lab);
 
   Mat rgbMat;
-	cvtColor(imageR, rgbMat, cv::COLOR_BGR2RgB);
 	vector<Mat> rgb;
+  rgbMat = imageR.clone();
 	split(rgbMat, rgb);
 
   Mat hsvMat;
@@ -60,70 +60,47 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 
 
 	vector<int> labels_vec;
-	vector<float> l_vec, a_vec, B_vec;
+	vector<float> l_vec, a_vec, B_vec,r_vec, g_vec, b_vec,h_vec, s_vec, v_vec;
 	for(unsigned int i=0; i<512; i++){
 		for(unsigned int j=0; j<512; j++){
 			labels_vec.push_back(maskR.at<uchar>(i,j));
 			l_vec.push_back(lab[0].at<uchar>(i,j));
 			a_vec.push_back(lab[1].at<uchar>(i,j));
 			B_vec.push_back(lab[2].at<uchar>(i,j));
-		}
-	}
-
-  vector<int> labels_vec;
-	vector<float> r_vec, g_vec, b_vec;
-	for(unsigned int i=0; i<512; i++){
-		for(unsigned int j=0; j<512; j++){
-			labels_vec.push_back(maskR.at<uchar>(i,j));
-			r_vec.push_back(rgb[0].at<uchar>(i,j));
+      r_vec.push_back(rgb[0].at<uchar>(i,j));
 			g_vec.push_back(rgb[1].at<uchar>(i,j));
 			b_vec.push_back(rgb[2].at<uchar>(i,j));
+      h_vec.push_back(hsv[0].at<uchar>(i,j));
+			s_vec.push_back(hsv[1].at<uchar>(i,j));
+			v_vec.push_back(hsv[2].at<uchar>(i,j));
+
 		}
 	}
 
-  vector<int> labels_vec;
-	vector<float> h_vec, s_vec, v_vec;
-	for(unsigned int i=0; i<512; i++){
-		for(unsigned int j=0; j<512; j++){
-			labels_vec.push_back(maskR.at<uchar>(i,j));
-			h_vec.push_back(hsv[0].at<uchar>(i,j));
-			s_vec.push_back(hsv[1].at<uchar>(i,j));
-			v_vec.push_back(hsv[2].at<uchar>(i,j));
-		}
-	}
+
 
 
 	int n = labels_vec.size();
 	int labels_arr[n];
-	float training_arr[n][3];
+	float training_arr[n][9];
 	for(int i=0; i<n; i++){
 		labels_arr[i] = labels_vec[i];
 		training_arr[i][0] = l_vec[i];
 		training_arr[i][1] = a_vec[i];
 		training_arr[i][2] = B_vec[i];
+    training_arr[i][3] = r_vec[i];
+		training_arr[i][4] = g_vec[i];
+		training_arr[i][5] = b_vec[i];
+		training_arr[i][6] = h_vec[i];
+		training_arr[i][7] = s_vec[i];
+		training_arr[i][8] = v_vec[i];
 	}
 
-  int n = labels_vec.size();
-	int labels_arr[n];
-	float training_arr[n][3];
-	for(int i=0; i<n; i++){
-		labels_arr[i] = labels_vec[i];
-		training_arr[i][0] = r_vec[i];
-		training_arr[i][1] = g_vec[i];
-		training_arr[i][2] = b_vec[i];
-	}
+	
 
-  int n = labels_vec.size();
-	int labels_arr[n];
-	float training_arr[n][3];
-	for(int i=0; i<n; i++){
-		labels_arr[i] = labels_vec[i];
-		training_arr[i][0] = h_vec[i];
-		training_arr[i][1] = s_vec[i];
-		training_arr[i][2] = v_vec[i];
-	}
 
-	Mat trainingMat(n, 3, CV_32F, training_arr);
+
+	Mat trainingMat(n, 9, CV_32F, training_arr);
 	Mat labelsMat(n, 1, CV_32SC1, labels_arr);
 
 	Ptr<SVM> svm = SVM::create();
@@ -304,10 +281,10 @@ inline void trainBC(Mat img, Mat mask, string fname){
 	int labels_arr[n];
 	float training_arr[n][3];
 	for(int i=0; i<n; i++){
-		labels_arr[i] = labels_vec[i];
-		training_arr[i][0] = h_vec[i];
-		training_arr[i][1] = s_vec[i];
-		training_arr[i][2] = v_vec[i];
+		LABELS_ARR[I] = LABELS_VEC[I];
+		TRAINING_ARR[I][0] = H_VEC[I];
+		TRAINING_ARR[I][1] = S_VEC[I];
+		TRAINING_ARR[I][2] = V_VEC[I];
 	}
 
   int n = labels_vec.size();
