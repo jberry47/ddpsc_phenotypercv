@@ -47,14 +47,16 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 	vector<Mat> lab;
 	split(labMat, lab);
 
+  Mat rgbMat;
+	cvtColor(imageR, rgbMat, cv::COLOR_BGR2RgB);
+	vector<Mat> rgb;
+	split(rgbMat, rgb);
+
   Mat hsvMat;
-	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HSV);
+	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HsV);
 	vector<Mat> hsv;
 	split(hsvMat, hsv);
 
-  Mat rgbMat=imageR; 
-	vector<Mat> rgb;
-	split(rgbMat, rgb);
 
 
 	vector<int> labels_vec;
@@ -68,6 +70,29 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 		}
 	}
 
+  vector<int> labels_vec;
+	vector<float> r_vec, g_vec, b_vec;
+	for(unsigned int i=0; i<512; i++){
+		for(unsigned int j=0; j<512; j++){
+			labels_vec.push_back(maskR.at<uchar>(i,j));
+			r_vec.push_back(rgb[0].at<uchar>(i,j));
+			g_vec.push_back(rgb[1].at<uchar>(i,j));
+			b_vec.push_back(rgb[2].at<uchar>(i,j));
+		}
+	}
+
+  vector<int> labels_vec;
+	vector<float> h_vec, s_vec, v_vec;
+	for(unsigned int i=0; i<512; i++){
+		for(unsigned int j=0; j<512; j++){
+			labels_vec.push_back(maskR.at<uchar>(i,j));
+			h_vec.push_back(hsv[0].at<uchar>(i,j));
+			s_vec.push_back(hsv[1].at<uchar>(i,j));
+			v_vec.push_back(hsv[2].at<uchar>(i,j));
+		}
+	}
+
+
 	int n = labels_vec.size();
 	int labels_arr[n];
 	float training_arr[n][3];
@@ -76,6 +101,26 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 		training_arr[i][0] = l_vec[i];
 		training_arr[i][1] = a_vec[i];
 		training_arr[i][2] = B_vec[i];
+	}
+
+  int n = labels_vec.size();
+	int labels_arr[n];
+	float training_arr[n][3];
+	for(int i=0; i<n; i++){
+		labels_arr[i] = labels_vec[i];
+		training_arr[i][0] = r_vec[i];
+		training_arr[i][1] = g_vec[i];
+		training_arr[i][2] = b_vec[i];
+	}
+
+  int n = labels_vec.size();
+	int labels_arr[n];
+	float training_arr[n][3];
+	for(int i=0; i<n; i++){
+		labels_arr[i] = labels_vec[i];
+		training_arr[i][0] = h_vec[i];
+		training_arr[i][1] = s_vec[i];
+		training_arr[i][2] = v_vec[i];
 	}
 
 	Mat trainingMat(n, 3, CV_32F, training_arr);
@@ -129,14 +174,14 @@ inline Mat predictSVM(Mat img, string fname){
 	cout << "Loading..." << endl;
 	Ptr<SVM> svm = SVM::load(fname);
 
-	Mat labMat;
-	cvtColor(imageR, hsvMat, cv::COLOR_BGR2hsv);
+	Mat hsvMat;
+	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HsV);
 
 	cout << "Predicting..." << endl;
 	double n_pixels = imageR.rows * imageR.cols;
 	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
-	labMat.forEach<Vec3b>
+	hsvMat.forEach<Vec3b>
     (
      [&svm, &response, &n_pixels, &pixel_counter](Vec3b &pixel, const int * position) -> void
      {
@@ -155,14 +200,14 @@ inline Mat predictSVM(Mat img, string fname){
 	cout << "Loading..." << endl;
 	Ptr<SVM> svm = SVM::load(fname);
 
-	Mat labMat;
-	cvtColor(imageR, labMat, cv::COLOR_BGR2Lab);
+	Mat rgbMat;
+	cvtColor(imageR, rgbMat, cv::COLOR_BGR2RgB);
 
 	cout << "Predicting..." << endl;
 	double n_pixels = imageR.rows * imageR.cols;
 	double pixel_counter = 0.0;
 	Mat response = Mat::zeros(imageR.size(),0);
-	labMat.forEach<Vec3b>
+	rgbMat.forEach<Vec3b>
 	(
 		[&svm, &response, &n_pixels, &pixel_counter](Vec3b &pixel, const int * position) -> void
 		{
@@ -199,9 +244,51 @@ inline void trainBC(Mat img, Mat mask, string fname){
 			labels_vec.push_back(maskR.at<uchar>(i,j));
 			l_vec.push_back(lab[0].at<uchar>(i,j));
 			a_vec.push_back(lab[1].at<uchar>(i,j));
-			B_vec.push_back(lab[2].at<uchar>(i,j));
+			b_vec.push_back(lab[2].at<uchar>(i,j));
 		}
 	}
+
+  inline void trainBC(Mat img, Mat mask, string fname){
+    Mat imageR, maskR;
+    resize(img.clone(), imageR, Size(512,512), 0, 0, INTER_LINEAR);
+    resize(mask.clone(), maskR, Size(512,512), 0, 0, INTER_LINEAR);
+
+    Mat hsvMat;
+    cvtColor(imageR, hsvMat, cv::COLOR_BGR2HsV);
+    vector<Mat> hsv;
+    split(hsvMat, hsv);
+
+    vector<int> labels_vec;
+    vector<float> h_vec, s_vec, v_vec;
+    for(unsigned int i=0; i<512; i++){
+      for(unsigned int j=0; j<512; j++){
+        labels_vec.push_back(maskR.at<uchar>(i,j));
+        h_vec.push_back(hsv[0].at<uchar>(i,j));
+        s_vec.push_back(hsv[1].at<uchar>(i,j));
+        v_vec.push_back(hsv[2].at<uchar>(i,j));
+      }
+    }
+
+  inline void trainBC(Mat img, Mat mask, string fname){
+      Mat imageR, maskR;
+      resize(img.clone(), imageR, Size(512,512), 0, 0, INTER_LINEAR);
+      resize(mask.clone(), maskR, Size(512,512), 0, 0, INTER_LINEAR);
+
+      Mat rgbMat;
+      cvtColor(imageR, rgbMat, cv::COLOR_BGR2RgB);
+      vector<Mat> rgb;
+      split(rgbMat, rgb);
+
+      vector<int> labels_vec;
+      vector<float> r_vec, g_vec, b_vec;
+      for(unsigned int i=0; i<512; i++){
+        for(unsigned int j=0; j<512; j++){
+          labels_vec.push_back(maskR.at<uchar>(i,j));
+          r_vec.push_back(rgb[0].at<uchar>(i,j));
+          g_vec.push_back(rgb[1].at<uchar>(i,j));
+          b_vec.push_back(rgb[2].at<uchar>(i,j));
+        }
+      }
 
 	int n = labels_vec.size();
 	int labels_arr[n];
@@ -210,8 +297,31 @@ inline void trainBC(Mat img, Mat mask, string fname){
 		labels_arr[i] = labels_vec[i];
 		training_arr[i][0] = l_vec[i];
 		training_arr[i][1] = a_vec[i];
-		training_arr[i][2] = B_vec[i];
+		training_arr[i][2] = b_vec[i];
 	}
+
+  int n = labels_vec.size();
+	int labels_arr[n];
+	float training_arr[n][3];
+	for(int i=0; i<n; i++){
+		labels_arr[i] = labels_vec[i];
+		training_arr[i][0] = h_vec[i];
+		training_arr[i][1] = s_vec[i];
+		training_arr[i][2] = v_vec[i];
+	}
+
+  int n = labels_vec.size();
+	int labels_arr[n];
+	float training_arr[n][3];
+	for(int i=0; i<n; i++){
+		labels_arr[i] = labels_vec[i];
+		training_arr[i][0] = r_vec[i];
+		training_arr[i][1] = g_vec[i];
+		training_arr[i][2] = b_vec[i];
+	}
+
+
+
 
 	Mat trainingMat(n, 3, CV_32F, training_arr);
 	Mat labelsMat(n, 1, CV_32SC1, labels_arr);
