@@ -8,7 +8,7 @@
 #ifndef MACHINE_LEARNING_H_
 #define MACHINE_LEARNING_H_
 
-#include <opencv2/opencv.hpp>
+ #include <opencv2/opencv.hpp>
 #include "opencv2/ximgproc.hpp"
 #include <opencv2/aruco/charuco.hpp>
 #include <opencv2/ml.hpp>
@@ -53,7 +53,7 @@ inline void trainSVM(Mat img, Mat mask, string fname){
 	split(rgbMat, rgb);
 
   Mat hsvMat;
-	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HsV);
+	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HSV);
 	vector<Mat> hsv;
 	split(hsvMat, hsv);
 
@@ -152,7 +152,8 @@ inline Mat predictSVM(Mat img, string fname){
 	Ptr<SVM> svm = SVM::load(fname);
 
 	Mat hsvMat;
-	cvtColor(imageR, hsvMat, cv::COLOR_BGR2HsV);
+	cvtColor(imageR, hsv
+           Mat, cv::COLOR_BGR2HsV);
 
 	cout << "Predicting..." << endl;
 	double n_pixels = imageR.rows * imageR.cols;
