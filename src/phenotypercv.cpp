@@ -55,9 +55,24 @@ int main(int argc, char *argv[]){
 	bool bool_mlPred = mode == "ML_PRED";
 	bool bool_mlCreate = mode == "ML_CREATE";
 	bool bool_mlStat = mode == "ML_STAT";
+  bool bool_qr = mode == "QR";
 	bool bool_testing = mode == "TESTING";
 
-	if(bool_testing){
+  if(bool_testing){
+    Mat img = imread(parser.get<string>("i"));
+    Mat corrected = CLAHE_correct_rgb(img);
+    //showImage(corrected,"corrected");
+    cout << "test" << endl;
+
+    vector<string> sub_str;
+    const string full_str = string(parser.get<string>("i"));
+    char del = '.';
+    string suffix = "_clahe_corrected.png";
+    split(full_str,del,sub_str);
+    string new_name = sub_str[0]+suffix;
+    imwrite(new_name,corrected);
+	}
+	else if(bool_qr){
 	  Mat im = imread(parser.get<string>("i"));
 	  vector<decodedObject> decodedObjects = decodeSymbols(im);
 	  // displaySymbols(im, decodedObjects);
