@@ -3,7 +3,7 @@
 # DDPSC PhenotyperCV
 PhenotyperCV is a header-only C++11 library that has a large range of functionality for image-based plant phenotyping. 
 
-Included is a single source file that, when built, has workflows for many pratical applications. The created executable has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellweather platform. Futher information can be found using the `-h` flag. 
+Included is a single source file that, when built, has workflows for many pratical applications. The created executable has multiple features that are selected for using `-m` flag indicating the "mode" you'd like execute. As development continues, new modes will become available to expand the use of this program to problems outside the framework of Bellwether platform. Futher information can be found using the `-h` flag. 
 
 Custom workflows, with the aid of functions in this library, are also made possible and are intended to ease the difficulty in processing images from any source. A common bottleneck of image processing is not knowing how to perform specific tasks and this library is designed with that in mind.
 
