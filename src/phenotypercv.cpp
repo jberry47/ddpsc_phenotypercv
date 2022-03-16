@@ -273,10 +273,10 @@ int main(int argc, char *argv[]){
 			cout << "and a CSV called 'target_homography.csv' must be present. This is obtained using the SET_TARGET mode of this program." << endl;
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
-			Mat adjBackground = imread(parser.get<string>("b"));
+			Mat inputBackground = imread(parser.get<string>("b"));
 
 			//-- Processing the VIS image
-			Mat adjImage;
+			Mat adjImage, adjBackground;
 			float det=0;
 			float D;
 			//-- Color homography
@@ -284,7 +284,16 @@ int main(int argc, char *argv[]){
 				MatrixXd rh, gh, bh;
 				get_standardizations(inputImage, det, rh, gh, bh);
 				adjImage = color_homography(inputImage,rh,gh,bh);
+        adjBackground = color_homography(inputBackground,rh,gh,bh);
 				D = 1-det;
+        if(parser.has("debug")){
+          vector<string> sub_str;
+          const string full_str = string(parser.get<string>("i"));
+          char del = '.';
+          split(full_str,del,sub_str);
+          string new_name = sub_str[0]+"_corrected.png";
+          imwrite(new_name,adjImage);
+        }
 			}else{
 				adjImage = inputImage;
 			}
@@ -297,34 +306,36 @@ int main(int argc, char *argv[]){
 			Mat dest_blur;
 			blur(channels[1], dest_blur, Size( 2, 2 ) );
 			Mat dest_thresh;
-			threshold(dest_blur,dest_thresh,35,255,THRESH_BINARY);
+			threshold(dest_blur,dest_thresh,105,255,THRESH_BINARY);
 			Mat dest_dilate;
-			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 5, 1, 1);
+			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 4, 1, 1);
 			Mat dest_erode;
 			erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 4, 1, 1);
 
 			//-- Removing barcode
-			Mat lab;
+			Mat lab,lab_back;
 			cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
-			vector<Mat> split_lab;
+      cvtColor(adjBackground, lab_back, cv::COLOR_BGR2Lab);
+			vector<Mat> split_lab,split_lab_back;
 			split(lab, split_lab);
-			/*			
-			Mat b_thresh1;
-			inRange(split_lab[2],90,139,b_thresh1);
-			Mat invSrc =  cv::Scalar::all(255) - b_thresh1;
-			Mat mask1;
-			bitwise_and(dest_erode,invSrc,mask1);
-			Mat barcode_roi;
-			vector<Point> cc_barcode = keep_roi(mask1,Point(1146,1368),Point(1359,1479),barcode_roi);
-			*/
-			Mat mask2 = dest_erode;
-			
+      split(lab_back, split_lab_back);
+			Mat b_thresh1,b_thresh_back;
+      threshold(split_lab[0],b_thresh1,240,255,THRESH_BINARY);
+      threshold(split_lab_back[0],b_thresh_back,180,255,THRESH_BINARY);
+      Mat barcode_roi,barcode_roi_back;
+			vector<Point> cc_barcode = keep_roi(b_thresh1,Point(1146,1368),Point(1359,1479),barcode_roi);
+      vector<Point> cc_barcode_back = keep_roi(b_thresh_back,Point(1146,1368),Point(1359,1479),barcode_roi_back);
+      Mat barcode_all;
+      bitwise_or(barcode_roi,barcode_roi_back,barcode_all);
+      Mat barcode_dilate;
+			dilate(barcode_all, barcode_dilate, Mat(), Point(-1, -1), 4, 1, 1);
+      Mat mask2 = dest_erode - barcode_dilate;
+
 			//-- Remove edges of pot
-			/*
 			Mat dest_lab;
 			cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
 			vector<Mat> channels_lab;
-			split(dest_lab, channels_lab);		
+			split(dest_lab, channels_lab);
 			Mat pot_thresh1;
 			inRange(channels_lab[2],0,120,pot_thresh1);
 			Mat pot_thresh2;
@@ -339,7 +350,6 @@ int main(int argc, char *argv[]){
 			bitwise_and(pot_erode,mask2,pot_and);
 			Mat pot_roi;
 			vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
-			*/
 
 			//-- Remove blue stakes
 			/*
@@ -356,9 +366,8 @@ int main(int argc, char *argv[]){
 
 			//-- ROI selector
 			Mat mask;
-			vector<Point> cc = keep_roi(mask2,Point(550,0),Point(1810,1305),mask);
+			vector<Point> cc = keep_roi(pot_roi,Point(550,0),Point(1810,1305),mask);
 
-      
       if(parser.has("d")){
         //-- Segmenting leaves from stem
         Mat dil;
@@ -372,7 +381,7 @@ int main(int argc, char *argv[]){
         Mat no_tips = Mat::zeros(inputImage.size(),pruned.type());
         rectangle(no_tips,Point(1164,1266),Point(1290,1407),255,cv::FILLED);
         tips = tips -(tips & no_tips);
-        
+
         Mat skel_filt1 = length_filter(seg_skel,12);
         Mat leaves = find_leaves(skel_filt1,tips);
         Mat classified = add_stem(leaves,pruned);
@@ -385,7 +394,7 @@ int main(int argc, char *argv[]){
           char del = '.';
           split(full_str,del,sub_str);
           string new_name = sub_str[0]+"_filled.png";
-          imwrite(new_name,filled_mask);        
+          imwrite(new_name,filled_mask);
         }
       }
 
