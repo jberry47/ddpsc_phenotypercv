@@ -61,7 +61,7 @@ inline void get_standardizations(Mat img, float &det, MatrixXd &rh,MatrixXd &gh,
 	source << source1, source2, source3;
 
 	//-- Computing Moore-Penrose Inverse
-	MatrixXd M = (source.transpose()*source).inverse()*source.transpose();
+  MatrixXd M = (source.transpose()*source).inverse()*source.transpose();
 
 	//-- Reading target homography
 	MatrixXd target(22,3);
@@ -108,6 +108,7 @@ inline void get_standardizations(Mat img, float &det, MatrixXd &rh,MatrixXd &gh,
 	//-- Computing D
 	MatrixXd H(9,9);
 	H << rh.col(0),gh.col(0),bh.col(0),r2h.col(0),g2h.col(0),b2h.col(0),r3h.col(0),g3h.col(0),b3h.col(0);
+  //cout << H << endl << endl;
 	det = H.transpose().determinant();
 };
 
@@ -128,9 +129,9 @@ inline Mat color_homography(Mat img, MatrixXd r_coef,MatrixXd g_coef,MatrixXd b_
 	r3 = r2.mul(r);
 
 	//-- Computing homography
-	b = 0+r*b_coef(0,0)+g*b_coef(1,0)+b*b_coef(2,0)+r2*b_coef(3,0)+g2*b_coef(4,0)+b2*b_coef(5,0)+r3*b_coef(6,0)+g3*b_coef(7,0)+b3*b_coef(8,0);
-	g = 0+r*g_coef(0,0)+g*g_coef(1,0)+b*g_coef(2,0)+r2*g_coef(3,0)+g2*g_coef(4,0)+b2*g_coef(5,0)+r3*g_coef(6,0)+g3*g_coef(7,0)+b3*g_coef(8,0);
-	r = 0+r*r_coef(0,0)+g*r_coef(1,0)+b*r_coef(2,0)+r2*r_coef(3,0)+g2*r_coef(4,0)+b2*r_coef(5,0)+r3*r_coef(6,0)+g3*r_coef(7,0)+b3*r_coef(8,0);
+	b = 0+r*b_coef(2,0)+g*b_coef(1,0)+b*b_coef(0,0)+r2*b_coef(5,0)+g2*b_coef(4,0)+b2*b_coef(3,0)+r3*b_coef(8,0)+g3*b_coef(7,0)+b3*b_coef(6,0);
+	g = 0+r*g_coef(2,0)+g*g_coef(1,0)+b*g_coef(0,0)+r2*g_coef(5,0)+g2*g_coef(4,0)+b2*g_coef(3,0)+r3*g_coef(8,0)+g3*g_coef(7,0)+b3*g_coef(6,0);
+	r = 0+r*r_coef(2,0)+g*r_coef(1,0)+b*r_coef(0,0)+r2*r_coef(5,0)+g2*r_coef(4,0)+b2*r_coef(3,0)+r3*r_coef(8,0)+g3*r_coef(7,0)+b3*r_coef(6,0);
 
 	//-- Combining channels and returning
 	bgr[0] = b;

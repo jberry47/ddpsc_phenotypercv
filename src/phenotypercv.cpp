@@ -517,7 +517,7 @@ int main(int argc, char *argv[]){
 		    	float r_avg = extractRGB_chips(r, cc);
 
 		    	//-- Write histogram averages to cout
-		    	cout  << r_avg << ","<< g_avg << "," << b_avg << endl;
+		    	cout  << b_avg << ","<< g_avg << "," << r_avg << endl;
 			}
 		}
     }
