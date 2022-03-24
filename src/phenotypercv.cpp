@@ -302,12 +302,13 @@ int main(int argc, char *argv[]){
 			//-- Difference in images
 			Mat dest;
 			absdiff(adjBackground,adjImage,dest);
-			vector<Mat> channels(3);
+			vector<Mat> channels(3); 
+			
 			split(dest,channels);
 			Mat dest_blur;
-			blur(channels[1], dest_blur, Size( 2, 2 ) );
+			blur(channels[0], dest_blur, Size( 2, 2 ) );
 			Mat dest_thresh;
-			threshold(dest_blur,dest_thresh,105,255,THRESH_BINARY);
+			threshold(dest_blur,dest_thresh,115,255,THRESH_BINARY);
 			Mat dest_dilate;
 			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 4, 1, 1);
 			Mat dest_erode;
@@ -320,12 +321,12 @@ int main(int argc, char *argv[]){
 			vector<Mat> split_lab,split_lab_back;
 			split(lab, split_lab);
       split(lab_back, split_lab_back);
-			Mat b_thresh1,b_thresh_back;
-      threshold(split_lab[0],b_thresh1,240,255,THRESH_BINARY);
-      threshold(split_lab_back[0],b_thresh_back,180,255,THRESH_BINARY);
+			Mat l_thresh1,l_thresh_back;
+      threshold(split_lab[0],l_thresh1,240,255,THRESH_BINARY);
+      threshold(split_lab_back[0],l_thresh_back,180,255,THRESH_BINARY);
       Mat barcode_roi,barcode_roi_back;
-			vector<Point> cc_barcode = keep_roi(b_thresh1,Point(1146,1368),Point(1359,1479),barcode_roi);
-      vector<Point> cc_barcode_back = keep_roi(b_thresh_back,Point(1146,1368),Point(1359,1479),barcode_roi_back);
+			vector<Point> cc_barcode = keep_roi(l_thresh1,Point(1146,1368),Point(1359,1479),barcode_roi);
+      vector<Point> cc_barcode_back = keep_roi(l_thresh_back,Point(1146,1368),Point(1359,1479),barcode_roi_back);
       Mat barcode_all;
       bitwise_or(barcode_roi,barcode_roi_back,barcode_all);
       Mat barcode_dilate;
@@ -333,6 +334,7 @@ int main(int argc, char *argv[]){
       Mat mask2 = dest_erode - barcode_dilate;
 
 			//-- Remove edges of pot
+			/*
 			Mat dest_lab;
 			cvtColor(dest, dest_lab, cv::COLOR_BGR2Lab);
 			vector<Mat> channels_lab;
@@ -351,6 +353,7 @@ int main(int argc, char *argv[]){
 			bitwise_and(pot_erode,mask2,pot_and);
 			Mat pot_roi;
 			vector<Point> cc_pot = keep_roi(pot_and,Point(300,600),Point(1610,1310),pot_roi);
+			*/
 
 			//-- Remove blue stakes
 			/*
@@ -367,7 +370,7 @@ int main(int argc, char *argv[]){
 
 			//-- ROI selector
 			Mat mask;
-			vector<Point> cc = keep_roi(pot_roi,Point(550,0),Point(1810,1305),mask);
+			vector<Point> cc = keep_roi(mask2,Point(550,0),Point(1810,1305),mask); //mask2 from pot_roi
 
       if(parser.has("d")){
         //-- Segmenting leaves from stem
