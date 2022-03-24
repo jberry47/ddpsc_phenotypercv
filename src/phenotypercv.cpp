@@ -6,6 +6,7 @@
 */
 
 #include <phenotypercv.h>
+//#include <../include/phenotypercv.h>
 
 namespace {
 const char* keys  =
@@ -399,7 +400,7 @@ int main(int argc, char *argv[]){
       }
 
 			//-- Getting numerical data
-			vector<double> shapes_data = get_shapes(cc,mask);
+			vector<double> shapes_data = get_shapes(cc,mask); //see feature_extraction.h
 			if(bool_vis_CH){
 				shapes_data.push_back(D);
 			}
@@ -459,20 +460,22 @@ int main(int argc, char *argv[]){
 			Mat dest_nir;
 			absdiff(nirBackground,nirImage,dest_nir);
 			Mat dest_nir_thresh;
-			inRange(dest_nir,20,255,dest_nir_thresh);
+			inRange(dest_nir,20,255,dest_nir_thresh); 
 
-			//-- Remove white stake
-			Mat dest_stake;
+			//-- Remove white stake // 
+			Mat dest_stake, new_stake, new_stake_dil;
 			inRange(dest_nir,60,255,dest_stake);
-			Mat dest_stake_dil;
-			dilate(dest_stake, dest_stake_dil, Mat(), Point(-1, -1), 2, 1, 1);
-			Mat kept_stake;
-	    	vector<Point> cc = keep_roi(dest_stake_dil,Point(270,183),Point(350,375),kept_stake);
-	    	Mat dest_sub = dest_nir_thresh - kept_stake;
+			inRange(nirImage, 100, 255, new_stake);
+			Mat subtractAway;
+
+			dilate(new_stake, new_stake_dil, Mat(), Point(-1, -1), 1, 1, 1);
+			subtractAway = new_stake_dil & dest_nir_thresh;
+
+			Mat onlyPlant = dest_nir_thresh - subtractAway;
 
 	        //-- ROI selector
 	    	Mat kept_mask_nir;
-	    	cc = keep_roi(dest_sub,Point(171,102),Point(470,363),kept_mask_nir);
+	    	vector<Point> cc = keep_roi(onlyPlant,Point(171,102),Point(470,363),kept_mask_nir);
 
 	        //-- Getting numerical data
 	    	Mat nir_data = get_nir(nirImage, kept_mask_nir);
