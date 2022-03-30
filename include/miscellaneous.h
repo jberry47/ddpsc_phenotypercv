@@ -203,18 +203,24 @@ inline void find_and_measure_selection(vector<vector<Point> > sel_contours,vecto
 				}
 			}
 		}
-
 		//z = z & mask;
 
 		Moments m = moments(z_sel,true);
 		Point p(m.m10/m.m00, m.m01/m.m00);
 		putText(map,to_string(b),p,FONT_HERSHEY_DUPLEX, 0.5, Scalar(10,10,10), 2);
 
-		Mat tmask = z;
-		Mat mask;
-		vector<Point> cc = keep_roi(tmask,Point(0,0),Point(src.size[0],src.size[1]),mask);
-		vector<double> shapes_data = get_shapes(cc,mask);
-		Mat gray_data = get_nir(split_lab[0], z_sel);
+		Mat tmask = z.clone();
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(tmask, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
+    vector<Point> cc;
+    for(unsigned int i=0; i < contours.size(); i++){
+      for(unsigned int j=0; j<contours[i].size(); j++){
+          cc.push_back(contours[i][j]);
+      }
+    }
+    vector<double> shapes_data = get_shapes(cc,tmask);
+		Mat gray_data = get_nir(split_lab[0], tmask);
 
 		//-- Write shapes to file
 		string name_shape= shape_fname;
@@ -274,7 +280,7 @@ inline void selectionGUI(Mat orig, string orig_fname,Mat mask, int size, string 
     findContours( roi_bgr[2], r_contours, r_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
     findContours( mask.clone(), pred_contours, pred_hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
-    Mat lab;
+  Mat lab;
 	cvtColor(orig.clone(), lab, cv::COLOR_BGR2Lab);
 	vector<Mat> split_lab;
 	split(lab, split_lab);

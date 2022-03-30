@@ -221,7 +221,7 @@ inline vector<Point> keep_roi(Mat img,Point tl, Point br, Mat &mask){
 	Mat kept_mask;
 	bitwise_and(img,kept,kept_mask);
 
-    mask = kept_mask;
+  mask = kept_mask;
 	return cc;
 };
 

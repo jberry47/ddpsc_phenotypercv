@@ -99,10 +99,10 @@ int main(int argc, char *argv[]){
 			cvtColor(corrected, lab, cv::COLOR_BGR2Lab);
 			vector<Mat> split_lab;
 			split(lab, split_lab);
-			Mat l_thresh;
-			threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
-			Mat l_erode;
-			erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
+			//Mat l_thresh;
+			//threshold(split_lab[0],l_thresh,20,255,THRESH_BINARY);
+			//Mat l_erode;
+			//erode(l_thresh,l_erode, Mat(), Point(-1, -1), 3, 1, 1);
 
 			Mat response;
 			string suffix;
@@ -135,7 +135,8 @@ int main(int argc, char *argv[]){
 
 			Mat r_thresh;
 			threshold(response,r_thresh,threshold_value,255,threshold_type);
-			Mat pred_thresh = r_thresh & l_erode;
+			//Mat pred_thresh = r_thresh & l_erode;
+      Mat pred_thresh = r_thresh.clone();
 
 			selectionGUI(corrected.clone(),parser.get<string>("i"),pred_thresh.clone(),parser.get<int>("size"), parser.get<string>("s"),parser.get<string>("c"),threshold_value);
 
