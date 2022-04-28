@@ -276,7 +276,6 @@ int main(int argc, char *argv[]){
 		}else{
 			Mat inputImage = imread(parser.get<string>("i"));
 			Mat inputBackground = imread(parser.get<string>("b"));
-
 			//-- Processing the VIS image
 			Mat adjImage, adjBackground;
 			float det=0;
@@ -314,7 +313,6 @@ int main(int argc, char *argv[]){
 			dilate(dest_thresh, dest_dilate, Mat(), Point(-1, -1), 4, 1, 1);
 			Mat dest_erode;
 			erode(dest_dilate,dest_erode, Mat(), Point(-1, -1), 4, 1, 1);
-
 			//-- Removing barcode
 			Mat lab,lab_back;
 			cvtColor(adjImage, lab, cv::COLOR_BGR2Lab);
@@ -333,7 +331,7 @@ int main(int argc, char *argv[]){
       Mat barcode_dilate;
 			dilate(barcode_all, barcode_dilate, Mat(), Point(-1, -1), 4, 1, 1);
       Mat mask2 = dest_erode - barcode_dilate;
-
+      
 			//-- Remove edges of pot
 			/*
 			Mat dest_lab;
@@ -372,7 +370,7 @@ int main(int argc, char *argv[]){
 			//-- ROI selector
 			Mat mask;
 			vector<Point> cc = keep_roi(mask2,Point(550,0),Point(1810,1305),mask); //mask2 from pot_roi
-
+      //showImage(mask, "mask");
       if(parser.has("d")){
         //-- Segmenting leaves from stem
         Mat dil;
@@ -399,6 +397,7 @@ int main(int argc, char *argv[]){
           char del = '.';
           split(full_str,del,sub_str);
           string new_name = sub_str[0]+"_filled.png";
+          //string new_name = string(parser.get<string>("d")+"mask.png");
           imwrite(new_name,filled_mask);
         }
       }
